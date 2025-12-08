@@ -1,6 +1,7 @@
 {
   "name": "the-local-link-server",
   "version": "1.0.0",
+  "type": "module",
   "description": "Backend API for The Local Link",
   "main": "server.js",
   "scripts": {
