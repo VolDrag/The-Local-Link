@@ -1,0 +1,4 @@
+# Files to exclude from Docker build context
+node_modules
+.env
+.git
