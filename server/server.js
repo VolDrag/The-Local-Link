@@ -8,6 +8,13 @@ import serviceRoutes from './routes/serviceRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';  //#Rafi#
 import cors from 'cors';
 import { connectDB } from './config/db.js';
+
+// Import models to register them with Mongoose
+import './models/User.js';
+import './models/Service.js';
+import './models/Category.js';
+import './models/Review.js';
+
 dotenv.config();
 
 const app = express();
