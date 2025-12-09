@@ -1,0 +1,133 @@
+/* ifty */
+.service-list-container {
+  width: 100%;
+}
+
+.results-info {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #2a2a2a;
+  border-radius: 6px;
+}
+
+.results-info p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #a0a0a0;
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.no-services {
+  text-align: center;
+  padding: 60px 20px;
+  background: #2a2a2a;
+  border-radius: 8px;
+}
+
+.no-services p {
+  font-size: 1.125rem;
+  color: #a0a0a0;
+  margin: 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  background: #2a2a2a;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e0e0e0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #333;
+  border-color: #666;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.page-number {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #404040;
+  background: #2a2a2a;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e0e0e0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-number:hover {
+  background: #333;
+  border-color: #666;
+}
+
+.page-number.active {
+  background: #555;
+  border-color: #666;
+  color: white;
+}
+
+.pagination-ellipsis {
+  color: #666;
+  font-weight: 500;
+  padding: 0 4px;
+}
+
+@media (max-width: 1024px) {
+  .service-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .service-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .pagination-btn {
+    padding: 6px 12px;
+    font-size: 0.8125rem;
+  }
+  
+  .page-number {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8125rem;
+  }
+}

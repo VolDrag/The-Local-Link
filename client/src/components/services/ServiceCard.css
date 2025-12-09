@@ -1,0 +1,157 @@
+/* ifty */
+.service-card {
+  background: #2a2a2a;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+}
+
+.service-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.service-card-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.service-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.service-category {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(64, 64, 64, 0.95);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b0b0b0;
+}
+
+.verified-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #10b981;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.service-card-content {
+  padding: 16px;
+}
+
+.service-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #e0e0e0;
+  line-height: 1.4;
+}
+
+.service-description {
+  font-size: 0.875rem;
+  color: #a0a0a0;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.service-provider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  color: #b0b0b0;
+}
+
+.provider-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.service-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: #a0a0a0;
+  margin-bottom: 12px;
+}
+
+.location-icon {
+  font-size: 1rem;
+}
+
+.service-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #404040;
+}
+
+.service-rating {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  color: #d1d5db;
+  font-size: 1rem;
+}
+
+.star.filled {
+  color: #fbbf24;
+}
+
+.rating-text {
+  font-size: 0.75rem;
+  color: #a0a0a0;
+}
+
+.service-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  .service-card-image {
+    height: 160px;
+  }
+  
+  .service-title {
+    font-size: 1rem;
+  }
+  
+  .service-price {
+    font-size: 1.125rem;
+  }
+}

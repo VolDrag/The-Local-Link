@@ -1,2 +1,50 @@
-# Docker Compose configuration for The Local Link
-# Run with: docker-compose up
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:latest
+    container_name: local-link-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo-data:/data/db
+
+  # Backend API Server
+  server:
+    build: ./server
+    container_name: local-link-server
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      MONGO_URI: mongodb://admin:password@mongo:27017/locallink?authSource=admin
+      JWT_SECRET: your-secret-key-here
+      NODE_ENV: development
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      - mongo
+
+  # Frontend React Client
+  client:
+    build: ./client
+    container_name: local-link-client
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:5000
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:
