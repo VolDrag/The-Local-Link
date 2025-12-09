@@ -7,10 +7,20 @@ import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import cors from 'cors';
 import { connectDB } from './config/db.js';
+
+// Import models to register them with Mongoose
+import './models/User.js';
+import './models/Service.js';
+import './models/Category.js';
+import './models/Review.js';
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5050;
+
+// CORS must be enabled BEFORE routes
+app.use(cors());
 
 app.use(express.json());
 
@@ -18,8 +28,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/services", serviceRoutes);
 
 connectDB();
-
-app.use(cors());
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
 
