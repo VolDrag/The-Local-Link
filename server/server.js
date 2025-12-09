@@ -17,7 +17,7 @@ import './models/Review.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 5000;
 
 // CORS must be enabled BEFORE routes
 app.use(cors());
