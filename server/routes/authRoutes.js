@@ -14,6 +14,6 @@ router.get('/me', protect, getMe);
 
 // Admin routes
 router.post('/admin/login', adminLogin);
-router.post('/admin/setup', setupAdmin); // REMOVE THIS AFTER CREATING ADMIN
+// router.post('/admin/setup', setupAdmin); // REMOVE THIS AFTER CREATING ADMIN
 
 export default router;

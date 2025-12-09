@@ -20,6 +20,40 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Please fill in all required fields' });
     }
 
+    // 2. Validate email format (something@gmail.com or other domains)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address (e.g., example@gmail.com)' });
+    }
+
+    // 3. Validate password requirements
+    // - At least 8 characters
+    // - Must contain at least one number
+    // - Must contain at least one special character
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    const hasNumber = /\d/.test(password);
+    if (!hasNumber) {
+      return res.status(400).json({ message: 'Password must contain at least one number' });
+    }
+
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    if (!hasSpecialChar) {
+      return res.status(400).json({ message: 'Password must contain at least one special character (!@#$%^&* etc.)' });
+    }
+
+    // 4. Validate phone number format (+880 followed by 10 digits)
+    if (phone) {
+      const phoneRegex = /^\+880\d{10}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ 
+          message: 'Phone number must start with +880 and be followed by exactly 10 digits (e.g., +8801712345678)' 
+        });
+      }
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
