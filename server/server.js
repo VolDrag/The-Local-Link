@@ -5,21 +5,23 @@ import express from 'express';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';  //#Rafi#
 import cors from 'cors';
 import { connectDB } from './config/db.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 5000;
 
+// Enable CORS before routes
+app.use(cors());
 app.use(express.json());
-
-app.use("/api/auth", authRoutes);
-app.use("/api/services", serviceRoutes);
 
 connectDB();
 
-app.use(cors());
+app.use("/api/auth", authRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/categories", categoryRoutes); //#Rafi#
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
 
