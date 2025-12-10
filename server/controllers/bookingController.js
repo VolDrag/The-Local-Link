@@ -1,5 +1,4 @@
 // Booking Controller
-// Teammate 4: Implement booking and scheduling logic
 
 // @desc    Create a booking
 // @route   POST /api/bookings

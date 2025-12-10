@@ -1,5 +1,4 @@
 // User Controller
-// Teammate 1: Implement user profile management logic
 
 // @desc    Get user profile
 // @route   GET /api/users/:id

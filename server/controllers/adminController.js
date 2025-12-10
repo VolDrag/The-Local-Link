@@ -1,5 +1,5 @@
 // Admin Controller
-// Teammate 5: Implement admin dashboard and management logic
+
 
 // @desc    Get all users
 // @route   GET /api/admin/users
