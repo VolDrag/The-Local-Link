@@ -14,12 +14,12 @@ function App() {
       <div className="App">
         <Routes>
           {/* Auth Routes */}
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           
           {/* Service Routes */}
-          <Route path="/" element={<ServiceSearch />} />
           <Route path="/services" element={<ServiceSearch />} />
           <Route path="/services/add" element={<AddService />} />  {/*Rafi*/}  
           <Route path="/services/:id" element={<ServiceDetails />} />
