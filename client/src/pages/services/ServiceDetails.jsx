@@ -214,8 +214,8 @@ const ServiceDetails = () => {
               <div className="portfolio-grid">
                 {provider.portfolio.slice(0, 4).map((item, index) => (
                   <div key={index} className="portfolio-item">
-                    {item.image && <img src={item.image} alt={item.title} />}
-                    <p className="portfolio-title">{item.title}</p>
+                    {item?.image && <img src={item.image} alt={item?.title || 'Portfolio item'} />}
+                    {item?.title && <p className="portfolio-title">{item.title}</p>}
                   </div>
                 ))}
               </div>
