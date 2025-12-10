@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';  //#Rafi#
+import adminRoutes from './routes/adminRoutes.js';
 import cors from 'cors';
 import { connectDB } from './config/db.js';
 
@@ -14,6 +15,8 @@ import './models/User.js';
 import './models/Service.js';
 import './models/Category.js';
 import './models/Review.js';
+import './models/Booking.js';
+import './models/Report.js';
 
 dotenv.config();
 
@@ -29,6 +32,7 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/categories", categoryRoutes); //#Rafi#
+app.use("/api/admin", adminRoutes);
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
 

@@ -48,13 +48,25 @@ export const authService = {
 
   // Get stored user
   getStoredUser: () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+    try {
+      const user = localStorage.getItem('user');
+      if (!user || user === 'undefined' || user === 'null') {
+        return null;
+      }
+      return JSON.parse(user);
+    } catch (error) {
+      console.error('Error parsing stored user:', error);
+      return null;
+    }
   },
 
   // Get stored token
   getStoredToken: () => {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    if (!token || token === 'undefined' || token === 'null') {
+      return null;
+    }
+    return token;
   },
 };
 

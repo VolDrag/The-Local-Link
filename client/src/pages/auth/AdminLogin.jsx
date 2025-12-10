@@ -31,11 +31,15 @@ const AdminLogin = () => {
       return;
     }
 
+    console.log('Starting admin login...');
     const result = await adminLogin({ email, password });
+    console.log('Login result:', result);
 
     if (result.success) {
+      console.log('Login successful, navigating to dashboard...');
       navigate('/admin/dashboard');
     } else {
+      console.log('Login failed:', result.error);
       setError(result.error);
     }
   };
