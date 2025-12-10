@@ -1,10 +1,21 @@
-// Booking routes
-// /api/bookings
+import express from 'express';
+import { 
+  createBooking, 
+  getMyBookings, 
+  getProviderBookings, 
+  getBookingById, 
+  updateBookingStatus, 
+  cancelBooking 
+} from '../controllers/bookingController.js';
+import { protect } from '../middleware/authMiddleware.js'; // Note the .js extension!
 
-const express = require('express');
 const router = express.Router();
 
-// TODO: Import controllers and middleware
-// TODO: Define routes for booking operations and reviews
+router.post('/', protect, createBooking);
+router.get('/my-bookings', protect, getMyBookings);
+router.get('/provider-bookings', protect, getProviderBookings);
+router.get('/:id', protect, getBookingById);
+router.put('/:id/status', protect, updateBookingStatus);
+router.put('/:id/cancel', protect, cancelBooking);
 
-module.exports = router;
+export default router;

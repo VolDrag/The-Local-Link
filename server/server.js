@@ -3,6 +3,9 @@
 // App configuration and middleware setup goes here
 import express from 'express';
 import dotenv from 'dotenv';
+//Anupam
+import bookingRoutes from './routes/bookingRoutes.js';
+//
 import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';  //#Rafi#
@@ -28,7 +31,14 @@ connectDB();
 
 app.use("/api/auth", authRoutes);
 app.use("/api/services", serviceRoutes);
+<<<<<<< HEAD
+//Anupam
+app.use('/api/bookings', bookingRoutes);
+
+connectDB();
+=======
 app.use("/api/categories", categoryRoutes); //#Rafi#
+>>>>>>> 28a0cffee2fbf161d3ccead1bc0781767880f15e
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
 
