@@ -1,53 +1,37 @@
-// Booking Controller
-// Teammate 4: Implement booking and scheduling logic
+import Booking from '../models/Booking.js';
+import Service from '../models/Service.js';
 
 // @desc    Create a booking
 // @route   POST /api/bookings
 // @access  Private
-const createBooking = async (req, res) => {
-  // TODO: Implement create booking
+export const createBooking = async (req, res) => {
+  try {
+    const { serviceId, scheduledDate, userNotes } = req.body;
+
+    const service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    const booking = await Booking.create({
+      user: req.user._id,
+      service: serviceId,
+      provider: service.provider,
+      scheduledDate,
+      userNotes,
+      status: 'pending' 
+    });
+
+    res.status(201).json(booking);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Get user bookings
-// @route   GET /api/bookings/my-bookings
-// @access  Private
-const getMyBookings = async (req, res) => {
-  // TODO: Implement get user bookings
-};
-
-// @desc    Get provider bookings
-// @route   GET /api/bookings/provider-bookings
-// @access  Private (Provider only)
-const getProviderBookings = async (req, res) => {
-  // TODO: Implement get provider bookings
-};
-
-// @desc    Get booking by ID
-// @route   GET /api/bookings/:id
-// @access  Private
-const getBookingById = async (req, res) => {
-  // TODO: Implement get booking by ID
-};
-
-// @desc    Update booking status
-// @route   PUT /api/bookings/:id/status
-// @access  Private
-const updateBookingStatus = async (req, res) => {
-  // TODO: Implement update booking status
-};
-
-// @desc    Cancel booking
-// @route   PUT /api/bookings/:id/cancel
-// @access  Private
-const cancelBooking = async (req, res) => {
-  // TODO: Implement cancel booking
-};
-
-module.exports = {
-  createBooking,
-  getMyBookings,
-  getProviderBookings,
-  getBookingById,
-  updateBookingStatus,
-  cancelBooking,
-};
+// Placeholders for other features
+export const getMyBookings = async (req, res) => { res.status(200).json({ message: "My bookings" }); };
+export const getProviderBookings = async (req, res) => { res.status(200).json({ message: "Provider bookings" }); };
+export const getBookingById = async (req, res) => { res.status(200).json({ message: "Get booking" }); };
+export const updateBookingStatus = async (req, res) => { res.status(200).json({ message: "Update status" }); };
+export const cancelBooking = async (req, res) => { res.status(200).json({ message: "Cancel booking" }); };

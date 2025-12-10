@@ -3,6 +3,9 @@
 // App configuration and middleware setup goes here
 import express from 'express';
 import dotenv from 'dotenv';
+//Anupam
+import bookingRoutes from './routes/bookingRoutes.js';
+//
 import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import cors from 'cors';
@@ -26,6 +29,8 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/services", serviceRoutes);
+//Anupam
+app.use('/api/bookings', bookingRoutes);
 
 connectDB();
 

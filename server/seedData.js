@@ -408,4 +408,11 @@ const seedData = async () => {
   }
 };
 
+
+
+
+
+
+
+
 connectDB().then(seedData);
