@@ -6,6 +6,7 @@ import AddService from './pages/services/AddService';   //Rafi
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminLogin from './pages/auth/AdminLogin';
+import AdminPanel from './pages/admin/AdminPanel';
 import './App.css';
 
 function App() {
@@ -18,6 +19,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={<AdminPanel />} />
           
           {/* Service Routes */}
           <Route path="/services" element={<ServiceSearch />} />
