@@ -127,23 +127,129 @@ const getAreasByCity = asyncHandler(async (req, res) => {
 // @desc    Create a service
 // @route   POST /api/services
 // @access  Private (Provider only)
-const createService = async (req, res) => {
-  // TODO: Implement create service
-};
+const createService = asyncHandler(async (req, res) => {
+  // Get data from form
+  const { title, description, category, pricing, pricingUnit, location, images, hasOffer, offerDescription, offerExpiry } = req.body;
+
+  console.log('req.user:', req.user); //Rafi  (debugging)
+  console.log('req.body:', req.body); //Rafi (debugging)
+
+  // Step 1: Check if user is a provider
+  if (req.user.role !== 'provider') {
+    res.status(403);
+    throw new Error('Only service providers can create services');
+  }
+
+  // Step 2: Check if all required fields are provided
+  if (!title || !description || !category || !pricing || !location) {
+    res.status(400);
+    throw new Error('Please provide all required fields');
+  }
+
+  // Step 3: Check if location has all parts (city, area, country)
+  if (!location.city || !location.area || !location.country) {
+    res.status(400);
+    throw new Error('Please provide complete location details (city, area, country)');
+  }
+
+  // Step 4: Save service to database
+  const service = await Service.create({
+    title,
+    description,
+    category,
+    pricing,
+    pricingUnit: pricingUnit || 'fixed',
+    location,
+    images: images || [],
+    provider: req.user._id,
+    hasOffer: hasOffer || false,
+    offerDescription,
+    offerExpiry,
+  });
+
+  // Step 5: Get the service with category and provider details
+  const populatedService = await Service.findById(service._id)
+    .populate('category', 'name icon')
+    .populate('provider', 'username businessName email phone isVerified');
+
+  // Step 6: Send back the created service
+  res.status(201).json({
+    success: true,
+    message: 'Service created successfully',
+    service: populatedService,
+  });
+});
 
 // @desc    Update a service
 // @route   PUT /api/services/:id
 // @access  Private (Provider only)
-const updateService = async (req, res) => {
-  // TODO: Implement update service
-};
+const updateService = asyncHandler(async (req, res) => {
+  // Step 1: Find the service
+  const service = await Service.findById(req.params.id);
+
+  if (!service) {
+    res.status(404);
+    throw new Error('Service not found');
+  }
+
+  // Step 2: Check if the logged-in user owns this service
+  if (service.provider.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('You can only update your own services');
+  }
+
+  // Step 3: Update the service with new data
+  const updatedService = await Service.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true }
+  )
+    .populate('category', 'name icon')
+    .populate('provider', 'username businessName email phone isVerified');
+
+  // Step 4: Send back the updated service
+  res.json({
+    success: true,
+    message: 'Service updated successfully',
+    service: updatedService,
+  });
+});
 
 // @desc    Delete a service
 // @route   DELETE /api/services/:id
 // @access  Private (Provider only)
-const deleteService = async (req, res) => {
-  // TODO: Implement delete service
-};
+
+
+
+
+//####################################Rafi###############################################
+const deleteService = asyncHandler(async (req, res) => {
+  // Step 1: Find the service
+  const service = await Service.findById(req.params.id);
+
+  if (!service) {
+    res.status(404);
+    throw new Error('Service not found');
+  }
+
+  // Step 2: Check if the logged-in user owns this service (or is admin)
+  if (
+    service.provider.toString() !== req.user._id.toString() &&
+    req.user.role !== 'admin'
+  ) {
+    res.status(403);
+    throw new Error('You can only delete your own services');
+  }
+
+  // Step 3: Delete the service
+  await service.deleteOne();
+
+  // Step 4: Send success message
+  res.json({
+    success: true,
+    message: 'Service deleted successfully',
+  });
+});
 
 export {
   getServices,
