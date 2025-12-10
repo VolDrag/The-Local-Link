@@ -4,6 +4,7 @@
 import express from 'express';
 import { registerUser, loginUser, getMe, adminLogin, setupAdmin } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
+import { adminOnly } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ router.get('/me', protect, getMe);
 
 // Admin routes
 router.post('/admin/login', adminLogin);
-router.post('/admin/setup', setupAdmin); // REMOVE THIS AFTER CREATING ADMIN
+router.get('/admin/me', protect, adminOnly, getMe); 
+// router.post('/admin/setup', setupAdmin); // REMOVE THIS AFTER CREATING ADMIN
 
 export default router;
