@@ -2,15 +2,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getServiceById } from '../../services/api';
+import { deleteService } from '../../services/serviceService';  //*Rafi*/
+import { useAuth } from '../../context/AuthContext';    //*Rafi*/
 import './ServiceDetails.css';
 
 const ServiceDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();   // Get current logged-in user info  //*Rafi*/
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);  //*Rafi*/
+  const [deleting, setDeleting] = useState(false);    //*Rafi*/
 
   useEffect(() => {
     const fetchService = async () => {
@@ -52,7 +57,39 @@ const ServiceDetails = () => {
     };
     return `৳${service.pricing}${unitLabels[service.pricingUnit] || ''}`;
   };
+//****Rafi****/
+  // Check if current user is the owner or admin
+  const isOwner = user && service && user._id === service.provider?._id;
+  const isAdmin = user && user.role === 'admin';
+  const canEdit = isOwner || isAdmin;
 
+  const handleEdit = () => {
+    navigate(`/services/${id}/edit`);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    try {
+      await deleteService(id);
+      alert('Service deleted successfully!');
+      navigate('/services');
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      alert(error.message || 'Failed to delete service. Please try again.');
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+  };
+//
   if (loading) {
     return (
       <div className="service-details-page">
@@ -161,6 +198,18 @@ const ServiceDetails = () => {
             <button className="contact-btn">Contact Provider</button>
             <button className="bookmark-btn">♥ Save</button>
           </div>
+
+          {/* Edit/Delete buttons - only visible to owner or admin */}
+          {canEdit && (
+            <div className="owner-actions">
+              <button onClick={handleEdit} className="edit-btn">
+                ✏️ Edit Service
+              </button>
+              <button onClick={handleDeleteClick} className="delete-btn">
+                🗑️ Delete Service
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="provider-info">
@@ -223,6 +272,32 @@ const ServiceDetails = () => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={handleDeleteCancel}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete this service? This action cannot be undone.</p>
+            <div className="modal-actions">
+              <button
+                onClick={handleDeleteCancel}
+                className="btn-cancel"
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="btn-delete"
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

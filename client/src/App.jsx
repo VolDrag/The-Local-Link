@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ServiceSearch from './pages/services/ServiceSearch';
 import ServiceDetails from './pages/services/ServiceDetails';
 import AddService from './pages/services/AddService';   //Rafi
+import EditService from './pages/services/EditService';   //Rafi
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminLogin from './pages/auth/AdminLogin';
@@ -34,7 +35,8 @@ function App() {
           
           {/* Service Routes */}
           <Route path="/services" element={<ServiceSearch />} />
-          <Route path="/services/add" element={<AddService />} />  {/*Rafi*/}  
+          <Route path="/services/add" element={<AddService />} />  {/*Rafi*/}
+          <Route path="/services/:id/edit" element={<EditService />} />  {/*Rafi*/}
           <Route path="/services/:id" element={<ServiceDetails />} />
           <Route path="/services/:id/reviews" element={<div style={{ padding: '40px', textAlign: 'center' }}><h2>Reviews Page</h2><p>Coming soon...</p></div>} />
           
