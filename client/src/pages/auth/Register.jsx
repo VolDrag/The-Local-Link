@@ -99,6 +99,7 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
+        <button onClick={() => navigate('/')} className="btn-home">🏠 Home</button>
         <h2>Register for The Local Link</h2>
         <p className="auth-subtitle">Create your account and get started</p>
 

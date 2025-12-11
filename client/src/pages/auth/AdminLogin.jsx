@@ -47,6 +47,7 @@ const AdminLogin = () => {
   return (
     <div className="auth-container admin-login">
       <div className="auth-card">
+        <button onClick={() => navigate('/')} className="btn-home">🏠 Home</button>
         <h2>Admin Login</h2>
         <p className="auth-subtitle">Access the admin dashboard</p>
 
