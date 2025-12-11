@@ -36,14 +36,8 @@ const Login = () => {
     const result = await login({ email, password });
 
     if (result.success) {
-      // Redirect based on role
-      if (result.data.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else if (result.data.role === 'provider') {
-        navigate('/provider/dashboard');
-      } else {
-        navigate('/');
-      }
+      // Redirect to home page for all users
+      navigate('/');
     } else {
       setError(result.error);
     }
@@ -52,6 +46,7 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
+        <button onClick={() => navigate('/')} className="btn-home">🏠 Home</button>
         <h2>Login to The Local Link</h2>
         <p className="auth-subtitle">Welcome back! Please login to your account.</p>
 
