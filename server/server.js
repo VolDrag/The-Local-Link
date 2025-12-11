@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';  //#Rafi#
 import adminRoutes from './routes/adminRoutes.js';
+import userRoutes from './routes/userRoutes.js'; //user profile routes
 import cors from 'cors';
 import { connectDB } from './config/db.js';
 
@@ -33,7 +34,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/categories", categoryRoutes); //#Rafi#
 app.use("/api/admin", adminRoutes);
-
+app.use('/api/users', userRoutes); // user profile routes
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
 
 app.listen(PORT, () => {
