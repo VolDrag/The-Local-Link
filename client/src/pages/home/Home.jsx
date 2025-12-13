@@ -101,7 +101,7 @@ const Home = () => {
             <>
               <div className="welcome-message">
                 <h3>Hello, {user?.username}! 👋</h3>
-                <p className="user-role">You are logged in as a <span className="role-badge">{user?.role}</span></p>
+                <p className="user-role">You are logged in</p>
               </div>
               
               {!hasProfile && (
