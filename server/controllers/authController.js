@@ -1,5 +1,4 @@
 // Authentication Controller
-// Teammate 1: Implement registration, login, and authentication logic
 
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';

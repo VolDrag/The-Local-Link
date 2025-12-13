@@ -1,4 +1,18 @@
 // Multer middleware for file uploads
-// Teammate 2: Implement file upload configuration (for service images)
-
 // TODO: Configure multer for image uploads
+import multer from 'multer';
+import path from 'path';
+
+const storage = multer.diskStorage({
+    destination: (req, res, cb) => {
+        cb(null, 'uploads/');
+
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage });
+
+export default upload;

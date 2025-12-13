@@ -10,7 +10,7 @@ import {
   updateService,
   deleteService,
 } from '../controllers/serviceController.js';
-import { getServiceReviews } from '../controllers/reviewController.js';
+import { getServiceReviews, createReview, canReviewService } from '../controllers/reviewController.js';
 import { protect } from '../middleware/authMiddleware.js';    // Authentication middleware
 import { authorize } from '../middleware/roleMiddleware.js';  // Role-based authorization middleware
 
@@ -23,8 +23,14 @@ router.get('/locations/areas/:country/:city', getAreasByCity);
 
 // Public service routes
 router.get('/', getServices);
-router.get('/:id', getServiceById);
+
+// Review routes (MUST be before /:id route to avoid conflict)
 router.get('/:serviceId/reviews', getServiceReviews);
+router.post('/:serviceId/reviews', protect, createReview);
+router.get('/:serviceId/can-review', protect, canReviewService);
+
+// Service by ID route (after specific routes)
+router.get('/:id', getServiceById);
 
 // Protected routes - Provider only for create, update, delete  //##############Rafi###################
 router.post('/', protect, authorize('provider'), createService);

@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import Booking from '../models/Booking.js';
 import Service from '../models/Service.js';
+=======
+// Booking Controller
+>>>>>>> cf8b3cefcc6375f1a545a7b9122044e5ab453eaa
 
 // @desc    Create a booking
 // @route   POST /api/bookings

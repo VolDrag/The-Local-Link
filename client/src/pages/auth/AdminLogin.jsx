@@ -31,11 +31,15 @@ const AdminLogin = () => {
       return;
     }
 
+    console.log('Starting admin login...');
     const result = await adminLogin({ email, password });
+    console.log('Login result:', result);
 
     if (result.success) {
+      console.log('Login successful, navigating to dashboard...');
       navigate('/admin/dashboard');
     } else {
+      console.log('Login failed:', result.error);
       setError(result.error);
     }
   };
@@ -43,6 +47,7 @@ const AdminLogin = () => {
   return (
     <div className="auth-container admin-login">
       <div className="auth-card">
+        <button onClick={() => navigate('/')} className="btn-home">🏠 Home</button>
         <h2>Admin Login</h2>
         <p className="auth-subtitle">Access the admin dashboard</p>
 

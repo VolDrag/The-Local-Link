@@ -1,10 +1,23 @@
 // Admin routes
 // /api/admin
 
-const express = require('express');
+import express from 'express';
 const router = express.Router();
+import { getDashboardStats, getAllUsers, getAllServices } from '../controllers/adminController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { adminOnly } from '../middleware/roleMiddleware.js';
 
-// TODO: Import controllers and middleware
-// TODO: Define routes for admin operations (users, services, categories, stats)
+// All routes require authentication and admin role
+router.use(protect);
+router.use(adminOnly);
 
-module.exports = router;
+// Dashboard routes
+router.get('/dashboard/stats', getDashboardStats);
+
+// User management routes
+router.get('/users', getAllUsers);
+
+// Service management routes
+router.get('/services', getAllServices);
+
+export default router;

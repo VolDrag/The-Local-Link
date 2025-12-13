@@ -2,10 +2,10 @@
 // Generate JWT token for testing
 import jwt from 'jsonwebtoken';
 
-const userId = "69382eb83cd7d84220ec64b9";
+const userId = "6938cb05cf3a99b0eff722ff";
 const email = "ahmed@example.com";
 const role = "provider";
-const secret = "your_secret_key_here_change_this_in_production";
+const secret = "M328ZugZGmffws21bwqPVZNy3W9O+/ErM8jJeeX+mwE=";
 
 const token = jwt.sign(
   { id: userId, email: email, role: role },
