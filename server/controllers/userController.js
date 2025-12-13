@@ -1,5 +1,5 @@
 // User Controller
-import Profile from '../models/profile.js';
+import Profile from '../models/Profile.js';
 import uploadMiddleware from '../middleware/uploadMiddleware.js'; 
 
 // @desc    Get user profile
@@ -51,7 +51,7 @@ const getUserProfile = async (req, res) => {
 const createorupdateUserProfile = async (req, res) => {
   // TODO: Implement create or update user profile
   try {
-    const {age, phone, location, name, userId, businessName, availabilityStatus, services} = req.body;    
+    const {age, phone, location, name, userId, businessName, availabilityStatus} = req.body;    
     const image = req.file ? req.file.path : null;
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required' });
@@ -63,10 +63,18 @@ const createorupdateUserProfile = async (req, res) => {
       });
     }
     // Check if user is trying to set provider fields but is not a provider
-    if (req.user.role !== 'provider' && (businessName || availabilityStatus || services)) {
+    if (req.user.role !== 'provider' && (businessName || availabilityStatus)) {
       return res.status(403).json({ 
         success: false,
-        message: 'Only providers can set business name, availability status, and services'
+        message: 'Only providers can set business name and availability status'
+      });
+    }
+
+    // Prevent manual manipulation of services array
+    if (req.body.services !== undefined) {
+      return res.status(403).json({ 
+        success: false,
+        message: 'Services are automatically managed when you create or delete services'
       });
     }
 
@@ -94,7 +102,8 @@ const createorupdateUserProfile = async (req, res) => {
       if (req.user.role === 'provider') {
         if (businessName) profileData.businessName = businessName;
         if (availabilityStatus) profileData.availabilityStatus = availabilityStatus;
-        if (services) profileData.services = services;
+        // services array will be empty initially and populated when services are created
+        profileData.services = [];
       }
         
       profile = await Profile.create(profileData);
@@ -117,7 +126,7 @@ const createorupdateUserProfile = async (req, res) => {
       if (req.user.role === 'provider') {
         if (businessName) profile.businessName = businessName;
         if (availabilityStatus) profile.availabilityStatus = availabilityStatus;
-        if (services) profile.services = services;
+        // services are managed automatically through service creation/deletion
       }
 
       await profile.save();
@@ -141,10 +150,71 @@ const createorupdateUserProfile = async (req, res) => {
 
 
 // @desc    Delete user account
-// @route   DELETE /api/users/:id
+// @route   DELETE /api/users/:userId
 // @access  Private
 const deleteUser = async (req, res) => {
-  // TODO: Implement delete user
+  try {
+    const userIdToDelete = req.params.userId;
+
+    // Check if user is deleting their own account or is an admin
+    if (req.user._id.toString() !== userIdToDelete && req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        success: false,
+        message: 'You can only delete your own account'
+      });
+    }
+
+    // Import models needed for cascade deletion
+    const User = (await import('../models/User.js')).default;
+    const Service = (await import('../models/Service.js')).default;
+    const Booking = (await import('../models/Booking.js')).default;
+    const Review = (await import('../models/Review.js')).default;
+
+    // Check if user exists
+    const user = await User.findById(userIdToDelete);
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Cascade delete operations
+    
+    // 1. Delete user's profile
+    await Profile.findOneAndDelete({ user: userIdToDelete });
+
+    // 2. If user is a provider, delete all their services
+    if (user.role === 'provider') {
+      await Service.deleteMany({ provider: userIdToDelete });
+    }
+
+    // 3. Delete all bookings where user is seeker or provider
+    await Booking.deleteMany({ 
+      $or: [
+        { seeker: userIdToDelete },
+        { provider: userIdToDelete }
+      ]
+    });
+
+    // 4. Delete all reviews by the user
+    await Review.deleteMany({ user: userIdToDelete });
+
+    // 5. Finally, delete the user account
+    await User.findByIdAndDelete(userIdToDelete);
+
+    res.json({
+      success: true,
+      message: 'User account and all associated data deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting user account',
+      error: error.message
+    });
+  }
 };
 
 export { getUserProfile, createorupdateUserProfile, deleteUser };

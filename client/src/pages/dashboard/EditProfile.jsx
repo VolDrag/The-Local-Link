@@ -49,7 +49,7 @@ const EditProfile = () => {
         });
         
         if (profile.image) {
-          setImagePreview(`http://localhost:5000/${profile.image}`);
+          setImagePreview(`http://localhost:5000/${profile.image}`); 
         }
       }
     } catch (err) {
@@ -105,7 +105,23 @@ const EditProfile = () => {
         return;
       }
 
-      const result = await createOrUpdateProfile(formData);
+      // Prepare data to send - exclude provider fields for seekers
+      const dataToSend = {
+        userId: formData.userId,
+        name: formData.name,
+        age: formData.age,
+        phone: formData.phone,
+        location: formData.location,
+        image: formData.image
+      };
+
+      // Only include provider-specific fields if user is a provider
+      if (user.role === 'provider') {
+        dataToSend.businessName = formData.businessName;
+        dataToSend.availabilityStatus = formData.availabilityStatus;
+      }
+
+      const result = await createOrUpdateProfile(dataToSend);
       
       if (result.success) {
         setSuccess(result.message);

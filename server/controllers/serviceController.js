@@ -172,13 +172,22 @@ const createService = asyncHandler(async (req, res) => {
     .populate('category', 'name icon')
     .populate('provider', 'username businessName email phone isVerified');
 
-  // Step 6: Send back the created service
+  // Step 6: Add service to provider's profile
+  const Profile = (await import('../models/Profile.js')).default; //Profile e dekhabe
+  await Profile.findOneAndUpdate(
+    { user: req.user._id },
+    { $addToSet: { services: service._id } },
+    { upsert: false }
+  );
+
+  // Step 7: Send back the created service
   res.status(201).json({
     success: true,
     message: 'Service created successfully',
     service: populatedService,
   });
 });
+
 
 // @desc    Update a service
 // @route   PUT /api/services/:id
@@ -241,10 +250,17 @@ const deleteService = asyncHandler(async (req, res) => {
     throw new Error('You can only delete your own services');
   }
 
-  // Step 3: Delete the service
+  // Step 3: Remove service from provider's profile
+  const Profile = (await import('../models/Profile.js')).default;
+  await Profile.findOneAndUpdate(
+    { user: service.provider },
+    { $pull: { services: service._id } }
+  );
+
+  // Step 4: Delete the service
   await service.deleteOne();
 
-  // Step 4: Send success message
+  // Step 5: Send success message
   res.json({
     success: true,
     message: 'Service deleted successfully',

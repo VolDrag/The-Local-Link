@@ -1,16 +1,18 @@
 // User Profile Display Component
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserProfile } from '../../services/profileService';
+import { getUserProfile, deleteUser } from '../../services/profileService';
 import { useAuth } from '../../context/AuthContext';
 import './UserProfile.css';
 
 const UserProfile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -41,6 +43,29 @@ const UserProfile = () => {
 
   const handleEditProfile = () => {
     navigate('/profile/edit');
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleteLoading(true);
+      setError('');
+      
+      const result = await deleteUser(user._id);
+      
+      if (result.success) {
+        // Logout and redirect to home
+        logout();
+        navigate('/', { state: { message: 'Account deleted successfully' } });
+      } else {
+        setError(result.message || 'Failed to delete account');
+      }
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      setError(err.message || 'Failed to delete account');
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteModal(false);
+    }
   };
 
   if (loading) {
@@ -78,9 +103,14 @@ const UserProfile = () => {
       <div className="profile-header">
         <button onClick={() => navigate('/')} className="btn-home">🏠 Home</button>
         <h1>My Profile</h1>
-        <button onClick={handleEditProfile} className="btn-edit">
-          Edit Profile
-        </button>
+        <div className="header-actions">
+          <button onClick={handleEditProfile} className="btn-edit">
+            Edit Profile
+          </button>
+          <button onClick={() => setShowDeleteModal(true)} className="btn-delete">
+            Delete Account
+          </button>
+        </div>
       </div>
 
       <div className="profile-content">
@@ -160,9 +190,9 @@ const UserProfile = () => {
                 </p>
               </div>
 
-              {profile.services && profile.services.length > 0 && (
-                <div className="info-group">
-                  <label>Services</label>
+              <div className="info-group">
+                <label>My Services</label>
+                {profile.services && profile.services.length > 0 ? (
                   <div className="services-list">
                     {profile.services.map((service) => (
                       <div key={service._id} className="service-item">
@@ -172,12 +202,47 @@ const UserProfile = () => {
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="no-services-message">
+                    No services created yet. Create your first service to showcase your offerings!
+                  </p>
+                )}
+              </div>
             </>
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Delete Account</h2>
+            <p className="warning-text">
+              Are you sure you want to delete your account? This action cannot be undone.
+            </p>
+            <p className="warning-subtext">
+              All your data including profile, services, bookings, and reviews will be permanently deleted.
+            </p>
+            <div className="modal-actions">
+              <button 
+                onClick={() => setShowDeleteModal(false)} 
+                className="btn-cancel"
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteAccount} 
+                className="btn-confirm-delete"
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? 'Deleting...' : 'Yes, Delete My Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

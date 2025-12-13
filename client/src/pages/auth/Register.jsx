@@ -203,15 +203,21 @@ const Register = () => {
 
             <div className="form-group">
               <label htmlFor="location">Location *</label>
-              <input
-                type="text"
+              <select
                 id="location"
                 name="location"
                 value={location}
                 onChange={handleChange}
-                placeholder="Enter your location"
                 required
-              />
+              >
+                <option value="">Select your location</option>
+                <option value="Dhaka">Dhaka</option>
+                <option value="Chittagong">Chittagong</option>
+                <option value="Sylhet">Sylhet</option>
+                <option value="Khulna">Khulna</option>
+                <option value="Rajshahi">Rajshahi</option>
+                <option value="Comilla">Comilla</option>
+              </select>
             </div>
           </div>
 
