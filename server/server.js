@@ -8,6 +8,7 @@ import { connectDB } from './config/db.js';
 import bookingRoutes from './routes/bookingRoutes.js'; // Anupam
 import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js'; // Rafi
 //import reviewRoutes from './routes/reviewRoutes.js'; // Anupam
 
@@ -28,15 +29,19 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Serve uploaded files statically
+app.use('/uploads', express.static('uploads')); //Debashish
+
 // Connect to Database
 connectDB();
 
 // Define Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes); //Debashish
 app.use("/api/services", serviceRoutes);
 app.use('/api/bookings', bookingRoutes);     // Anupam's Feature
 app.use("/api/categories", categoryRoutes);  // Rafi's Feature
 //app.use("/api/reviews", reviewRoutes);       // Anupam's Feature
+app.use('/api/users', userRoutes); //Debashish
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
 
