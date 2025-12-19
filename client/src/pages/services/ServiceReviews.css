@@ -1,0 +1,115 @@
+/* ServiceReviews.css */
+.service-reviews-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.back-link {
+  display: inline-block;
+  padding: 8px 16px;
+  color: #b0b0b0;
+  background: transparent;
+  border: none;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: #e0e0e0;
+  text-decoration: underline;
+}
+
+.loading-container,
+.error-container {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.service-info h1 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 2rem;
+}
+
+.rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stars-large {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.stars-large .star {
+  font-size: 1.5rem;
+  color: #ddd;
+}
+
+.stars-large .star.filled {
+  color: #ffc107;
+}
+
+.rating-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.review-count {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.btn-write-review {
+  padding: 0.75rem 1.5rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.btn-write-review:hover {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+@media (max-width: 768px) {
+  .service-reviews-page {
+    padding: 1rem;
+  }
+
+  .reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .service-info h1 {
+    font-size: 1.5rem;
+  }
+
+  .btn-write-review {
+    width: 100%;
+  }
+}

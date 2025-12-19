@@ -10,6 +10,7 @@ import AdminLogin from './pages/auth/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserProfile from './pages/dashboard/UserProfile';
 import EditProfile from './pages/dashboard/EditProfile';
+import ServiceReviews from './pages/services/ServiceReviews';//Anupam
 import Home from './pages/home/Home';
 import './App.css';
 
@@ -38,7 +39,7 @@ function App() {
           <Route path="/services/add" element={<AddService />} />  {/*Rafi*/}
           <Route path="/services/:id/edit" element={<EditService />} />  {/*Rafi*/}
           <Route path="/services/:id" element={<ServiceDetails />} />
-          <Route path="/services/:id/reviews" element={<div style={{ padding: '40px', textAlign: 'center' }}><h2>Reviews Page</h2><p>Coming soon...</p></div>} />
+          <Route path="/services/:id/reviews" element={<ServiceReviews />} />
           
           {/* Placeholder for other routes */}
           <Route path="*" element={<div style={{ padding: '40px', textAlign: 'center' }}><h2>404 - Page Not Found</h2></div>} />
