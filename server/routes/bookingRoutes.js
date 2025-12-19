@@ -32,4 +32,8 @@ router.get('/:id', getBookingById);                        // Get booking by ID
 router.patch('/:id/status', authorize('provider'), updateBookingStatus);  // Provider updates booking status
 //router.patch('/:id/cancel', cancelBooking);                // Cancel booking (user or provider)
 
+// for updating booking status
+router.put('/:bookingId/status', protect, updateBookingStatus); //Debashish 
+
+
 export default router;

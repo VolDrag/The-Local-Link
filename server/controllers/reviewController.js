@@ -2,6 +2,8 @@
 import Review from '../models/Review.js';
 import Booking from '../models/Booking.js';
 import Service from '../models/Service.js';
+import { checkAndUpdateVerification } from '../utils/verificationHelper.js'; //Debashish
+
 
 // @desc    Create a review
 // @route   POST /api/reviews
@@ -52,12 +54,19 @@ export const createReview = async (req, res) => {
     // Populate user info
     await review.populate('user', 'name avatar');
 
+    // Check reviewer (seeker) verification
+    //Debashish
+    await checkAndUpdateVerification(req.user._id); // Check reviewer (seeker) verification
+    // Also check provider verification
+    await checkAndUpdateVerification(service.provider); // Check provider verification
+
     res.status(201).json(review);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
 
 // @desc    Get reviews for a service
 // @route   GET /api/reviews/service/:serviceId

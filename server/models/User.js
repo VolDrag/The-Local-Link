@@ -1,5 +1,6 @@
 // User model schema
 // Teammate 1: Define user schema with authentication fields
+//Debashish
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 

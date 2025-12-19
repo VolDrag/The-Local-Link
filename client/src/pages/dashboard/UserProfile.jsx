@@ -12,7 +12,7 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false); 
 
   useEffect(() => {
     if (!user) {
@@ -168,21 +168,34 @@ const UserProfile = () => {
             <p>{profile.location || 'Not specified'}</p>
           </div>
 
+          {/* Verified Status - Show for all users */}
+          <div className="info-group">
+            <label>Verified Status</label>
+            <p className={`status-badge ${profile.isVerified ? 'verified' : 'not-verified'} ${user?.role === 'seeker' ? 'seeker-verified' : 'provider-verified'}`}>
+              {profile.isVerified ? (
+                <>
+                  ✓ Verified 
+                  {user?.role === 'seeker' && ' (3+ bookings & reviews)'}
+                  {user?.role === 'provider' && ' (5+ completed bookings & reviews)'}
+                </>
+              ) : (
+                <>
+                  ✗ Not Verified
+                  {user?.role === 'seeker' && ' (Need 3 bookings & 3 reviews)'}
+                  {user?.role === 'provider' && ' (Need 5 completed bookings & 5 reviews)'}
+                </>
+              )}
+            </p>
+          </div>
+
           {/* Provider-specific fields */}
-          {profile.user?.role === 'provider' && (
+          {user?.role === 'provider' && (
             <>
               <div className="info-group">
                 <label>Business Name</label>
                 <p>{profile.businessName || 'Not specified'}</p>
               </div>
-
-              <div className="info-group">
-                <label>Verified Status</label>
-                <p className={`status-badge ${profile.isVerified ? 'verified' : 'not-verified'}`}>
-                  {profile.isVerified ? '✓ Verified' : '✗ Not Verified'}
-                </p>
-              </div>
-
+              
               <div className="info-group">
                 <label>Availability</label>
                 <p className={`status-badge ${profile.availabilityStatus === 'online' ? 'online' : 'offline'}`}>

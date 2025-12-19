@@ -1,6 +1,8 @@
 // Anupam - Booking Controller
 import Booking from '../models/Booking.js';
 import Service from '../models/Service.js';
+import { checkAndUpdateVerification } from '../utils/verificationHelper.js'; //Debashish
+
 
 export const createBooking = async (req, res) => {
   try {
@@ -19,6 +21,8 @@ export const createBooking = async (req, res) => {
       userNotes,
       status: 'pending' 
     });
+    // Check seeker verification
+    await checkAndUpdateVerification(req.user._id); //Debashish
 
     res.status(201).json(booking);
   } catch (error) {
@@ -26,6 +30,7 @@ export const createBooking = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
 
 export const getMyBookings = async (req, res) => {
   try {
@@ -90,7 +95,7 @@ export const updateBookingStatus = async (req, res) => {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
-    const booking = await Booking.findById(req.params.id);
+    const booking = await Booking.findById(req.params.id || req.params.bookingId);
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
@@ -100,8 +105,19 @@ export const updateBookingStatus = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to update this booking' });
     }
 
+    // Update status
     booking.status = status;
+    // Set completedAt if status is completed
+    if (status === 'completed') {
+      booking.completedAt = Date.now();
+    }
     await booking.save();
+
+    // After updating booking status to 'completed' (add in updateBookingStatus function)
+    //Debashish
+    if (status === 'completed') {
+      await checkAndUpdateVerification(booking.provider); // Check provider verification
+    } 
 
     res.status(200).json(booking);
   } catch (error) {

@@ -24,7 +24,7 @@ export const checkAndUpdateVerification = async (userId) => {
       const bookingCount = await Booking.countDocuments({ seeker: userId });
       
       // Count reviews given by seeker
-      const reviewCount = await Review.countDocuments({ user: userId });
+      const reviewCount = await Review.countDocuments({ user: userId }); 
 
       // Seeker needs at least 3 bookings AND 3 reviews
       shouldBeVerified = bookingCount >= 3 && reviewCount >= 3;
