@@ -10,7 +10,7 @@ import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js'; // Rafi
-//import reviewRoutes from './routes/reviewRoutes.js'; // Anupam
+import reviewRoutes from './routes/reviewRoutes.js'; // Anupam
 
 // Import models to register them with Mongoose
 import './models/User.js';
@@ -40,7 +40,7 @@ app.use("/api/auth", authRoutes); //Debashish
 app.use("/api/services", serviceRoutes);
 app.use('/api/bookings', bookingRoutes);     // Anupam's Feature
 app.use("/api/categories", categoryRoutes);  // Rafi's Feature
-//app.use("/api/reviews", reviewRoutes);       // Anupam's Feature
+app.use("/api/reviews", reviewRoutes);       // Anupam's Feature
 app.use('/api/users', userRoutes); //Debashish
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
