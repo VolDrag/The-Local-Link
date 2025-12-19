@@ -1,52 +1,111 @@
-// Booking Controller
+// Anupam - Booking Controller
+import Booking from '../models/Booking.js';
+import Service from '../models/Service.js';
 
-// @desc    Create a booking
-// @route   POST /api/bookings
-// @access  Private
-const createBooking = async (req, res) => {
-  // TODO: Implement create booking
+export const createBooking = async (req, res) => {
+  try {
+    const { serviceId, scheduledDate, userNotes } = req.body;
+
+    const service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+        const booking = await Booking.create({
+      seeker: req.user._id,      // Changed from 'user' to 'seeker'
+      service: serviceId,
+      provider: service.provider,
+      scheduledTime: scheduledDate,  // Changed from 'scheduledDate' to 'scheduledTime'
+      userNotes,
+      status: 'pending' 
+    });
+
+    res.status(201).json(booking);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Get user bookings
-// @route   GET /api/bookings/my-bookings
-// @access  Private
-const getMyBookings = async (req, res) => {
-  // TODO: Implement get user bookings
+export const getMyBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ user: req.user._id })
+      .populate('service', 'title category pricing')
+      .populate('provider', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Get provider bookings
-// @route   GET /api/bookings/provider-bookings
-// @access  Private (Provider only)
-const getProviderBookings = async (req, res) => {
-  // TODO: Implement get provider bookings
+export const getProviderBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ provider: req.user._id })
+      .populate('service', 'title category pricing')
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Get booking by ID
-// @route   GET /api/bookings/:id
-// @access  Private
-const getBookingById = async (req, res) => {
-  // TODO: Implement get booking by ID
+export const getBookingById = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('service', 'title description category pricing')
+      .populate('user', 'name email phone')
+      .populate('provider', 'name email phone');
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    if (
+      booking.user._id.toString() !== req.user._id.toString() &&
+      booking.provider._id.toString() !== req.user._id.toString() &&
+      req.user.role !== 'admin'
+    ) {
+      return res.status(403).json({ message: 'Not authorized to view this booking' });
+    }
+
+    res.status(200).json(booking);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Update booking status
-// @route   PUT /api/bookings/:id/status
-// @access  Private
-const updateBookingStatus = async (req, res) => {
-  // TODO: Implement update booking status
-};
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
 
-// @desc    Cancel booking
-// @route   PUT /api/bookings/:id/cancel
-// @access  Private
-const cancelBooking = async (req, res) => {
-  // TODO: Implement cancel booking
-};
+    const booking = await Booking.findById(req.params.id);
 
-module.exports = {
-  createBooking,
-  getMyBookings,
-  getProviderBookings,
-  getBookingById,
-  updateBookingStatus,
-  cancelBooking,
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    if (booking.provider.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to update this booking' });
+    }
+
+    booking.status = status;
+    await booking.save();
+
+    res.status(200).json(booking);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };

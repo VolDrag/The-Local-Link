@@ -8,7 +8,7 @@ import {
   getProviderBookings,
   getBookingById,
   updateBookingStatus,
-  cancelBooking
+  //cancelBooking
 } from '../controllers/bookingController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { authorize } from '../middleware/roleMiddleware.js';
@@ -30,6 +30,6 @@ router.get('/:id', getBookingById);                        // Get booking by ID
 
 // Status management routes
 router.patch('/:id/status', authorize('provider'), updateBookingStatus);  // Provider updates booking status
-router.patch('/:id/cancel', cancelBooking);                // Cancel booking (user or provider)
+//router.patch('/:id/cancel', cancelBooking);                // Cancel booking (user or provider)
 
 export default router;
