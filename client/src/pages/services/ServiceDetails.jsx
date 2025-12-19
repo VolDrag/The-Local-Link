@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getServiceById } from '../../services/api';
 import { deleteService } from '../../services/serviceService';  //*Rafi*/
 import { useAuth } from '../../context/AuthContext';    //*Rafi*/
+import BookingForm from '../../components/booking/BookingForm';//Anupam
 import './ServiceDetails.css';
 
 const ServiceDetails = () => {
@@ -15,6 +16,7 @@ const ServiceDetails = () => {
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);  //*Rafi*/
+  const [showBookingForm, setShowBookingForm] = useState(false); //Anupam
   const [deleting, setDeleting] = useState(false);    //*Rafi*/
 
   useEffect(() => {
@@ -85,7 +87,18 @@ const ServiceDetails = () => {
       setShowDeleteModal(false);
     }
   };
+//Anupam - Booking handlers
+const handleBookService = () => {
+  if (!user) {
+    navigate('/login');
+    return;
+  }
+  setShowBookingForm(true);
+};
 
+const handleBookingSuccess = (booking) => {
+  setShowBookingForm(false);
+};
   const handleDeleteCancel = () => {
     setShowDeleteModal(false);
   };
@@ -195,9 +208,14 @@ const ServiceDetails = () => {
           )}
 
           <div className="action-buttons">
-            <button className="contact-btn">Contact Provider</button>
-            <button className="bookmark-btn">♥ Save</button>
-          </div>
+  {!isOwner && (
+    <button className="book-now-btn" onClick={handleBookService}>
+      📅 Book Now
+    </button>
+  )}
+  <button className="contact-btn">Contact Provider</button>
+  <button className="bookmark-btn">♥ Save</button>
+</div>
 
           {/* Edit/Delete buttons - only visible to owner or admin */}
           {canEdit && (
@@ -295,6 +313,17 @@ const ServiceDetails = () => {
                 {deleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {showBookingForm && (
+        <div className="modal-overlay" onClick={() => setShowBookingForm(false)}>
+          <div className="modal-content booking-modal" onClick={(e) => e.stopPropagation()}>
+            <BookingForm 
+              service={service} 
+              onClose={() => setShowBookingForm(false)}
+              onSuccess={handleBookingSuccess}
+            />
           </div>
         </div>
       )}
