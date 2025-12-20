@@ -2,6 +2,7 @@
 import Booking from '../models/Booking.js';
 import Service from '../models/Service.js';
 import { checkAndUpdateVerification } from '../utils/verificationHelper.js'; //Debashish
+import { createNotification } from './notificationController.js';
 
 
 export const createBooking = async (req, res) => {
@@ -23,6 +24,17 @@ export const createBooking = async (req, res) => {
     });
     // Check seeker verification
     await checkAndUpdateVerification(req.user._id); //Debashish
+    // Create notification for provider -Anupam
+    await createNotification({
+      recipient: service.provider._id,
+      sender: req.user._id,
+      type: 'booking_created',
+      title: 'New Booking Request',
+      message: `${req.user.name} has requested a booking for "${service.title}"`,
+      relatedBooking: booking._id,
+      relatedService: serviceId,
+      link: `/bookings/${booking._id}`
+    });
 
     res.status(201).json(booking);
   } catch (error) {
@@ -115,9 +127,45 @@ export const updateBookingStatus = async (req, res) => {
 
     // After updating booking status to 'completed' (add in updateBookingStatus function)
     //Debashish
-    if (status === 'completed') {
-      await checkAndUpdateVerification(booking.provider); // Check provider verification
-    } 
+    // if (status === 'completed') {
+    //   await checkAndUpdateVerification(booking.provider); // Check provider verification
+    // } 
+    // Create notification for seeker based on status change
+    let notificationTitle = '';
+    let notificationMessage = '';
+    let notificationType = '';
+
+    switch (status) {
+      case 'confirmed':
+        notificationType = 'booking_confirmed';
+        notificationTitle = 'Booking Confirmed';
+        notificationMessage = `Your booking for "${booking.service.title}" has been confirmed by ${booking.provider.name}`;
+        break;
+      case 'completed':
+        notificationType = 'booking_completed';
+        notificationTitle = 'Booking Completed';
+        notificationMessage = `Your booking for "${booking.service.title}" has been completed. Please leave a review!`;
+        await checkAndUpdateVerification(booking.provider._id);
+        break;
+      case 'cancelled':
+        notificationType = 'booking_cancelled';
+        notificationTitle = 'Booking Cancelled';
+        notificationMessage = `Your booking for "${booking.service.title}" has been cancelled by the provider`;
+        break;
+    }
+
+    if (notificationType) {
+      await createNotification({
+        recipient: booking.seeker._id,
+        sender: req.user._id,
+        type: notificationType,
+        title: notificationTitle,
+        message: notificationMessage,
+        relatedBooking: booking._id,
+        relatedService: booking.service._id,
+        link: `/bookings/${booking._id}`
+      });
+    }
 
     res.status(200).json(booking);
   } catch (error) {

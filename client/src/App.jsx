@@ -11,6 +11,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UserProfile from './pages/dashboard/UserProfile';
 import EditProfile from './pages/dashboard/EditProfile';
 import ServiceReviews from './pages/services/ServiceReviews';//Anupam
+import NotificationsPage from './pages/notifications/NotificationsPage'; // Anupam
 import Home from './pages/home/Home';
 import './App.css';
 
@@ -33,6 +34,9 @@ function App() {
           {/* Profile Routes */}
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/profile/edit" element={<EditProfile />} />
+          
+          {/* Notification Routes - Anupam */}
+          <Route path="/notifications" element={<NotificationsPage />} />
           
           {/* Service Routes */}
           <Route path="/services" element={<ServiceSearch />} />
