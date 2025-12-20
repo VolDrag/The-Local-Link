@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ServiceList from '../../components/services/ServiceList';
+import Breadcrumb from '../../components/common/Breadcrumb';
+import { getCategories } from '../../services/serviceService';
 import {
   searchServices,
   getCountries,
@@ -34,13 +36,15 @@ const ServiceSearch = () => {
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [categoryName, setCategoryName] = useState(searchParams.get('categoryName') || '');
   const [loadingLocations, setLoadingLocations] = useState({
     countries: false,
     cities: false,
     areas: false,
   });
 
-  // Load countries on mount
+  // Load countries and categories on mount
   useEffect(() => {
     const loadCountries = async () => {
       setLoadingLocations((prev) => ({ ...prev, countries: true }));
@@ -53,7 +57,18 @@ const ServiceSearch = () => {
         setLoadingLocations((prev) => ({ ...prev, countries: false }));
       }
     };
+
+    const loadCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error('Error loading categories:', err);
+      }
+    };
+
     loadCountries();
+    loadCategories();
   }, []);
 
   // Load cities when country changes
@@ -164,16 +179,46 @@ const ServiceSearch = () => {
     setCity('');
     setArea('');
     setCategory('');
+    setCategoryName('');
     setMinRating('');
     setSort('relevance');
     setPage(1);
   };
 
+  const handleCategoryChange = (e) => {
+    const selectedCategoryId = e.target.value;
+    setCategory(selectedCategoryId);
+    
+    if (selectedCategoryId) {
+      const selectedCategory = categories.find(cat => cat._id === selectedCategoryId);
+      setCategoryName(selectedCategory?.name || '');
+    } else {
+      setCategoryName('');
+    }
+  };
+
   return (
     <div className="service-search-page">
+      <Breadcrumb categoryName={categoryName} />
+      
       <div className="search-header">
         <h1>Find Local Services</h1>
         <p>Discover trusted service providers in your area</p>
+        {categoryName && (
+          <div className="active-category-filter">
+            <span>Browsing: <strong>{categoryName}</strong></span>
+            <button 
+              onClick={() => {
+                setCategory('');
+                setCategoryName('');
+              }} 
+              className="remove-category-btn"
+              title="Clear category filter"
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="search-container">
@@ -257,8 +302,13 @@ const ServiceSearch = () => {
 
             <div className="filter-group">
               <label>Category</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <select value={category} onChange={handleCategoryChange}>
                 <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name} ({cat.serviceCount})
+                  </option>
+                ))}
               </select>
             </div>
 

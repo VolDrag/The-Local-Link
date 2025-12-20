@@ -166,26 +166,6 @@ export const updateBookingStatus = async (req, res) => {
         link: `/bookings/${booking._id}`
       });
     }
-    if (notificationType) {
-  //console.log('🔔 Creating notification for seeker:', {
-    recipient: booking.seeker._id,
-    type: notificationType,
-    title: notificationTitle
-  });
-  
-  const notification = await createNotification({
-    recipient: booking.seeker._id,
-    sender: req.user._id,
-    type: notificationType,
-    title: notificationTitle,
-    message: notificationMessage,
-    relatedBooking: booking._id,
-    relatedService: booking.service._id,
-    link: `/bookings/${booking._id}`
-  });
-  
-  //console.log('✅ Notification created:', notification);
-}
 
     res.status(200).json(booking);
   } catch (error) {
