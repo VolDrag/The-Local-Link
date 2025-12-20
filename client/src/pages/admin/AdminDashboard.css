@@ -281,8 +281,10 @@
 }
 
 .badge-category {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background-color: transparent;
+  color: #000000;
+  border: none;
+  padding: 0;
 }
 
 .no-data {
@@ -428,7 +430,7 @@
 }
 
 .modal-content {
-  background-color: #2a2a2a;
+  background: #ffffff;
   border-radius: 12px;
   width: 100%;
   max-width: 1200px;
@@ -453,37 +455,39 @@
 
 .modal-header {
   padding: 25px 30px;
-  border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  background: transparent;
 }
 
 .modal-header h2 {
   margin: 0;
-  font-size: 1.5rem;
-  color: #fff;
+  font-size: 1.8rem;
+  color: #ff4757;
+  font-weight: 700;
 }
 
 .modal-close {
   background: none;
   border: none;
-  color: #fff;
-  font-size: 1.5rem;
+  color: #999999;
+  font-size: 1.8rem;
   cursor: pointer;
   padding: 5px 10px;
   border-radius: 6px;
   transition: all 0.2s ease;
+  line-height: 1;
 }
 
 .modal-close:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: rotate(90deg);
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #000000;
 }
 
 .modal-body {
-  padding: 30px;
+  padding: 0;
   overflow-y: auto;
   flex: 1;
 }
@@ -495,32 +499,37 @@
 .users-table table {
   width: 100%;
   border-collapse: collapse;
-  background-color: rgba(255, 255, 255, 0.02);
-  border-radius: 8px;
+  background-color: transparent;
+  border-radius: 0;
   overflow: hidden;
 }
 
 .users-table thead {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .users-table th {
-  padding: 15px;
+  padding: 16px 20px;
   text-align: left;
   font-weight: 600;
-  color: #fff;
-  font-size: 0.95rem;
+  color: #ffffff;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: none;
 }
 
 .users-table tbody tr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background-color 0.2s ease;
+  background: transparent;
 }
 
 .users-table tbody tr:hover {
-  background-color: rgba(102, 126, 234, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .users-table tbody tr:last-child {
@@ -528,9 +537,15 @@
 }
 
 .users-table td {
-  padding: 15px;
-  color: #ddd;
+  padding: 16px 20px;
+  color: #000000;
   font-size: 0.9rem;
+  border: none;
+}
+
+.users-table td:first-child {
+  color: #000000;
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {
