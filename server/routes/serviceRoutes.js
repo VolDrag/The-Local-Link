@@ -6,9 +6,10 @@ import {
   getCountries,
   getCitiesByCountry,
   getAreasByCity,
-  createService,
-  updateService,
-  deleteService,
+  createService,  
+  updateService,  //feature 15
+  deleteService,  //feature 15
+  toggleAvailability, //feature 16  
 } from '../controllers/serviceController.js';
 import { getServiceReviews } from '../controllers/reviewController.js';
 import { protect } from '../middleware/authMiddleware.js';    // Authentication middleware
@@ -28,6 +29,7 @@ router.get('/:serviceId/reviews', getServiceReviews);
 
 // Protected routes - Provider only for create, update, delete  //##############Rafi###################
 router.post('/', protect, authorize('provider'), createService);
+router.patch('/:id/availability', protect, authorize('provider'), toggleAvailability);//feature 16
 router.put('/:id', protect, authorize('provider'), updateService);
 router.delete('/:id', protect, authorize('provider', 'admin'), deleteService);
 
