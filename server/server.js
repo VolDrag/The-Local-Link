@@ -11,6 +11,9 @@ import serviceRoutes from './routes/serviceRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js'; // Rafi
 import reviewRoutes from './routes/reviewRoutes.js'; // Anupam
+import notificationRoutes from './routes/notificationRoutes.js'; // Anupam
+
+//console.log('✅ Notification routes loaded:', notificationRoutes); // ADD THIS LINE
 
 // Import models to register them with Mongoose
 import './models/User.js';
@@ -18,6 +21,7 @@ import './models/Service.js';
 import './models/Category.js';
 import './models/Review.js';
 import './models/Booking.js';
+import './models/Notification.js';
 
 
 dotenv.config();
@@ -30,18 +34,20 @@ app.use(cors());
 app.use(express.json());
 
 // Serve uploaded files statically
-app.use('/uploads', express.static('uploads')); //Debashish
+app.use('/uploads', express.static('uploads'));
 
 // Connect to Database
 connectDB();
 
 // Define Routes
-app.use("/api/auth", authRoutes); //Debashish
+app.use("/api/auth", authRoutes);
 app.use("/api/services", serviceRoutes);
-app.use('/api/bookings', bookingRoutes);     // Anupam's Feature
-app.use("/api/categories", categoryRoutes);  // Rafi's Feature
-app.use("/api/reviews", reviewRoutes);       // Anupam's Feature
-app.use('/api/users', userRoutes); //Debashish
+app.use('/api/bookings', bookingRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/notifications', notificationRoutes); // Anupam's Feature
+//console.log('✅ Notification routes registered at /api/notifications'); // ADD THIS LINE
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
 

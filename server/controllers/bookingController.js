@@ -9,21 +9,23 @@ export const createBooking = async (req, res) => {
   try {
     const { serviceId, scheduledDate, userNotes } = req.body;
 
-    const service = await Service.findById(serviceId);
+    const service = await Service.findById(serviceId).populate('provider', 'name');
     if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }
 
-        const booking = await Booking.create({
-      seeker: req.user._id,      // Changed from 'user' to 'seeker'
+    const booking = await Booking.create({
+      seeker: req.user._id,
       service: serviceId,
-      provider: service.provider,
-      scheduledTime: scheduledDate,  // Changed from 'scheduledDate' to 'scheduledTime'
+      provider: service.provider._id,
+      scheduledTime: scheduledDate,
       userNotes,
       status: 'pending' 
     });
+    
     // Check seeker verification
     await checkAndUpdateVerification(req.user._id); //Debashish
+    
     // Create notification for provider -Anupam
     await createNotification({
       recipient: service.provider._id,
@@ -46,7 +48,7 @@ export const createBooking = async (req, res) => {
 
 export const getMyBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id })
+    const bookings = await Booking.find({ seeker: req.user._id })
       .populate('service', 'title category pricing')
       .populate('provider', 'name email')
       .sort({ createdAt: -1 });
@@ -62,7 +64,7 @@ export const getProviderBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ provider: req.user._id })
       .populate('service', 'title category pricing')
-      .populate('user', 'name email')
+      .populate('seeker', 'name email')
       .sort({ createdAt: -1 });
 
     res.status(200).json(bookings);
@@ -76,7 +78,7 @@ export const getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
       .populate('service', 'title description category pricing')
-      .populate('user', 'name email phone')
+      .populate('seeker', 'name email phone')
       .populate('provider', 'name email phone');
 
     if (!booking) {
@@ -84,7 +86,7 @@ export const getBookingById = async (req, res) => {
     }
 
     if (
-      booking.user._id.toString() !== req.user._id.toString() &&
+      booking.seeker._id.toString() !== req.user._id.toString() &&
       booking.provider._id.toString() !== req.user._id.toString() &&
       req.user.role !== 'admin'
     ) {
@@ -107,13 +109,16 @@ export const updateBookingStatus = async (req, res) => {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
-    const booking = await Booking.findById(req.params.id || req.params.bookingId);
+    const booking = await Booking.findById(req.params.id || req.params.bookingId)
+      .populate('service', 'title')
+      .populate('seeker', 'name')
+      .populate('provider', 'name');
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    if (booking.provider.toString() !== req.user._id.toString()) {
+    if (booking.provider._id.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to update this booking' });
     }
 
@@ -125,11 +130,6 @@ export const updateBookingStatus = async (req, res) => {
     }
     await booking.save();
 
-    // After updating booking status to 'completed' (add in updateBookingStatus function)
-    //Debashish
-    // if (status === 'completed') {
-    //   await checkAndUpdateVerification(booking.provider); // Check provider verification
-    // } 
     // Create notification for seeker based on status change
     let notificationTitle = '';
     let notificationMessage = '';
@@ -166,6 +166,26 @@ export const updateBookingStatus = async (req, res) => {
         link: `/bookings/${booking._id}`
       });
     }
+    if (notificationType) {
+  //console.log('🔔 Creating notification for seeker:', {
+    recipient: booking.seeker._id,
+    type: notificationType,
+    title: notificationTitle
+  });
+  
+  const notification = await createNotification({
+    recipient: booking.seeker._id,
+    sender: req.user._id,
+    type: notificationType,
+    title: notificationTitle,
+    message: notificationMessage,
+    relatedBooking: booking._id,
+    relatedService: booking.service._id,
+    link: `/bookings/${booking._id}`
+  });
+  
+  //console.log('✅ Notification created:', notification);
+}
 
     res.status(200).json(booking);
   } catch (error) {
