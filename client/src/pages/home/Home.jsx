@@ -1,11 +1,10 @@
 // Home page - Landing page with hero section and features
+// #ifty - Removed categories section, moved to separate page
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getUserProfile } from '../../services/profileService';
 // import NotificationBell from '../../components/notifications/NotificationBell'; // Anupam - Temporarily commented
-import { getCategories } from '../../services/serviceService';
-import CategoryCard from '../../components/services/CategoryCard';
 import './Home.css';
 
 const Home = () => {
@@ -13,8 +12,6 @@ const Home = () => {
   const { user, logout } = useAuth();
   const [hasProfile, setHasProfile] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -22,20 +19,7 @@ const Home = () => {
     } else {
       setLoading(false);
     }
-    loadCategories();
   }, [user]);
-
-  const loadCategories = async () => {
-    try {
-      setCategoriesLoading(true);
-      const data = await getCategories();
-      setCategories(data);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    } finally {
-      setCategoriesLoading(false);
-    }
-  };
 
   const checkProfile = async () => {
     try {
@@ -167,7 +151,7 @@ const Home = () => {
             <h3>Find Services</h3>
             <p>Search and discover local service providers in your area</p>
             {user ? (
-              <button onClick={() => navigate('/services')} className="feature-btn">
+              <button onClick={() => navigate('/categories')} className="feature-btn">
                 Browse Services
               </button>
             ) : (
@@ -232,25 +216,6 @@ const Home = () => {
             </>
           )}
         </div>
-      </section>
-
-      {/* Browse Categories Section */}
-      <section className="categories-section" id="categories">
-        <h2 className="section-title">Browse by Category</h2>
-        <p className="section-subtitle">Explore services by category to find what you need</p>
-        {categoriesLoading ? (
-          <div className="categories-loading">Loading categories...</div>
-        ) : categories.length > 0 ? (
-          <div className="categories-grid">
-            {categories.map((category) => (
-              <CategoryCard key={category._id} category={category} />
-            ))}
-          </div>
-        ) : (
-          <div className="no-categories">
-            <p>No categories available at the moment.</p>
-          </div>
-        )}
       </section>
 
       {/* Footer */}

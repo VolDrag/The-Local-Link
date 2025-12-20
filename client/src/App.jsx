@@ -4,6 +4,7 @@ import ServiceSearch from './pages/services/ServiceSearch';
 import ServiceDetails from './pages/services/ServiceDetails';
 import AddService from './pages/services/AddService';   //Rafi
 import EditService from './pages/services/EditService';   //Rafi
+import CategoriesPage from './pages/services/CategoriesPage';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminLogin from './pages/auth/AdminLogin';
@@ -40,6 +41,7 @@ function App() {
           
           {/* Service Routes */}
           <Route path="/services" element={<ServiceSearch />} />
+          <Route path="/categories" element={<CategoriesPage />} /> {/* #ifty - Categories page route */}
           <Route path="/services/add" element={<AddService />} />  {/*Rafi*/}
           <Route path="/services/:id/edit" element={<EditService />} />  {/*Rafi*/}
           <Route path="/services/:id" element={<ServiceDetails />} />
