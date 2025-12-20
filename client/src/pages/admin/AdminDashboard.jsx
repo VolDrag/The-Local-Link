@@ -17,6 +17,11 @@ const AdminDashboard = () => {
   const [showSeekerModal, setShowSeekerModal] = useState(false);
   const [allSeekers, setAllSeekers] = useState([]);
   const [loadingSeekers, setLoadingSeekers] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [allCategories, setAllCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [categoryForm, setCategoryForm] = useState({ name: '', description: '', icon: '📦' });
+  const [editingCategory, setEditingCategory] = useState(null);
 
   useEffect(() => {
     // Check if user is admin
@@ -99,6 +104,113 @@ const AdminDashboard = () => {
     } finally {
       setLoadingSeekers(false);
     }
+  };
+
+  const handleShowCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await adminService.getAllCategories();
+      setAllCategories(response.data || []);
+      setShowCategoryModal(true);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      alert(err.response?.data?.message || 'Failed to load categories');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  const handleCreateCategory = async (e) => {
+    e.preventDefault();
+    try {
+      await adminService.createCategory(categoryForm);
+      setCategoryForm({ name: '', description: '', icon: '📦' });
+      await handleShowCategories();
+      await fetchDashboardStats();
+      alert('Category created successfully');
+    } catch (err) {
+      console.error('Error creating category:', err);
+      alert(err.response?.data?.message || 'Failed to create category');
+    }
+  };
+
+  const handleUpdateCategory = async (e) => {
+    e.preventDefault();
+    try {
+      await adminService.updateCategory(editingCategory._id, categoryForm);
+      setEditingCategory(null);
+      setCategoryForm({ name: '', description: '', icon: '📦' });
+      await handleShowCategories();
+      await fetchDashboardStats();
+      alert('Category updated successfully');
+    } catch (err) {
+      console.error('Error updating category:', err);
+      alert(err.response?.data?.message || 'Failed to update category');
+    }
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this category?')) {
+      return;
+    }
+    try {
+      await adminService.deleteCategory(id);
+      await handleShowCategories();
+      await fetchDashboardStats();
+      alert('Category deleted successfully');
+    } catch (err) {
+      console.error('Error deleting category:', err);
+      alert(err.response?.data?.message || 'Failed to delete category');
+    }
+  };
+
+  const openEditCategoryModal = (category) => {
+    setEditingCategory(category);
+    setCategoryForm({
+      name: category.name,
+      description: category.description || '',
+      icon: category.icon || '📦'
+    });
+  };
+
+  const iconOptions = [
+    { icon: '🔧', name: 'Repair' },
+    { icon: '🏠', name: 'Home' },
+    { icon: '💻', name: 'Technology' },
+    { icon: '🚗', name: 'Automotive' },
+    { icon: '🎨', name: 'Art & Design' },
+    { icon: '📚', name: 'Education' },
+    { icon: '🍔', name: 'Food' },
+    { icon: '💼', name: 'Business' },
+    { icon: '🏥', name: 'Healthcare' },
+    { icon: '✈️', name: 'Travel' },
+    { icon: '🎵', name: 'Music' },
+    { icon: '🏋️', name: 'Fitness' },
+    { icon: '🌿', name: 'Nature' },
+    { icon: '🔌', name: 'Electrical' },
+    { icon: '📱', name: 'Mobile' },
+    { icon: '👔', name: 'Fashion' },
+    { icon: '🛠️', name: 'Tools' },
+    { icon: '🏗️', name: 'Construction' },
+    { icon: '🎓', name: 'Academic' },
+    { icon: '💇', name: 'Beauty' },
+    { icon: '🧹', name: 'Cleaning' },
+    { icon: '🔑', name: 'Security' },
+    { icon: '📦', name: 'General' },
+    { icon: '⚡', name: 'Energy' },
+    { icon: '🎬', name: 'Entertainment' },
+    { icon: '📷', name: 'Photography' },
+    { icon: '🎮', name: 'Gaming' },
+    { icon: '⚽', name: 'Sports' },
+    { icon: '🎸', name: 'Musical' },
+    { icon: '🍕', name: 'Restaurant' },
+    { icon: '🌸', name: 'Floral' },
+    { icon: '🐶', name: 'Pet Care' }
+  ];
+
+  const getIconName = (iconEmoji) => {
+    const found = iconOptions.find(opt => opt.icon === iconEmoji);
+    return found ? found.name : 'Unknown';
   };
 
   if (loading) {
@@ -185,7 +297,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card clickable" onClick={handleShowCategories}>
             <div className="stat-icon categories">📁</div>
             <div className="stat-info">
               <h3>{stats?.overview?.totalCategories || 0}</h3>
@@ -443,6 +555,133 @@ const AdminDashboard = () => {
                     </tbody>
                   </table>
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Management Modal */}
+      {showCategoryModal && (
+        <div className="modal-overlay" onClick={() => {
+          setShowCategoryModal(false);
+          setEditingCategory(null);
+          setCategoryForm({ name: '', description: '', icon: '📦' });
+        }}>
+          <div className="modal-content large-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Category Management</h2>
+              <button className="modal-close" onClick={() => {
+                setShowCategoryModal(false);
+                setEditingCategory(null);
+                setCategoryForm({ name: '', description: '', icon: '📦' });
+              }}>✕</button>
+            </div>
+            <div className="modal-body">
+              {loadingCategories ? (
+                <div className="loading">Loading categories...</div>
+              ) : (
+                <>
+                  <div className="category-form-section">
+                    <h3>{editingCategory ? 'Edit Category' : 'Create New Category'}</h3>
+                    <form onSubmit={editingCategory ? handleUpdateCategory : handleCreateCategory} className="category-form">
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Category Name *</label>
+                          <input
+                            type="text"
+                            value={categoryForm.name}
+                            onChange={(e) => setCategoryForm({...categoryForm, name: e.target.value})}
+                            placeholder="e.g., Plumbing, Cleaning, etc."
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>
+                            Icon: <span className="selected-name">{categoryForm.icon} {getIconName(categoryForm.icon)}</span>
+                          </label>
+                          <div className="icon-picker">
+                            {iconOptions.map((option) => (
+                              <button
+                                key={option.icon}
+                                type="button"
+                                className={`icon-option ${categoryForm.icon === option.icon ? 'selected' : ''}`}
+                                onClick={() => setCategoryForm({...categoryForm, icon: option.icon})}
+                                title={option.name}
+                              >
+                                {option.icon}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Description</label>
+                        <textarea
+                          value={categoryForm.description}
+                          onChange={(e) => setCategoryForm({...categoryForm, description: e.target.value})}
+                          placeholder="Brief description of this category"
+                          rows="3"
+                        />
+                      </div>
+                      <div className="form-actions">
+                        <button type="submit" className="btn-primary">
+                          {editingCategory ? '✓ Update Category' : '+ Create Category'}
+                        </button>
+                        {editingCategory && (
+                          <button 
+                            type="button" 
+                            className="btn-secondary" 
+                            onClick={() => {
+                              setEditingCategory(null);
+                              setCategoryForm({ name: '', description: '', icon: '📦' });
+                            }}
+                          >
+                            Cancel Edit
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="categories-list-section">
+                    <h3>Existing Categories ({allCategories.length})</h3>
+                    <div className="categories-grid">
+                      {allCategories.map((category) => (
+                        <div key={category._id} className="category-card">
+                          <div className="category-card-header">
+                            <span className="category-icon-large">{category.icon || '📦'}</span>
+                            <div className="category-card-info">
+                              <h4>{category.name}</h4>
+                              <p className="category-description">
+                                {category.description || 'No description'}
+                              </p>
+                              <span className={`status-badge ${category.isActive ? 'active' : 'inactive'}`}>
+                                {category.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="category-card-actions">
+                            <button 
+                              className="btn-edit" 
+                              onClick={() => openEditCategoryModal(category)}
+                              title="Edit category"
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button 
+                              className="btn-delete" 
+                              onClick={() => handleDeleteCategory(category._id)}
+                              title="Delete category"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
