@@ -155,3 +155,13 @@
     font-size: 1.125rem;
   }
 }
+
+.verified-badge.provider-verified {
+  background-color: #1976d2; /* Blue */
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}

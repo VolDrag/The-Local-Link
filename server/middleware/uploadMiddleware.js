@@ -2,11 +2,11 @@
 // TODO: Configure multer for image uploads
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 
 const storage = multer.diskStorage({
-    destination: (req, res, cb) => {
+    destination: (req, file, cb) => {
         cb(null, 'uploads/');
-
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + path.extname(file.originalname));

@@ -1,4 +1,5 @@
 // User Controller
+//Debashish
 import Profile from '../models/Profile.js';
 import uploadMiddleware from '../middleware/uploadMiddleware.js'; 
 
@@ -52,7 +53,8 @@ const createorupdateUserProfile = async (req, res) => {
   // TODO: Implement create or update user profile
   try {
     const {age, phone, location, name, userId, businessName, availabilityStatus} = req.body;    
-    const image = req.file ? req.file.path : null;
+    // Normalize path to use forward slashes for URLs (works on all platforms)
+    const image = req.file ? req.file.path.replace(/\\/g, '/') : null;
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required' });
     }

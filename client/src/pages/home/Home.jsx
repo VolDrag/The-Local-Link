@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getUserProfile } from '../../services/profileService';
+// import NotificationBell from '../../components/notifications/NotificationBell'; // Anupam - Temporarily commented
 import './Home.css';
 
 const Home = () => {
@@ -66,6 +67,7 @@ const Home = () => {
         <div className="header-content">
           <h1 className="logo">The Local Link</h1>
           <nav className="nav-menu">
+            {/* {user && <NotificationBell />} */}
             {user ? (
               <>
                 <button onClick={handleProfileAction} className="nav-btn">

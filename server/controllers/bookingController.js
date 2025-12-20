@@ -1,52 +1,195 @@
-// Booking Controller
+// Anupam - Booking Controller
+import Booking from '../models/Booking.js';
+import Service from '../models/Service.js';
+import { checkAndUpdateVerification } from '../utils/verificationHelper.js'; //Debashish
+import { createNotification } from './notificationController.js';
 
-// @desc    Create a booking
-// @route   POST /api/bookings
-// @access  Private
-const createBooking = async (req, res) => {
-  // TODO: Implement create booking
+
+export const createBooking = async (req, res) => {
+  try {
+    const { serviceId, scheduledDate, userNotes } = req.body;
+
+    const service = await Service.findById(serviceId).populate('provider', 'name');
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    const booking = await Booking.create({
+      seeker: req.user._id,
+      service: serviceId,
+      provider: service.provider._id,
+      scheduledTime: scheduledDate,
+      userNotes,
+      status: 'pending' 
+    });
+    
+    // Check seeker verification
+    await checkAndUpdateVerification(req.user._id); //Debashish
+    
+    // Create notification for provider -Anupam
+    await createNotification({
+      recipient: service.provider._id,
+      sender: req.user._id,
+      type: 'booking_created',
+      title: 'New Booking Request',
+      message: `${req.user.name} has requested a booking for "${service.title}"`,
+      relatedBooking: booking._id,
+      relatedService: serviceId,
+      link: `/bookings/${booking._id}`
+    });
+
+    res.status(201).json(booking);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Get user bookings
-// @route   GET /api/bookings/my-bookings
-// @access  Private
-const getMyBookings = async (req, res) => {
-  // TODO: Implement get user bookings
+
+export const getMyBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ seeker: req.user._id })
+      .populate('service', 'title category pricing')
+      .populate('provider', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Get provider bookings
-// @route   GET /api/bookings/provider-bookings
-// @access  Private (Provider only)
-const getProviderBookings = async (req, res) => {
-  // TODO: Implement get provider bookings
+export const getProviderBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ provider: req.user._id })
+      .populate('service', 'title category pricing')
+      .populate('seeker', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Get booking by ID
-// @route   GET /api/bookings/:id
-// @access  Private
-const getBookingById = async (req, res) => {
-  // TODO: Implement get booking by ID
+export const getBookingById = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('service', 'title description category pricing')
+      .populate('seeker', 'name email phone')
+      .populate('provider', 'name email phone');
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    if (
+      booking.seeker._id.toString() !== req.user._id.toString() &&
+      booking.provider._id.toString() !== req.user._id.toString() &&
+      req.user.role !== 'admin'
+    ) {
+      return res.status(403).json({ message: 'Not authorized to view this booking' });
+    }
+
+    res.status(200).json(booking);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };
 
-// @desc    Update booking status
-// @route   PUT /api/bookings/:id/status
-// @access  Private
-const updateBookingStatus = async (req, res) => {
-  // TODO: Implement update booking status
-};
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
 
-// @desc    Cancel booking
-// @route   PUT /api/bookings/:id/cancel
-// @access  Private
-const cancelBooking = async (req, res) => {
-  // TODO: Implement cancel booking
-};
+    const booking = await Booking.findById(req.params.id || req.params.bookingId)
+      .populate('service', 'title')
+      .populate('seeker', 'name')
+      .populate('provider', 'name');
 
-module.exports = {
-  createBooking,
-  getMyBookings,
-  getProviderBookings,
-  getBookingById,
-  updateBookingStatus,
-  cancelBooking,
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    if (booking.provider._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to update this booking' });
+    }
+
+    // Update status
+    booking.status = status;
+    // Set completedAt if status is completed
+    if (status === 'completed') {
+      booking.completedAt = Date.now();
+    }
+    await booking.save();
+
+    // Create notification for seeker based on status change
+    let notificationTitle = '';
+    let notificationMessage = '';
+    let notificationType = '';
+
+    switch (status) {
+      case 'confirmed':
+        notificationType = 'booking_confirmed';
+        notificationTitle = 'Booking Confirmed';
+        notificationMessage = `Your booking for "${booking.service.title}" has been confirmed by ${booking.provider.name}`;
+        break;
+      case 'completed':
+        notificationType = 'booking_completed';
+        notificationTitle = 'Booking Completed';
+        notificationMessage = `Your booking for "${booking.service.title}" has been completed. Please leave a review!`;
+        await checkAndUpdateVerification(booking.provider._id);
+        break;
+      case 'cancelled':
+        notificationType = 'booking_cancelled';
+        notificationTitle = 'Booking Cancelled';
+        notificationMessage = `Your booking for "${booking.service.title}" has been cancelled by the provider`;
+        break;
+    }
+
+    if (notificationType) {
+      await createNotification({
+        recipient: booking.seeker._id,
+        sender: req.user._id,
+        type: notificationType,
+        title: notificationTitle,
+        message: notificationMessage,
+        relatedBooking: booking._id,
+        relatedService: booking.service._id,
+        link: `/bookings/${booking._id}`
+      });
+    }
+    if (notificationType) {
+  //console.log('🔔 Creating notification for seeker:', {
+    recipient: booking.seeker._id,
+    type: notificationType,
+    title: notificationTitle
+  });
+  
+  const notification = await createNotification({
+    recipient: booking.seeker._id,
+    sender: req.user._id,
+    type: notificationType,
+    title: notificationTitle,
+    message: notificationMessage,
+    relatedBooking: booking._id,
+    relatedService: booking.service._id,
+    link: `/bookings/${booking._id}`
+  });
+  
+  //console.log('✅ Notification created:', notification);
+}
+
+    res.status(200).json(booking);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 };

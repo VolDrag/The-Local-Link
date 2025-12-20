@@ -50,7 +50,9 @@ const ServiceCard = ({ service }) => {
             alt={title}
           />
           {category && <span className="service-category">{category.name}</span>}
-          {provider?.isVerified && <span className="verified-badge">✓ Verified</span>}
+          {provider?.isVerified && (
+            <span className="verified-badge provider-verified">✓ Verified Provider</span>
+          )}
         </div>
 
         <div className="service-card-content">

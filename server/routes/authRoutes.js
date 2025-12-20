@@ -1,6 +1,6 @@
 // Authentication routes
 // /api/auth
-
+//Debashish
 import express from 'express';
 import { registerUser, loginUser, getMe, adminLogin, setupAdmin } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
@@ -16,6 +16,6 @@ router.get('/me', protect, getMe);
 // Admin routes
 router.post('/admin/login', adminLogin);
 router.get('/admin/me', protect, adminOnly, getMe); 
-// router.post('/admin/setup', setupAdmin); // REMOVE THIS AFTER CREATING ADMIN
+// router.post('/admin/setup', setupAdmin); // REMOVE AFTER CREATING ADMIN
 
 export default router;
