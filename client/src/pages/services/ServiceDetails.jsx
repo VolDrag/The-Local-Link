@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getServiceById } from '../../services/api';
-import { deleteService } from '../../services/serviceService';  //*Rafi*/
+import { deleteService, toggleServiceAvailability } from '../../services/serviceService';  //*Rafi*/
 import { useAuth } from '../../context/AuthContext';    //*Rafi*/
 import BookingForm from '../../components/booking/BookingForm';//Anupam
 import './ServiceDetails.css';
@@ -18,6 +18,7 @@ const ServiceDetails = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);  //*Rafi*/
   const [showBookingForm, setShowBookingForm] = useState(false); //Anupam
   const [deleting, setDeleting] = useState(false);    //*Rafi*/
+  const [togglingAvailability, setTogglingAvailability] = useState(false);  // Track if we're toggling(feature 16)
 
   useEffect(() => {
     const fetchService = async () => {
@@ -60,6 +61,7 @@ const ServiceDetails = () => {
     return `৳${service.pricing}${unitLabels[service.pricingUnit] || ''}`;
   };
 //****Rafi****/
+//feature 15: Delete Service
   // Check if current user is the owner or admin
   const isOwner = user && service && user._id === service.provider?._id;
   const isAdmin = user && user.role === 'admin';
@@ -102,7 +104,40 @@ const handleBookingSuccess = (booking) => {
   const handleDeleteCancel = () => {
     setShowDeleteModal(false);
   };
+
+
+  //feature 16: Toggle Service Availability
+  // Handle toggling availability status
+  const handleToggleAvailability = async () => {
+    // Step 1: Set toggling state to true (button becomes disabled)
+    setTogglingAvailability(true);
+    
+    try {
+      // Step 2: Call the API to toggle availability
+      const response = await toggleServiceAvailability(id);
+      
+      // Step 3: Update the service state with the new status
+      setService((prevService) => ({
+        ...prevService,
+        availabilityStatus: response.availabilityStatus,
+      }));
+      
+      // Step 4: Show success message
+      alert(`Service is now ${response.availabilityStatus}!`);
+      
+    } catch (error) {
+      // Step 5: If error occurs, show error message
+      console.error('Error toggling availability:', error);
+      alert(error.message || 'Failed to update availability. Please try again.');
+    } finally {
+      // Step 6: Always set toggling back to false (button becomes enabled again)
+      setTogglingAvailability(false);
+    }
+  };
 //
+
+
+
   if (loading) {
     return (
       <div className="service-details-page">
@@ -220,6 +255,30 @@ const handleBookingSuccess = (booking) => {
           {/* Edit/Delete buttons - only visible to owner or admin */}
           {canEdit && (
             <div className="owner-actions">
+              {/*feature 16: Availability Toggle */}
+              {/* Availability Toggle Section */}
+              <div className="availability-section">
+                <div className="availability-display">
+                  <span className="availability-label">Current Status:</span>
+                  <span className={`status-badge ${service.availabilityStatus}`}>
+                    {service.availabilityStatus === 'online' ? '🟢 Online' : '⚫ Offline'}
+                  </span>
+                </div>
+                <button 
+                  onClick={handleToggleAvailability} 
+                  className="toggle-btn"
+                  disabled={togglingAvailability}
+                >
+                  {togglingAvailability 
+                    ? 'Updating...' 
+                    : service.availabilityStatus === 'online' 
+                      ? 'Set Offline' 
+                      : 'Set Online'
+                  }
+                </button>
+              </div>
+              {/* //////////////////////////// */}
+              
               <button onClick={handleEdit} className="edit-btn">
                 ✏️ Edit Service
               </button>

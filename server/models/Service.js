@@ -76,6 +76,15 @@ const serviceSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Provider's availability status     //*################Rafi##############(feature 16)
+    availabilityStatus: {
+      type: String,
+      enum: ['online', 'offline'],
+      default: 'online',
+    },
+
+
+    
     // Special offers
     hasOffer: {
       type: Boolean,

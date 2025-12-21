@@ -101,6 +101,12 @@ export const getBookingById = async (req, res) => {
 };
 
 export const updateBookingStatus = async (req, res) => {
+  console.log('📝 updateBookingStatus called with:', {
+    bookingId: req.params.id,
+    status: req.body.status,
+    userId: req.user._id
+  });
+  
   try {
     const { status } = req.body;
     
@@ -113,6 +119,14 @@ export const updateBookingStatus = async (req, res) => {
       .populate('service', 'title')
       .populate('seeker', 'name')
       .populate('provider', 'name');
+
+    console.log('📦 Booking found:', {
+      id: booking?._id,
+      status: booking?.status,
+      seeker: booking?.seeker?.name,
+      provider: booking?.provider?.name,
+      service: booking?.service?.title
+    });
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
@@ -129,6 +143,8 @@ export const updateBookingStatus = async (req, res) => {
       booking.completedAt = Date.now();
     }
     await booking.save();
+
+    console.log('💾 Booking saved with new status:', status);
 
     // Create notification for seeker based on status change
     let notificationTitle = '';
@@ -155,7 +171,13 @@ export const updateBookingStatus = async (req, res) => {
     }
 
     if (notificationType) {
-      await createNotification({
+      console.log('🔔 Creating notification for seeker:', {
+        recipient: booking.seeker._id,
+        type: notificationType,
+        title: notificationTitle
+      });
+      
+      const notification = await createNotification({
         recipient: booking.seeker._id,
         sender: req.user._id,
         type: notificationType,
@@ -165,11 +187,13 @@ export const updateBookingStatus = async (req, res) => {
         relatedService: booking.service._id,
         link: `/bookings/${booking._id}`
       });
+      
+      console.log('✅ Notification created:', notification);
     }
 
     res.status(200).json(booking);
   } catch (error) {
-    console.error(error);
+    console.error('❌ Error in updateBookingStatus:', error);
     res.status(500).json({ message: 'Server Error' });
   }
 };

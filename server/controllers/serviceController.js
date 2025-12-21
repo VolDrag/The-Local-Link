@@ -232,6 +232,8 @@ const updateService = asyncHandler(async (req, res) => {
 
 
 //####################################Rafi###############################################
+
+//Feature 15: Delete Service
 const deleteService = asyncHandler(async (req, res) => {
   // Step 1: Find the service
   const service = await Service.findById(req.params.id);
@@ -267,6 +269,47 @@ const deleteService = asyncHandler(async (req, res) => {
   });
 });
 
+
+//####################################Rafi###############################################
+//Feature 16: Toggle Service Availability
+
+// @desc    Toggle service availability status
+// @route   PATCH /api/services/:id/availability
+// @access  Private (Provider only)
+const toggleAvailability = asyncHandler(async (req, res) => {
+  // Step 1: Find the service by ID
+  const service = await Service.findById(req.params.id);
+
+  // Step 2: Check if service exists
+  if (!service) {
+    res.status(404);
+    throw new Error('Service not found');
+  }
+
+  // Step 3: Make sure only the owner can toggle
+  if (service.provider.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('You can only update your own service availability');
+  }
+
+  // Step 4: Toggle between online and offline
+  if (service.availabilityStatus === 'online') {
+    service.availabilityStatus = 'offline';
+  } else {
+    service.availabilityStatus = 'online';
+  }
+
+  // Step 5: Save the updated service
+  await service.save();
+
+  // Step 6: Send back the new status
+  res.json({
+    success: true,
+    message: `Service is now ${service.availabilityStatus}`,
+    availabilityStatus: service.availabilityStatus,
+  });
+});
+
 export {
   getServices,
   getServiceById,
@@ -276,4 +319,5 @@ export {
   createService,
   updateService,
   deleteService,
+  toggleAvailability,
 };

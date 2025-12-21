@@ -3,7 +3,7 @@
 
 import express from 'express';
 const router = express.Router();
-import { getDashboardStats, getAllUsers, getAllServices } from '../controllers/adminController.js';
+import { getDashboardStats, getAllUsers, getAllServices, createCategory, getAllCategories, updateCategory, deleteCategory } from '../controllers/adminController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { adminOnly } from '../middleware/roleMiddleware.js';
 
@@ -19,5 +19,11 @@ router.get('/users', getAllUsers);
 
 // Service management routes
 router.get('/services', getAllServices);
+
+// Category management routes
+router.get('/categories', getAllCategories);
+router.post('/categories', createCategory);
+router.put('/categories/:id', updateCategory);
+router.delete('/categories/:id', deleteCategory);
 
 export default router;
