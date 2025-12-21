@@ -12,6 +12,7 @@ import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js'; // Rafi
 import reviewRoutes from './routes/reviewRoutes.js'; // Anupam
 import notificationRoutes from './routes/notificationRoutes.js'; // Anupam
+import adminRoutes from './routes/adminRoutes.js';
 
 //console.log('✅ Notification routes loaded:', notificationRoutes); // ADD THIS LINE
 
@@ -47,6 +48,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes); // Anupam's Feature
+app.use('/api/admin', adminRoutes);
 //console.log('✅ Notification routes registered at /api/notifications'); // ADD THIS LINE
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));

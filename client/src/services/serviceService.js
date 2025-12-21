@@ -36,6 +36,20 @@ export const deleteService = async (serviceId) => {
   }
 };
 
+
+//Feature 16:
+// Toggle service availability (online/offline)
+export const toggleServiceAvailability = async (serviceId) => {
+  try {
+    // Send PATCH request to toggle availability
+    const response = await api.patch(`/services/${serviceId}/availability`);
+    return response.data; // Return the new status
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};//
+
+
 // Get all categories
 export const getCategories = async () => {
   try {

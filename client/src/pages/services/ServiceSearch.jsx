@@ -301,18 +301,6 @@ const ServiceSearch = () => {
             </div>
 
             <div className="filter-group">
-              <label>Category</label>
-              <select value={category} onChange={handleCategoryChange}>
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.name} ({cat.serviceCount})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="filter-group">
               <label>Minimum Rating</label>
               <select value={minRating} onChange={(e) => setMinRating(e.target.value)}>
                 <option value="">Any Rating</option>
