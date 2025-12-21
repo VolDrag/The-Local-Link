@@ -14,6 +14,9 @@ const AdminDashboard = () => {
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [allServices, setAllServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(false);
+  const [showSeekerModal, setShowSeekerModal] = useState(false);
+  const [allSeekers, setAllSeekers] = useState([]);
+  const [loadingSeekers, setLoadingSeekers] = useState(false);
 
   useEffect(() => {
     // Check if user is admin
@@ -82,6 +85,22 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleShowAllSeekers = async () => {
+    try {
+      setLoadingSeekers(true);
+      const response = await adminService.getAllUsers();
+      // Filter only seekers
+      const seekers = (response.data || []).filter(user => user.role === 'seeker');
+      setAllSeekers(seekers);
+      setShowSeekerModal(true);
+    } catch (err) {
+      console.error('Error fetching seekers:', err);
+      alert(err.response?.data?.message || 'Failed to load seekers');
+    } finally {
+      setLoadingSeekers(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -134,7 +153,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card clickable" onClick={handleShowAllSeekers}>
             <div className="stat-icon seekers">🔍</div>
             <div className="stat-info">
               <h3>{stats?.overview?.totalSeekers || 0}</h3>
@@ -375,6 +394,50 @@ const AdminDashboard = () => {
                             </span>
                           </td>
                           <td>{new Date(service.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Seeker Details Modal */}
+      {showSeekerModal && (
+        <div className="modal-overlay" onClick={() => setShowSeekerModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>All Service Seekers ({allSeekers.length})</h2>
+              <button className="modal-close" onClick={() => setShowSeekerModal(false)}>
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              {loadingSeekers ? (
+                <div className="loading">Loading seekers...</div>
+              ) : (
+                <div className="users-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Joined</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allSeekers.map((seeker) => (
+                        <tr key={seeker._id}>
+                          <td>{seeker.username}</td>
+                          <td>{seeker.email}</td>
+                          <td>{seeker.phone || 'N/A'}</td>
+                          <td>{seeker.location || 'N/A'}</td>
+                          <td>{new Date(seeker.createdAt).toLocaleDateString()}</td>
                         </tr>
                       ))}
                     </tbody>

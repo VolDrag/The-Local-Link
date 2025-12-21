@@ -1,4 +1,5 @@
 // Home page - Landing page with hero section and features
+// #ifty - Removed categories section, moved to separate page
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -150,7 +151,7 @@ const Home = () => {
             <h3>Find Services</h3>
             <p>Search and discover local service providers in your area</p>
             {user ? (
-              <button onClick={() => navigate('/services')} className="feature-btn">
+              <button onClick={() => navigate('/categories')} className="feature-btn">
                 Browse Services
               </button>
             ) : (
