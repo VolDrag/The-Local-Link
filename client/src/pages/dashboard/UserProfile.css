@@ -49,6 +49,7 @@
 .btn-edit:hover {
   background-color: #45a049;
 }
+}
 
 .profile-content {
   background: white;
@@ -153,7 +154,225 @@
   background-color: #f5f5f5;
   color: #757575;
 }
+/* Services Section Styling */
+.services-section {
+  grid-column: 1 / -1;
+  margin-top: 20px;
+}
 
+.services-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.services-header label {
+  margin: 0;
+}
+
+.btn-add-service {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-add-service:hover {
+  background-color: #45a049;
+}
+
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.service-item {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.service-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.service-header {
+  margin-bottom: 10px;
+}
+
+.service-item h4 {
+  font-size: 1.25rem;
+  color: #333;
+  margin: 0;
+}
+
+/* Availability Section in Profile */
+.service-item .availability-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.availability-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.availability-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #666;
+}
+
+.status-badge-small {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-badge-small.online {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge-small.offline {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+
+.btn-toggle-status {
+  padding: 8px 20px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-toggle-status:hover {
+  background-color: #1976D2;
+}
+
+.service-description {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.service-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.service-category {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.service-price {
+  color: #4CAF50;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.service-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.btn-edit-service,
+.btn-delete-service {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.btn-toggle {
+  background-color: #2196F3;
+  color: white;
+}
+
+.btn-toggle:hover {
+  background-color: #1976D2;
+}
+
+.btn-edit-service {
+  background-color: #FF9800;
+  color: white;
+}
+
+.btn-edit-service:hover {
+  background-color: #F57C00;
+}
+
+.btn-delete-service {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-delete-service:hover {
+  background-color: #d32f2f;
+}
+
+.no-services {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  border: 2px dashed #e0e0e0;
+}
+
+.no-services-message {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.btn-create-first-service {
+  padding: 12px 24px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-create-first-service:hover {
+  background-color: #45a049;
+}
 .services-list {
   display: grid;
   gap: 15px;

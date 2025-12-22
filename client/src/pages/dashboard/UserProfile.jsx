@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, deleteUser } from '../../services/profileService';
+import { deleteService, toggleServiceAvailability } from '../../services/serviceService';
 import { useAuth } from '../../context/AuthContext';
 import './UserProfile.css';
 
@@ -43,6 +44,41 @@ const UserProfile = () => {
 
   const handleEditProfile = () => {
     navigate('/profile/edit');
+  };
+
+  const handleAddService = () => {
+    navigate('/services/add');
+  };
+
+  const handleEditService = (serviceId) => {
+    navigate(`/services/${serviceId}/edit`);
+  };
+
+  const handleDeleteService = async (serviceId) => {
+    if (!window.confirm('Are you sure you want to delete this service?')) {
+      return;
+    }
+
+    try {
+      await deleteService(serviceId);
+      // Refresh profile to update services list
+      fetchProfile();
+    } catch (err) {
+      console.error('Error deleting service:', err);
+      setError(err.message || 'Failed to delete service');
+    }
+  };
+
+  const handleToggleAvailability = async (serviceId, currentStatus) => {
+    try {
+      await toggleServiceAvailability(serviceId);
+      // Refresh profile to update services list
+      fetchProfile();
+      alert(`Service is now ${currentStatus === 'online' ? 'offline' : 'online'}!`);
+    } catch (err) {
+      console.error('Error toggling service availability:', err);
+      setError(err.message || 'Failed to toggle service availability');
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -203,22 +239,68 @@ const UserProfile = () => {
                 </p>
               </div>
 
-              <div className="info-group">
-                <label>My Services</label>
+              <div className="info-group services-section">
+                <div className="services-header">
+                  <label>My Services</label>
+                  <button onClick={handleAddService} className="btn-add-service">
+                    + Add New Service
+                  </button>
+                </div>
                 {profile.services && profile.services.length > 0 ? (
                   <div className="services-list">
                     {profile.services.map((service) => (
                       <div key={service._id} className="service-item">
-                        <h4>{service.title}</h4>
-                        <p>{service.description}</p>
-                        <span className="service-price">৳{service.pricing}</span>
+                        <div className="service-header">
+                          <h4>{service.title}</h4>
+                        </div>
+                        <p className="service-description">{service.description}</p>
+                        <div className="service-details">
+                          <span className="service-category">📁 {service.category}</span>
+                          <span className="service-price">৳{service.pricing}</span>
+                        </div>
+                        
+                        {/* Current Status Section */}
+                        <div className="availability-section">
+                          <div className="availability-display">
+                            <span className="availability-label">Current Status:</span>
+                            <span className={`status-badge-small ${service.availabilityStatus === 'online' ? 'online' : 'offline'}`}>
+                              {service.availabilityStatus === 'online' ? '🟢 ONLINE' : '⚫ OFFLINE'}
+                            </span>
+                          </div>
+                          <button 
+                            onClick={() => handleToggleAvailability(service._id, service.availabilityStatus)} 
+                            className="btn-toggle-status"
+                          >
+                            {service.availabilityStatus === 'online' ? 'Set Offline' : 'Set Online'}
+                          </button>
+                        </div>
+
+                        <div className="service-actions">
+                          <button 
+                            onClick={() => handleEditService(service._id)} 
+                            className="btn-edit-service"
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteService(service._id)} 
+                            className="btn-delete-service"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="no-services-message">
-                    No services created yet. Create your first service to showcase your offerings!
-                  </p>
+                  <div className="no-services">
+                    <p className="no-services-message">
+                      No services created yet. Create your first service to showcase your offerings!
+                    </p>
+                    <button onClick={handleAddService} className="btn-create-first-service">
+                      Create Your First Service
+                    </button>
+                  </div>
                 )}
               </div>
             </>

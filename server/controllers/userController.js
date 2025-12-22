@@ -11,8 +11,8 @@ const getUserProfile = async (req, res) => {
   try {
     const userId = req.params.userId;
     const profile = await Profile.findOne({ user: userId })
-    .populate('user', 'username email role')
-    .populate('services', 'title description pricing');
+    .populate('user', 'username email role isVerified')
+    .populate('services', 'title description pricing category availabilityStatus isActive');
 
     if (!profile) {
       return res.status(404).json({ 

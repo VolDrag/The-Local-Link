@@ -17,7 +17,7 @@ const Register = () => {
     lastName: '',
     phone: '',
     location: '',
-    role: 'seeker',
+    providesServices: 'no',
     businessName: '',
   });
   const [error, setError] = useState('');
@@ -31,7 +31,7 @@ const Register = () => {
     lastName,
     phone,
     location,
-    role,
+    providesServices,
     businessName,
   } = formData;
 
@@ -45,7 +45,7 @@ const Register = () => {
     setError('');
 
     // Validation
-    if (!username || !email || !password || !location || !role) {
+    if (!username || !email || !password || !location) {
       setError('Please fill in all required fields');
       return;
     }
@@ -60,12 +60,14 @@ const Register = () => {
       return;
     }
 
-    if (role === 'provider' && !businessName) {
-      setError('Business name is required for providers');
+    if (providesServices === 'yes' && !businessName) {
+      setError('Business name is required if you provide services');
       return;
     }
 
-    // Prepare data
+    // Prepare data - set role based on providesServices
+    const role = providesServices === 'yes' ? 'provider' : 'seeker';
+    
     const userData = {
       username,
       email,
@@ -77,7 +79,7 @@ const Register = () => {
       role,
     };
 
-    if (role === 'provider') {
+    if (providesServices === 'yes') {
       userData.businessName = businessName;
     }
 
@@ -222,14 +224,14 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="role">Register as *</label>
-            <select id="role" name="role" value={role} onChange={handleChange} required>
-              <option value="seeker">Service Seeker</option>
-              <option value="provider">Service Provider</option>
+            <label htmlFor="providesServices">Do you provide any services? *</label>
+            <select id="providesServices" name="providesServices" value={providesServices} onChange={handleChange} required>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
             </select>
           </div>
 
-          {role === 'provider' && (
+          {providesServices === 'yes' && (
             <div className="form-group">
               <label htmlFor="businessName">Business Name *</label>
               <input
