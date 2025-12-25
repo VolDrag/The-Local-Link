@@ -7,6 +7,8 @@ import {
   markAllNotificationsAsRead,
   deleteNotification 
 } from '../../services/notificationService';
+// Import bookingService
+import bookingService from '../../services/bookingService';
 import './NotificationsPage.css';
 
 const NotificationsPage = () => {
@@ -61,6 +63,38 @@ const NotificationsPage = () => {
       console.error('Error deleting notification:', error);
     }
   };
+
+
+const handleConfirmBooking = async (e, bookingId) => {
+  e.stopPropagation();
+  console.log('🔍 Attempting to confirm booking:', bookingId);
+  console.log('🔍 Type of bookingId:', typeof bookingId);
+  try {
+    await bookingService.updateBookingStatus(bookingId, 'confirmed');
+    alert('Booking confirmed successfully!');
+    fetchNotifications();
+  } catch (error) {
+    console.error('❌ Error confirming booking:', error);
+    console.error('❌ Error response:', error.response?.data);
+    alert('Failed to confirm booking: ' + (error.response?.data?.message || error.message));
+  }
+};
+
+  const handleCancelBooking = async (e, bookingId) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to cancel this booking?')) {
+      return;
+    }
+    try {
+      await bookingService.updateBookingStatus(bookingId, 'cancelled');
+      alert('Booking cancelled successfully!');
+      fetchNotifications();
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      alert('Failed to cancel booking: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
 
   const handleNotificationClick = async (notification) => {
     if (!notification.isRead) {
@@ -153,24 +187,58 @@ const NotificationsPage = () => {
                     </span>
                   </div>
                 </div>
+        
                 <div className="notification-actions">
-                  {!notification.isRead && (
-                    <button
-                      className="action-btn read-btn"
-                      onClick={() => handleMarkAsRead(notification._id)}
-                      title="Mark as read"
-                    >
-                      ✓
-                    </button>
-                  )}
-                  <button
-                    className="action-btn delete-btn"
-                    onClick={() => handleDelete(notification._id)}
-                    title="Delete"
-                  >
-                    🗑️
-                  </button>
-                </div>
+  {/* Show Confirm/Cancel buttons ONLY for pending booking_created notifications */}
+  {notification.type === 'booking_created' && 
+   notification.relatedBooking && 
+   notification.relatedBooking.status === 'pending' && (
+    <>
+      <button
+        className="action-btn confirm-btn"
+        onClick={(e) => handleConfirmBooking(e, notification.relatedBooking._id || notification.relatedBooking)}
+        title="Confirm booking"
+      >
+        ✅ Confirm
+      </button>
+      <button
+        className="action-btn cancel-btn"
+        onClick={(e) => handleCancelBooking(e, notification.relatedBooking._id || notification.relatedBooking)}
+        title="Cancel booking"
+      >
+        ❌ Cancel
+      </button>
+    </>
+  )}
+  
+  {/* Show status badge if booking is no longer pending */}
+  {notification.type === 'booking_created' && 
+   notification.relatedBooking && 
+   notification.relatedBooking.status !== 'pending' && (
+    <span className={`status-badge ${notification.relatedBooking.status}`}>
+      {notification.relatedBooking.status === 'confirmed' && '✅ Confirmed'}
+      {notification.relatedBooking.status === 'cancelled' && '❌ Cancelled'}
+      {notification.relatedBooking.status === 'completed' && '🎉 Completed'}
+    </span>
+  )}
+  
+  {!notification.isRead && (
+    <button
+      className="action-btn read-btn"
+      onClick={() => handleMarkAsRead(notification._id)}
+      title="Mark as read"
+    >
+      ✓
+    </button>
+  )}
+  <button
+    className="action-btn delete-btn"
+    onClick={() => handleDelete(notification._id)}
+    title="Delete"
+  >
+    🗑️
+  </button>
+</div>
               </div>
             ))}
           </div>
