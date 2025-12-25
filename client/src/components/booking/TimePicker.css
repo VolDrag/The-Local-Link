@@ -1,0 +1,101 @@
+/* TimePicker.css */
+.time-picker-container {
+  position: relative;
+  width: 100%;
+}
+
+.time-picker-label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.time-picker-input {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.time-picker-input:hover {
+  border-color: #007bff;
+}
+
+.time-picker-input .placeholder {
+  color: #999;
+}
+
+.time-picker-input .selected {
+  color: #333;
+  font-weight: 500;
+}
+
+.time-icon {
+  font-size: 1.2rem;
+}
+
+.time-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 200px;
+  animation: slideDown 0.2s ease;
+}
+
+.time-slots {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.time-slot {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.time-slot:hover {
+  background: #e7f3ff;
+  color: #007bff;
+}
+
+.time-slot.selected {
+  background: #007bff;
+  color: white;
+  font-weight: 600;
+}
+
+/* Custom scrollbar */
+.time-slots::-webkit-scrollbar {
+  width: 6px;
+}
+
+.time-slots::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.time-slots::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.time-slots::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
