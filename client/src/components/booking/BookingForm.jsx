@@ -1,9 +1,10 @@
-// Booking form component
-// Booking form component
+// Enhanced Booking form with custom date/time pickers
 import { useState } from 'react';
 import { bookingService } from '../../services/bookingService';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import DatePicker from './DatePicker';
+import TimePicker from './TimePicker';
 import './BookingForm.css';
 
 const BookingForm = ({ service, onClose, onSuccess }) => {
@@ -11,17 +12,21 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
-    scheduledDate: '',
-    userNotes: ''
-  });
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [userNotes, setUserNotes] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  // Business hours configuration (8 AM to 8 PM)
+  const businessHours = { start: 8, end: 20 };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setError(null);
+  };
+
+  const handleTimeChange = (time) => {
+    setSelectedTime(time);
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
@@ -33,15 +38,24 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
     }
 
     // Validation
-    if (!formData.scheduledDate) {
-      setError('Please select a date and time');
+    if (!selectedDate) {
+      setError('Please select a date');
       return;
     }
 
-    const selectedDate = new Date(formData.scheduledDate);
+    if (!selectedTime) {
+      setError('Please select a time');
+      return;
+    }
+
+    // Combine date and time
+    const [hours, minutes] = selectedTime.split(':');
+    const scheduledDateTime = new Date(selectedDate);
+    scheduledDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+    // Validate that the scheduled time is in the future
     const now = new Date();
-    
-    if (selectedDate < now) {
+    if (scheduledDateTime <= now) {
       setError('Please select a future date and time');
       return;
     }
@@ -52,8 +66,8 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
     try {
       const bookingData = {
         serviceId: service._id,
-        scheduledDate: formData.scheduledDate,
-        userNotes: formData.userNotes
+        scheduledDate: scheduledDateTime.toISOString(),
+        userNotes: userNotes.trim()
       };
 
       const newBooking = await bookingService.createBooking(bookingData);
@@ -75,6 +89,25 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
     }
   };
 
+  // Get summary of selected date and time
+  const getScheduleSummary = () => {
+    if (!selectedDate || !selectedTime) return null;
+    
+    const [hours, minutes] = selectedTime.split(':');
+    const dateTime = new Date(selectedDate);
+    dateTime.setHours(parseInt(hours), parseInt(minutes));
+    
+    return dateTime.toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   return (
     <div className="booking-form-container">
       <div className="booking-form-header">
@@ -92,20 +125,37 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
       <form onSubmit={handleSubmit} className="booking-form">
         {error && <div className="error-message">{error}</div>}
 
-        <div className="form-group">
-          <label htmlFor="scheduledDate">
-            Preferred Date & Time <span className="required">*</span>
-          </label>
-          <input
-            type="datetime-local"
-            id="scheduledDate"
-            name="scheduledDate"
-            value={formData.scheduledDate}
-            onChange={handleChange}
-            min={new Date().toISOString().slice(0, 16)}
-            required
-          />
+        <div className="datetime-container">
+          <div className="form-group">
+            <DatePicker
+              selectedDate={selectedDate}
+              onDateChange={handleDateChange}
+              label="Select Date"
+              required={true}
+            />
+          </div>
+
+          <div className="form-group">
+            <TimePicker
+              selectedTime={selectedTime}
+              onTimeChange={handleTimeChange}
+              label="Select Time"
+              required={true}
+              businessHours={businessHours}
+              timeSlotInterval={30}
+            />
+          </div>
         </div>
+
+        {selectedDate && selectedTime && (
+          <div className="schedule-summary">
+            <div className="summary-icon">📅</div>
+            <div className="summary-content">
+              <strong>Scheduled for:</strong>
+              <p>{getScheduleSummary()}</p>
+            </div>
+          </div>
+        )}
 
         <div className="form-group">
           <label htmlFor="userNotes">
@@ -114,13 +164,13 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
           <textarea
             id="userNotes"
             name="userNotes"
-            value={formData.userNotes}
-            onChange={handleChange}
+            value={userNotes}
+            onChange={(e) => setUserNotes(e.target.value)}
             placeholder="Any specific requirements or questions..."
             rows="4"
             maxLength="500"
           />
-          <small>{formData.userNotes.length}/500 characters</small>
+          <small>{userNotes.length}/500 characters</small>
         </div>
 
         <div className="booking-info">
@@ -133,7 +183,7 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
               Cancel
             </button>
           )}
-          <button type="submit" className="btn-submit" disabled={loading}>
+          <button type="submit" className="btn-submit" disabled={loading || !selectedDate || !selectedTime}>
             {loading ? 'Sending Request...' : 'Send Booking Request'}
           </button>
         </div>

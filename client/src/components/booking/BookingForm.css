@@ -1,4 +1,4 @@
-/* BookingForm.css */
+/* BookingForm.css - Enhanced version */
 .booking-form-container {
   background: white;
   border-radius: 12px;
@@ -68,6 +68,12 @@
   gap: 1.5rem;
 }
 
+.datetime-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -109,6 +115,49 @@
 .form-group small {
   color: #666;
   font-size: 0.85rem;
+}
+
+.schedule-summary {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.summary-icon {
+  font-size: 2rem;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-content strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  opacity: 0.9;
+}
+
+.summary-content p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .error-message {
@@ -184,6 +233,10 @@
   .booking-form-container {
     padding: 1.5rem;
     margin: 1rem;
+  }
+
+  .datetime-container {
+    grid-template-columns: 1fr;
   }
 
   .form-actions {
