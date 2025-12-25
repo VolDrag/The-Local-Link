@@ -14,6 +14,8 @@ import EditProfile from './pages/dashboard/EditProfile';
 import ServiceReviews from './pages/services/ServiceReviews';//Anupam
 import NotificationsPage from './pages/notifications/NotificationsPage'; // Anupam
 import Home from './pages/home/Home';
+import VerifyEmail from './pages/auth/VerifyEmail';
+import ForgotPassword from './pages/auth/ForgotPassword';
 import './App.css';
 
 function App() {
@@ -28,6 +30,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          
+          {/* Email Verification and Password Reset */}
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

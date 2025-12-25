@@ -2,6 +2,8 @@
 //Debashish
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import { generate6DigitCode } from '../utils/tokenHelper.js';
+import sendEmail from '../utils/sendEmail.js';
 
 // Helper function to generate JWT token
 const generateToken = (id) => {
@@ -70,17 +72,112 @@ export const registerUser = async (req, res) => {
       businessName,
     });
 
-    const token = generateToken(user._id);
-    res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      token,
-    });
+    if (process.env.EMAIL_VERIFICATION_ENABLED === 'true') {
+      const code = generate6DigitCode();
+      user.emailVerificationCode = code;
+      user.emailVerificationExpires = Date.now() + 10 * 60 * 1000; // 10 min
+      await user.save();
+      await sendEmail(user.email, 'Your Verification Code', `Your code: ${code}`);
+      return res.status(201).json({ message: 'Verification code sent', userId: user._id });
+    } else {
+      user.emailVerified = true;
+      await user.save();
+      const token = generateToken(user._id);
+      return res.status(201).json({
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        token,
+      });
+    }
+    // const token = generateToken(user._id);
+    // res.status(201).json({
+    //   _id: user._id,
+    //   username: user.username,
+    //   email: user.email,
+    //   role: user.role,
+    //   token,
+    // });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error during registration' });
+  }
+};
+//Email verification
+// @desc    Verify user email
+// @route   POST /api/auth/verify-email
+// @access  Public
+export const verifyEmail = async (req, res) => {
+  const { userId, code } = req.body;
+  const user = await User.findById(userId);
+  if (!user || user.emailVerificationCode !== code || user.emailVerificationExpires < Date.now()) {
+    return res.status(400).json({ message: 'Invalid or expired code' });
+  }
+  user.emailVerified = true;
+  user.emailVerificationCode = undefined;
+  user.emailVerificationExpires = undefined;
+  await user.save();
+  res.json({ message: 'Email verified' });
+};
+//Forgot password
+// @desc    Forgot password
+// @route   POST /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  if (process.env.EMAIL_VERIFICATION_ENABLED === 'true') {
+    const code = generate6DigitCode();
+    user.passwordResetCode = code;
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+    await user.save();
+    await sendEmail(user.email, 'Password Reset Code', `Your code: ${code}`);
+    return res.json({ message: 'Reset code sent', userId: user._id });
+  } else {
+    // Optionally auto-reset or return error
+    return res.json({ message: 'Feature disabled' });
+  }
+};
+// Verify reset code
+// @desc    Verify password reset code
+// @route   POST /api/auth/verify-reset-code
+// @access  Public
+export const verifyResetCode = async (req, res) => {
+  const { userId, code } = req.body;
+  const user = await User.findById(userId);
+  if (!user || user.passwordResetCode !== code || user.passwordResetExpires < Date.now()) {
+    return res.status(400).json({ message: 'Invalid or expired code' });
+  }
+  res.json({ message: 'Code valid' });
+};
+//password reset
+// @desc    Reset password
+// @route   POST /api/auth/reset-password
+// @access  Public
+export const resetPassword = async (req, res) => {
+  const { userId, code, newPassword } = req.body;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (
+      !user.passwordResetCode ||
+      user.passwordResetCode !== code ||
+      !user.passwordResetExpires ||
+      user.passwordResetExpires < Date.now()
+    ) {
+      return res.status(400).json({ message: 'Invalid or expired reset code' });
+    }
+    user.password = newPassword; // Will be hashed by pre-save hook
+    user.passwordResetCode = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -96,10 +193,17 @@ export const loginUser = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-    if (!user || !(await user.matchPassword(password))) {
+    if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-
+    if (process.env.EMAIL_VERIFICATION_ENABLED === 'true' && !user.emailVerified) {
+      return res.status(401).json({ message: 'Please verify your email before logging in.' });
+    }
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
     const token = generateToken(user._id);
     res.status(200).json({
       _id: user._id,

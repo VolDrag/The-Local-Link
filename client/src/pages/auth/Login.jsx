@@ -100,6 +100,9 @@ const Login = () => {
             Don't have an account? <Link to="/register">Register here</Link>
           </p>
           <p>
+            <Link to="/forgot-password">Forgot Password?</Link>
+          </p>
+          <p>
             <Link to="/admin/login">Admin Login</Link>
           </p>
         </div>

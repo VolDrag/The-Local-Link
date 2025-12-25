@@ -1,7 +1,23 @@
 // Email helper using nodemailer
+//Debashsish 
 
-const sendEmail = async (options) => {
-  // TODO: Implement email sending logic
+import nodemailer from 'nodemailer';
+
+const sendEmail = async (to, subject, text) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USERNAME,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_USERNAME,
+    to,
+    subject,
+    text,
+  });
 };
 
-module.exports = sendEmail;
+export default sendEmail;

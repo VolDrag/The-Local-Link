@@ -181,6 +181,21 @@
   outline: none;
 }
 
+/* Make input and button boxes larger for forgot password flow */
+.auth-form input[type="email"],
+.auth-form input[type="text"],
+.auth-form input[type="password"] {
+  font-size: 1.25rem;
+  padding: 16px 14px;
+  border-radius: 8px;
+}
+
+.auth-form button {
+  font-size: 1.15rem;
+  padding: 14px 0;
+  border-radius: 8px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .auth-card {
