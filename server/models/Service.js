@@ -34,6 +34,32 @@ const serviceSchema = new mongoose.Schema(
       enum: ['hour', 'day', 'project', 'fixed'],
       default: 'fixed',
     },
+    // Feature 21: Dynamic pricing - hourly, weekly, monthly, project, fixed rates
+    pricingType: {
+      type: String,
+      enum: ['hourly', 'weekly', 'monthly', 'project', 'fixed'], // Added weekly, monthly, project
+      default: 'fixed',
+    },
+    hourlyRate: {
+      type: Number,
+      min: 0,
+    },
+    weeklyRate: {
+      type: Number,
+      min: 0,
+    },
+    monthlyRate: {
+      type: Number,
+      min: 0,
+    },
+    projectRate: {
+      type: Number,
+      min: 0,
+    },
+    fixedRate: {
+      type: Number,
+      min: 0,
+    },//finish feature 21
     images: [
       {
         type: String,

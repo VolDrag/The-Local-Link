@@ -49,6 +49,19 @@ export const toggleServiceAvailability = async (serviceId) => {
   }
 };//
 
+//Feature 21:
+// Update service pricing (hourly vs fixed rate)
+export const updateServicePricing = async (serviceId, pricingData) => {
+  try {
+    // Send PATCH request to update pricing
+    // pricingData should contain: { pricingType, hourlyRate, fixedRate }
+    const response = await api.patch(`/services/${serviceId}/pricing`, pricingData);
+    return response.data; // Return updated pricing information
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};//
+
 
 // Get all categories
 export const getCategories = async () => {

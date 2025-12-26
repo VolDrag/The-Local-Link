@@ -310,6 +310,119 @@ const toggleAvailability = asyncHandler(async (req, res) => {
   });
 });
 
+//####################################Rafi###############################################
+//Feature 21: Dynamic Pricing (Hourly, Weekly, Monthly, Project, Fixed Rates)
+
+// @desc    Update service pricing (hourly, weekly, monthly, project, or fixed rate)
+// @route   PATCH /api/services/:id/pricing
+// @access  Private (Provider only)
+const updateServicePricing = asyncHandler(async (req, res) => {
+  const { pricingType, hourlyRate, weeklyRate, monthlyRate, projectRate, fixedRate } = req.body;
+
+  // Step 1: Find the service by ID
+  const service = await Service.findById(req.params.id);
+
+  // Step 2: Check if service exists
+  if (!service) {
+    res.status(404);
+    throw new Error('Service not found');
+  }
+
+  // Step 3: Make sure only the owner can update pricing
+  if (service.provider.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('You can only update your own service pricing');
+  }
+
+  // Step 4: Validate pricing type (must be one of the allowed types)
+  if (pricingType && !['hourly', 'weekly', 'monthly', 'project', 'fixed'].includes(pricingType)) {
+    res.status(400);
+    throw new Error('Invalid pricing type. Must be "hourly", "weekly", "monthly", "project", or "fixed"');
+  }
+
+  // Step 5: Update pricing fields
+  if (pricingType) {
+    service.pricingType = pricingType;
+  }
+
+  if (hourlyRate !== undefined) {
+    if (hourlyRate < 0) {
+      res.status(400);
+      throw new Error('Hourly rate must be a positive number');
+    }
+    service.hourlyRate = hourlyRate;
+  }
+
+  if (weeklyRate !== undefined) {
+    if (weeklyRate < 0) {
+      res.status(400);
+      throw new Error('Weekly rate must be a positive number');
+    }
+    service.weeklyRate = weeklyRate;
+  }
+
+  if (monthlyRate !== undefined) {
+    if (monthlyRate < 0) {
+      res.status(400);
+      throw new Error('Monthly rate must be a positive number');
+    }
+    service.monthlyRate = monthlyRate;
+  }
+
+  if (projectRate !== undefined) {
+    if (projectRate < 0) {
+      res.status(400);
+      throw new Error('Project rate must be a positive number');
+    }
+    service.projectRate = projectRate;
+  }
+
+  if (fixedRate !== undefined) {
+    if (fixedRate < 0) {
+      res.status(400);
+      throw new Error('Fixed rate must be a positive number');
+    }
+    service.fixedRate = fixedRate;
+  }
+
+  // Step 6: Update the main pricing field based on pricing type (for backward compatibility)
+  if (service.pricingType === 'hourly' && service.hourlyRate !== undefined) {
+    service.pricing = service.hourlyRate;
+    service.pricingUnit = 'hour';
+  } else if (service.pricingType === 'weekly' && service.weeklyRate !== undefined) {
+    service.pricing = service.weeklyRate;
+    service.pricingUnit = 'day'; // Using 'day' for weekly (7 days)
+  } else if (service.pricingType === 'monthly' && service.monthlyRate !== undefined) {
+    service.pricing = service.monthlyRate;
+    service.pricingUnit = 'project'; // Using 'project' for monthly
+  } else if (service.pricingType === 'project' && service.projectRate !== undefined) {
+    service.pricing = service.projectRate;
+    service.pricingUnit = 'project';
+  } else if (service.pricingType === 'fixed' && service.fixedRate !== undefined) {
+    service.pricing = service.fixedRate;
+    service.pricingUnit = 'fixed';
+  }
+
+  // Step 7: Save the updated service
+  await service.save();
+
+  // Step 8: Send back the updated pricing information
+  res.json({
+    success: true,
+    message: 'Service pricing updated successfully',
+    pricing: {
+      pricingType: service.pricingType,
+      hourlyRate: service.hourlyRate,
+      weeklyRate: service.weeklyRate,
+      monthlyRate: service.monthlyRate,
+      projectRate: service.projectRate,
+      fixedRate: service.fixedRate,
+      currentPrice: service.pricing,
+      currentUnit: service.pricingUnit,
+    },
+  });
+});
+
 export {
   getServices,
   getServiceById,
@@ -320,4 +433,5 @@ export {
   updateService,
   deleteService,
   toggleAvailability,
+  updateServicePricing,
 };

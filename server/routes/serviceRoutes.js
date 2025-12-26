@@ -10,6 +10,7 @@ import {
   updateService,  //feature 15
   deleteService,  //feature 15
   toggleAvailability, //feature 16  
+  updateServicePricing, //feature 21
 } from '../controllers/serviceController.js';
 import { getServiceReviews } from '../controllers/reviewController.js';
 import { protect } from '../middleware/authMiddleware.js';    // Authentication middleware
@@ -27,10 +28,12 @@ router.get('/', getServices);
 router.get('/:id', getServiceById);
 router.get('/:serviceId/reviews', getServiceReviews);
 
-// Protected routes - Provider only for create, update, delete  //##############Rafi###################
-router.post('/', protect, authorize('provider'), createService);
+//##############Rafi###################
+// Protected routes - Provider only for create, update, delete, toggle availability, update pricing  
+router.post('/', protect, authorize('provider'), createService);//
 router.patch('/:id/availability', protect, authorize('provider'), toggleAvailability);//feature 16
-router.put('/:id', protect, authorize('provider'), updateService);
-router.delete('/:id', protect, authorize('provider', 'admin'), deleteService);
+router.patch('/:id/pricing', protect, authorize('provider'), updateServicePricing);//feature 21
+router.put('/:id', protect, authorize('provider'), updateService);//feature 15
+router.delete('/:id', protect, authorize('provider', 'admin'), deleteService);//feature 15
 
 export default router;

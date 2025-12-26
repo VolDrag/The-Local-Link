@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, deleteUser } from '../../services/profileService';
-import { deleteService, toggleServiceAvailability } from '../../services/serviceService';
+import { deleteService, toggleServiceAvailability } from '../../services/serviceService';//feature 16
 import { useAuth } from '../../context/AuthContext';
+import PricingManager from '../../components/services/PricingManager';//feature 21
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -274,6 +275,9 @@ const UserProfile = () => {
                             {service.availabilityStatus === 'online' ? 'Set Offline' : 'Set Online'}
                           </button>
                         </div>
+
+                        {/* Feature 21: Pricing Manager */}
+                        <PricingManager service={service} onUpdate={fetchProfile} />
 
                         <div className="service-actions">
                           <button 
