@@ -620,5 +620,6 @@
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 2px solid #e0e0e0;
+  grid-column: 1 / -1; /* Span full width across all grid columns */
 }
 /* ============= Feature 25: Portfolio Section - END ============= */
