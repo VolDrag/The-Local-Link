@@ -5,11 +5,14 @@ import { getUserProfile, deleteUser } from '../../services/profileService';
 import { deleteService, toggleServiceAvailability } from '../../services/serviceService';//feature 16
 import { useAuth } from '../../context/AuthContext';
 import PricingManager from '../../components/services/PricingManager';//feature 21
+import PortfolioManager from '../../components/portfolio/PortfolioManager';//feature 25 - Portfolio showcase component
 import './UserProfile.css';
 
 const UserProfile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  
+  // State management
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -307,6 +310,13 @@ const UserProfile = () => {
                   </div>
                 )}
               </div>
+
+              {/* ============= Feature 25: Portfolio Manager - START ============= */}
+              {/* Portfolio Manager - Allows providers to upload and manage work portfolio */}
+              <div className="portfolio-section">
+                <PortfolioManager />
+              </div>
+              {/* ============= Feature 25: Portfolio Manager - END ============= */}
             </>
           )}
         </div>

@@ -4,14 +4,17 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+// Portfolio item sub-schema
+//feature: Portfolio Management(25)
 const portfolioItemSchema = new mongoose.Schema(
     {
-        imageUrl: { type: String },
-        description: { type: String },
+        title: { type: String, required: true, trim: true, minlength: 5 },
+        description: { type: String, required: true, trim: true, minlength: 10 },
+        images: [{ type: String, required: true }], // Array of image URLs (max 3)
     },
     { _id: false }
 );
-
+//end feature: Portfolio Management(25)
 const userSchema = new mongoose.Schema(
     {
     email: { 
