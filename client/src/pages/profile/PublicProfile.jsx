@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getUserProfile } from '../../services/profileService';
+import PortfolioDisplay from '../../components/portfolio/PortfolioDisplay';// Reuse portfolio display/feature 25 component
 import './PublicProfile.css';
 
 const PublicProfile = () => {
@@ -87,18 +88,10 @@ const PublicProfile = () => {
         </div>
       )}
       {/* Portfolio (if any) */}
-      {profile.portfolio && profile.portfolio.length > 0 && (
+      {profile.user?.role === 'provider' && (
         <div className="portfolio-section">
           <h3>Portfolio</h3>
-          <div className="portfolio-list">
-            {profile.portfolio.map((item, idx) => (
-              <div key={idx} className="portfolio-item">
-                {item.image && <img src={item.image} alt={item.title || 'Portfolio'} style={{width: '100%', borderRadius: '8px', marginBottom: '8px'}} />}
-                {item.title && <p className="portfolio-title">{item.title}</p>}
-                {item.description && <p className="portfolio-description">{item.description}</p>}
-              </div>
-            ))}
-          </div>
+          <PortfolioDisplay providerId={profile.user._id} /> {/* Reuse portfolio display/feature 25 component */}
         </div>
       )}
     </div>
