@@ -21,16 +21,16 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Please fill in all required fields' });
     }
 
-    // 2. Validate email format (something@gmail.com or other domains)
+    // email format (something@gmail.com or other domains)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Please provide a valid email address (e.g., example@gmail.com)' });
+      return res.status(400).json({ message: 'Please provide a valid email address' });
     }
 
-    // 3. Validate password requirements
-    // - At least 8 characters
-    // - Must contain at least one number
-    // - Must contain at least one special character
+    // password requirements
+    // At least 8 characters
+    // Must contain at least one number
+    // Must contain at least one special character
     if (password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters long' });
     }
@@ -45,12 +45,12 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Password must contain at least one special character (!@#$%^&* etc.)' });
     }
 
-    // 4. Validate phone number format (+880 followed by 10 digits)
+    // phone number format (+880 followed by 10 digits)
     if (phone) {
       const phoneRegex = /^\+880\d{10}$/;
       if (!phoneRegex.test(phone)) {
         return res.status(400).json({ 
-          message: 'Phone number must start with +880 and be followed by exactly 10 digits (e.g., +8801712345678)' 
+          message: 'Phone number must start with +880 and be followed by exactly 10 digits' 
         });
       }
     }
@@ -91,20 +91,13 @@ export const registerUser = async (req, res) => {
         token,
       });
     }
-    // const token = generateToken(user._id);
-    // res.status(201).json({
-    //   _id: user._id,
-    //   username: user.username,
-    //   email: user.email,
-    //   role: user.role,
-    //   token,
-    // });
+
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error during registration' });
   }
 };
-//Email verification
+// Email verification
 // @desc    Verify user email
 // @route   POST /api/auth/verify-email
 // @access  Public
@@ -120,7 +113,7 @@ export const verifyEmail = async (req, res) => {
   await user.save();
   res.json({ message: 'Email verified' });
 };
-//Forgot password
+// Forgot password
 // @desc    Forgot password
 // @route   POST /api/auth/forgot-password
 // @access  Public
@@ -171,7 +164,7 @@ export const resetPassword = async (req, res) => {
     ) {
       return res.status(400).json({ message: 'Invalid or expired reset code' });
     }
-    user.password = newPassword; // Will be hashed by pre-save hook
+    user.password = newPassword; 
     user.passwordResetCode = undefined;
     user.passwordResetExpires = undefined;
     await user.save();

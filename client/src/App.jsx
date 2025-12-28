@@ -11,6 +11,7 @@ import AdminLogin from './pages/auth/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserProfile from './pages/dashboard/UserProfile';
 import EditProfile from './pages/dashboard/EditProfile';
+import PublicProfile from './pages/profile/PublicProfile';
 import ServiceReviews from './pages/services/ServiceReviews';//Anupam
 import NotificationsPage from './pages/notifications/NotificationsPage'; // Anupam
 import Home from './pages/home/Home';
@@ -41,6 +42,7 @@ function App() {
           {/* Profile Routes */}
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/profile/edit" element={<EditProfile />} />
+          <Route path="/profile/:id" element={<PublicProfile />} />
           
           {/* Notification Routes - Anupam */}
           <Route path="/notifications" element={<NotificationsPage />} />
