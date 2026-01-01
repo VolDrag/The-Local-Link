@@ -105,6 +105,18 @@ export const AuthProvider = ({ children }) => {
     isSeeker: user?.role === 'seeker',
   };
 
+  // Logout user when tab/window is closed
+  useEffect(() => {
+    const handleTabClose = () => {
+      authService.logout();
+      setUser(null);
+    };
+    window.addEventListener('beforeunload', handleTabClose);
+    return () => {
+      window.removeEventListener('beforeunload', handleTabClose);
+    };
+  }, []);
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 

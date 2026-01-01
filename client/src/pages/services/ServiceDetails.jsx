@@ -18,6 +18,12 @@ const ServiceDetails = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);  //*Rafi*/
   const [showBookingForm, setShowBookingForm] = useState(false); //Anupam
   const [deleting, setDeleting] = useState(false);    //*Rafi*/
+  // Navigate to provider profile
+  const handleGoToProviderProfile = () => {
+    if (service && service.provider && service.provider._id) {
+      navigate(`/profile/${service.provider._id}`);
+    }
+  };
 
   useEffect(() => {
     const fetchService = async () => {
@@ -215,7 +221,8 @@ const handleBookingSuccess = (booking) => {
       📅 Book Now
     </button>
   )}
-  <button className="contact-btn">Contact Provider</button>
+  <button className="contact-btn" onClick={handleGoToProviderProfile}>Provider Profile</button>
+        {/* Provider Profile Modal removed: now navigates to provider profile page */}
   <button className="bookmark-btn">♥ Save</button>
 </div>
 
