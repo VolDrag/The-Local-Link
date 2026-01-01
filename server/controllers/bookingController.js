@@ -197,3 +197,94 @@ export const updateBookingStatus = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+
+
+// Get booking history with filters - Feature 19 (Anupam)
+export const getBookingHistory = async (req, res) => {
+  try {
+    const { status, startDate, endDate, serviceId } = req.query;
+    
+    // Build filter query
+    const filter = { seeker: req.user._id };
+    
+    if (status) {
+      filter.status = status;
+    }
+    
+    if (startDate || endDate) {
+      filter.scheduledTime = {};
+      if (startDate) filter.scheduledTime.$gte = new Date(startDate);
+      if (endDate) filter.scheduledTime.$lte = new Date(endDate);
+    }
+    
+    if (serviceId) {
+      filter.service = serviceId;
+    }
+
+    const bookings = await Booking.find(filter)
+      .populate('service', 'title category pricing images')
+      .populate('provider', 'name email phone')
+      .sort({ scheduledTime: -1 });
+
+    // Calculate statistics
+    const stats = {
+      total: bookings.length,
+      pending: bookings.filter(b => b.status === 'pending').length,
+      confirmed: bookings.filter(b => b.status === 'confirmed').length,
+      completed: bookings.filter(b => b.status === 'completed').length,
+      cancelled: bookings.filter(b => b.status === 'cancelled').length
+    };
+
+    res.status(200).json({ bookings, stats });
+  } catch (error) {
+    console.error('Error fetching booking history:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// Get provider booking history with filters - Feature 19 (Anupam)
+export const getProviderBookingHistory = async (req, res) => {
+  try {
+    const { status, startDate, endDate, serviceId } = req.query;
+    
+    // Build filter query
+    const filter = { provider: req.user._id };
+    
+    if (status) {
+      filter.status = status;
+    }
+    
+    if (startDate || endDate) {
+      filter.scheduledTime = {};
+      if (startDate) filter.scheduledTime.$gte = new Date(startDate);
+      if (endDate) filter.scheduledTime.$lte = new Date(endDate);
+    }
+    
+    if (serviceId) {
+      filter.service = serviceId;
+    }
+
+    const bookings = await Booking.find(filter)
+      .populate('service', 'title category pricing images')
+      .populate('seeker', 'name email phone')
+      .sort({ scheduledTime: -1 });
+
+    // Calculate statistics
+    const stats = {
+      total: bookings.length,
+      pending: bookings.filter(b => b.status === 'pending').length,
+      confirmed: bookings.filter(b => b.status === 'confirmed').length,
+      completed: bookings.filter(b => b.status === 'completed').length,
+      cancelled: bookings.filter(b => b.status === 'cancelled').length,
+      totalRevenue: bookings
+        .filter(b => b.status === 'completed')
+        .reduce((sum, b) => sum + (b.service?.pricing?.amount || 0), 0)
+    };
+
+    res.status(200).json({ bookings, stats });
+  } catch (error) {
+    console.error('Error fetching provider booking history:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};

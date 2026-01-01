@@ -1,6 +1,9 @@
 // Entry point for the server
-import express from 'express';
+// Load environment variables FIRST before any imports
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import cors from 'cors';
 import { connectDB } from './config/db.js';
 
@@ -23,9 +26,6 @@ import './models/Category.js';
 import './models/Review.js';
 import './models/Booking.js';
 import './models/Notification.js';
-
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

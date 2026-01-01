@@ -13,6 +13,8 @@ import UserProfile from './pages/dashboard/UserProfile';
 import EditProfile from './pages/dashboard/EditProfile';
 import ServiceReviews from './pages/services/ServiceReviews';//Anupam
 import NotificationsPage from './pages/notifications/NotificationsPage'; // Anupam
+import BookingHistory from './pages/dashboard/BookingHistory'; // Feature 19 - Anupam
+import ProviderBookingHistory from './pages/dashboard/ProviderBookingHistory'; // Feature 19 - Anupam
 import Home from './pages/home/Home';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -45,6 +47,11 @@ function App() {
           {/* Notification Routes - Anupam */}
           <Route path="/notifications" element={<NotificationsPage />} />
           
+          {/* Booking History Routes - Feature 19 (Anupam) */}
+          <Route path="/bookings/history" element={<BookingHistory />} />
+          <Route path="/bookings/provider-history" element={<ProviderBookingHistory />} />
+          
+
           {/* Service Routes */}
           <Route path="/services" element={<ServiceSearch />} />
           <Route path="/categories" element={<CategoriesPage />} /> {/* #ifty - Categories page route */}
