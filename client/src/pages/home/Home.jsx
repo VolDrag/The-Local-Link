@@ -1,7 +1,7 @@
 // Home page - Landing page with hero section and features
 // #ifty - Removed categories section, moved to separate page
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getUserProfile } from '../../services/profileService';
 import NotificationBell from '../../components/notifications/NotificationBell'; // Anupam - Notification Bell
@@ -68,11 +68,22 @@ const Home = () => {
         <div className="header-content">
           <h1 className="logo">The Local Link</h1>
           <nav className="nav-menu">
-            {user && <NotificationBell />}
             {user ? (
               <>
+                <Link to="/categories" className="nav-link">Services</Link>
+                
+                {user.role === 'provider' && (
+                  <Link to="/bookings/provider-history" className="nav-link">Service History</Link>
+                )}
+                
+                {user.role === 'seeker' && (
+                  <Link to="/bookings/history" className="nav-link">My Bookings</Link>
+                )}
+                
+                <NotificationBell />
+                
                 <button onClick={handleProfileAction} className="nav-btn">
-                  {hasProfile ? '👤 My Profile' : '✏️ Create Profile'}
+                  👤 My Profile
                 </button>
                 <button onClick={handleLogout} className="nav-btn logout-btn">
                   Logout

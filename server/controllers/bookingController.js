@@ -203,10 +203,15 @@ export const updateBookingStatus = async (req, res) => {
 // Get booking history with filters - Feature 19 (Anupam)
 export const getBookingHistory = async (req, res) => {
   try {
+    console.log('📋 getBookingHistory called');
+    console.log('User:', req.user);
+    console.log('Query params:', req.query);
+    
     const { status, startDate, endDate, serviceId } = req.query;
     
     // Build filter query
     const filter = { seeker: req.user._id };
+    console.log('Filter:', filter);
     
     if (status) {
       filter.status = status;
@@ -227,6 +232,8 @@ export const getBookingHistory = async (req, res) => {
       .populate('provider', 'name email phone')
       .sort({ scheduledTime: -1 });
 
+    console.log('Found bookings:', bookings.length);
+
     // Calculate statistics
     const stats = {
       total: bookings.length,
@@ -238,7 +245,7 @@ export const getBookingHistory = async (req, res) => {
 
     res.status(200).json({ bookings, stats });
   } catch (error) {
-    console.error('Error fetching booking history:', error);
+    console.error('❌ Error fetching booking history:', error);
     res.status(500).json({ message: 'Server Error' });
   }
 };

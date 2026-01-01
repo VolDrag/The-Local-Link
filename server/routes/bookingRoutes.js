@@ -8,6 +8,8 @@ import {
   getProviderBookings,
   getBookingById,
   updateBookingStatus,
+  getBookingHistory, //feature 19
+  getProviderBookingHistory //feature 19
   //cancelBooking
 } from '../controllers/bookingController.js';
 import { protect } from '../middleware/authMiddleware.js';
@@ -19,21 +21,18 @@ const router = express.Router();
 router.use(protect);
 
 // User routes
-router.post('/', createBooking);                           // Create a new booking
-router.get('/my-bookings', getMyBookings);                 // Get user's bookings
+router.post('/', createBooking);                           
+router.get('/my-bookings', getMyBookings);  
+router.get('/history', getBookingHistory);               // MUST BE BEFORE /:id
 
 // Provider routes
-router.get('/provider-bookings', authorize('provider'), getProviderBookings);  // Get provider's bookings
+router.get('/provider-bookings', authorize('provider'), getProviderBookings);  
+router.get('/provider-history', authorize('provider'), getProviderBookingHistory);  // MUST BE BEFORE /:id
 
-// Shared routes (user can view their booking, provider can view bookings for their services)
-router.get('/:id', getBookingById);                        // Get booking by ID
+// Status management routes (BEFORE /:id)
+router.patch('/:id/status', authorize('provider'), updateBookingStatus);
 
-// Status management routes
-router.patch('/:id/status', authorize('provider'), updateBookingStatus);  // Provider updates booking status
-//router.patch('/:id/cancel', cancelBooking);                // Cancel booking (user or provider)
-
-// for updating booking status
-router.put('/:bookingId/status', protect, updateBookingStatus); //Debashish 
-
+// Shared routes - MUST BE LAST
+router.get('/:id', getBookingById);                       // Get booking by ID
 
 export default router;

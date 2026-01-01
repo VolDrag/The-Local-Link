@@ -25,6 +25,7 @@ const BookingHistory = () => {
       navigate('/login');
       return;
     }
+    console.log('Fetching booking history for user:', user._id, 'role:', user.role);
     fetchBookingHistory();
   }, [user, navigate, statusFilter, startDate, endDate]);
 
@@ -38,12 +39,16 @@ const BookingHistory = () => {
       if (startDate) filters.startDate = startDate;
       if (endDate) filters.endDate = endDate;
 
+      console.log('Calling getBookingHistory with filters:', filters);
       const data = await bookingService.getBookingHistory(filters);
+      console.log('Received booking history data:', data);
+      
       setBookings(data.bookings || []);
       setStats(data.stats || {});
     } catch (err) {
       console.error('Error fetching booking history:', err);
-      setError(err.response?.data?.message || 'Failed to load booking history');
+      console.error('Error response:', err.response);
+      setError(err.response?.data?.message || err.message || 'Failed to load booking history');
     } finally {
       setLoading(false);
     }
@@ -181,6 +186,7 @@ const BookingHistory = () => {
         {error && (
           <div className="error-message">
             <span>⚠️</span> {error}
+            <button onClick={fetchBookingHistory} className="btn-retry">Retry</button>
           </div>
         )}
 

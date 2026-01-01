@@ -15,6 +15,7 @@ import PublicProfile from './pages/profile/PublicProfile';
 import ServiceReviews from './pages/services/ServiceReviews';//Anupam
 import NotificationsPage from './pages/notifications/NotificationsPage'; // Anupam
 import BookingHistory from './pages/dashboard/BookingHistory'; // Feature 19 - Anupam
+import BookingDetails from './pages/dashboard/BookingDetails'; // Feature 19 - Anupam
 import ProviderBookingHistory from './pages/dashboard/ProviderBookingHistory'; // Feature 19 - Anupam
 import Home from './pages/home/Home';
 import VerifyEmail from './pages/auth/VerifyEmail';
@@ -52,7 +53,7 @@ function App() {
           {/* Booking History Routes - Feature 19 (Anupam) */}
           <Route path="/bookings/history" element={<BookingHistory />} />
           <Route path="/bookings/provider-history" element={<ProviderBookingHistory />} />
-          
+          <Route path="/bookings/:id" element={<BookingDetails />} />
 
           {/* Service Routes */}
           <Route path="/services" element={<ServiceSearch />} />
