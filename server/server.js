@@ -16,6 +16,8 @@ import categoryRoutes from './routes/categoryRoutes.js'; // Rafi
 import reviewRoutes from './routes/reviewRoutes.js'; // Anupam
 import notificationRoutes from './routes/notificationRoutes.js'; // Anupam
 import adminRoutes from './routes/adminRoutes.js';
+import eventRoutes from './routes/eventRoutes.js';
+import adminEventRoutes from './routes/adminEventRoutes.js';
 
 //console.log('✅ Notification routes loaded:', notificationRoutes); // ADD THIS LINE
 
@@ -26,6 +28,7 @@ import './models/Category.js';
 import './models/Review.js';
 import './models/Booking.js';
 import './models/Notification.js';
+import './models/Event.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,6 +52,8 @@ app.use("/api/reviews", reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes); // Anupam's Feature
 app.use('/api/admin', adminRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/admin/events', adminEventRoutes);
 //console.log('✅ Notification routes registered at /api/notifications'); // ADD THIS LINE
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));

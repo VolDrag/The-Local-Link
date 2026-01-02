@@ -194,6 +194,17 @@ const Home = () => {
             </div>
           )}
 
+          {user && (
+            <div className="feature-card">
+              <div className="feature-icon">🎉</div>
+              <h3>Events & Offers</h3>
+              <p>Discover exclusive events and special offers</p>
+              <button onClick={() => navigate('/events')} className="feature-btn">
+                View Events
+              </button>
+            </div>
+          )}
+
           {user?.role === 'admin' && (
             <div className="feature-card">
               <div className="feature-icon">⚙️</div>
