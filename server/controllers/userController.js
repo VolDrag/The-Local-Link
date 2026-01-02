@@ -104,8 +104,12 @@ const createorupdateUserProfile = async (req, res) => {
       if (req.user.role === 'provider') {
         if (businessName) profileData.businessName = businessName;
         if (availabilityStatus) profileData.availabilityStatus = availabilityStatus;
-        // services array will be empty initially and populated when services are created
-        profileData.services = [];
+        
+        // Check if there are any existing services for this provider and link them
+        //(case when services were created before profile-Rafi)
+        const Service = (await import('../models/Service.js')).default;     
+        const existingServices = await Service.find({ provider: userId }).select('_id');
+        profileData.services = existingServices.map(service => service._id);
       }
         
       profile = await Profile.create(profileData);

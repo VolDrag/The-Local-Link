@@ -105,17 +105,8 @@ export const AuthProvider = ({ children }) => {
     isSeeker: user?.role === 'seeker',
   };
 
-  // Logout user when tab/window is closed
-  useEffect(() => {
-    const handleTabClose = () => {
-      authService.logout();
-      setUser(null);
-    };
-    window.addEventListener('beforeunload', handleTabClose);
-    return () => {
-      window.removeEventListener('beforeunload', handleTabClose);
-    };
-  }, []);
+  // Note: Auto-logout on page refresh removed to maintain user sessions
+  // Users should manually logout using the logout button
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
