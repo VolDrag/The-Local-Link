@@ -63,7 +63,24 @@ const ServiceDetails = () => {
       project: '/project',
       fixed: '',
     };
-    return `৳${service.pricing}${unitLabels[service.pricingUnit] || ''}`;
+    
+    // Check if offer is valid
+    const isOfferValid = service.hasOffer && service.offerExpiry && new Date(service.offerExpiry) > new Date();
+    
+    // Extract discount percentage
+    let discountPercent = 0;
+    if (isOfferValid && service.offerDescription) {
+      const match = service.offerDescription.match(/(\d+)%?\s*off/i);
+      if (match) {
+        discountPercent = parseInt(match[1]);
+      }
+    }
+    
+    const unit = unitLabels[service.pricingUnit] || '';
+    const originalPrice = service.pricing;
+    const offerPrice = discountPercent > 0 ? service.pricing * (1 - discountPercent / 100) : service.pricing;
+    
+    return { originalPrice, offerPrice, unit, hasDiscount: discountPercent > 0, isOfferValid };
   };
 //****Rafi****/
 //feature 15: Delete Service
@@ -175,7 +192,23 @@ const handleBookingSuccess = (booking) => {
               <h1>{service.title}</h1>
               {category && <span className="category-badge">{category.name}</span>}
             </div>
-            <div className="price-tag">{formatPrice()}</div>
+            <div className="price-section">
+              {(() => {
+                const priceData = formatPrice();
+                return priceData.isOfferValid && priceData.hasDiscount ? (
+                  <>
+                    <span className="offer-badge-detail">🏷️ SPECIAL OFFER</span>
+                    <div className="price-display">
+                      <span className="original-price-detail">৳{priceData.originalPrice.toFixed(0)}{priceData.unit}</span>
+                      <span className="offer-price-detail">৳{priceData.offerPrice.toFixed(0)}{priceData.unit}</span>
+                      <span className="discount-badge">{Math.round((1 - priceData.offerPrice / priceData.originalPrice) * 100)}% OFF</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="price-tag">৳{priceData.originalPrice}{priceData.unit}</div>
+                );
+              })()}
+            </div>
           </div>
 
           <div className="rating-section">
