@@ -32,7 +32,12 @@ const Login = () => {
       setError('Please fill in all fields');
       return;
     }
-
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please provide a valid email address');
+      return;
+    }
     // Call login
     const result = await login({ email, password });
 

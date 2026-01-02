@@ -86,38 +86,96 @@ const EditProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
     setSuccess('');
 
-    try {
-      // Validate required fields
-      if (!formData.name || !formData.age || !formData.phone || !formData.location) {
-        setError('Please fill in all required fields');
-        setLoading(false);
+    // 1. Check required fields
+    if (!formData.name || !formData.phone || !formData.location) {
+      setError('Name, phone, and location are required fields');
+      return;
+    }
+
+    // 2. Name validation (2-100 characters)
+    if (formData.name.length < 2 || formData.name.length > 100) {
+      setError('Name must be between 2 and 100 characters');
+      return;
+    }
+
+    // 3. Name can only contain letters and spaces
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!nameRegex.test(formData.name)) {
+      setError('Name can only contain letters and spaces');
+      return;
+    }
+
+    // 4. Age validation (if provided)
+    if (formData.age) {
+      const ageNum = parseInt(formData.age);
+      if (isNaN(ageNum) || ageNum < 18 || ageNum > 120) {
+        setError('Age must be between 18 and 120');
         return;
       }
+    }
 
-      // Validate provider fields
-      if (user.role === 'provider' && !formData.businessName) {
+    // 5. Phone format validation (+880 followed by 10 digits)
+    const phoneRegex = /^\+880\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setError('Phone number must start with +880 followed by exactly 10 digits (e.g., +8801712345678)');
+      return;
+    }
+
+    // 6. Location validation (must be from allowed cities)
+    const allowedLocations = ['Dhaka', 'Chittagong', 'Khulna', 'Rajshahi', 'Sylhet'];
+    if (!allowedLocations.includes(formData.location)) {
+      setError('Please select a valid location');
+      return;
+    }
+
+    // 7. For providers, validate business name
+    if (user?.role === 'provider') {
+      if (!formData.businessName) {
         setError('Business name is required for providers');
-        setLoading(false);
+        return;
+      }
+      if (formData.businessName.length < 2 || formData.businessName.length > 100) {
+        setError('Business name must be between 2 and 100 characters');
+        return;
+      }
+    }
+
+    // 8. Image file validation (if uploaded)
+    if (formData.image) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(formData.image.type)) {
+        setError('Only JPEG, PNG, and GIF images are allowed');
         return;
       }
 
+      // Check file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (formData.image.size > maxSize) {
+        setError('Image size must be less than 5MB');
+        return;
+      }
+    }
+
+    // Continue with form submission
+    setLoading(true);
+
+    try {
       // Prepare data to send - exclude provider fields for seekers
       const dataToSend = {
         userId: formData.userId,
-        name: formData.name,
+        name: formData.name.trim(),
         age: formData.age,
-        phone: formData.phone,
+        phone: formData.phone.trim(),
         location: formData.location,
         image: formData.image
       };
 
       // Only include provider-specific fields if user is a provider
-      if (user.role === 'provider') {
-        dataToSend.businessName = formData.businessName;
+      if (user?.role === 'provider') {
+        dataToSend.businessName = formData.businessName.trim();
         dataToSend.availabilityStatus = formData.availabilityStatus;
       }
 
@@ -128,6 +186,8 @@ const EditProfile = () => {
         setTimeout(() => {
           navigate('/profile');
         }, 1500);
+      } else {
+        setError(result.message || 'Failed to update profile');
       }
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -209,21 +269,27 @@ const EditProfile = () => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="+8801812345678"
+              placeholder="+8801712345678"
               required
             />
+            <small className="field-hint">Format: +880 followed by 10 digits</small>
           </div>
 
           <div className="form-group">
-            <label>Location *</label>
-            <input
-              type="text"
+            <label htmlFor="location">Location *</label>
+            <select
+              id="location"
               name="location"
               value={formData.location}
-              onChange={handleChange}
-              placeholder="Enter your location"
-              required
-            />
+              onChange={handleChange} required
+            >
+              <option value="">Select your location</option>
+              <option value="Dhaka">Dhaka</option>
+              <option value="Chittagong">Chittagong</option>
+              <option value="Khulna">Khulna</option>
+              <option value="Rajshahi">Rajshahi</option>
+              <option value="Sylhet">Sylhet</option>
+            </select>
           </div>
 
           {/* Provider-specific fields */}

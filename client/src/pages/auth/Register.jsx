@@ -44,24 +44,74 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    // Validation
-    if (!username || !email || !password || !location) {
+    // 1. Check required fields
+    if (!username || !email || !password || !confirmPassword || !firstName || !phone || !location) {
       setError('Please fill in all required fields');
       return;
     }
 
+    // 2. Username validation
+    if (username.length < 3 || username.length > 30) {
+      setError('Username must be between 3 and 30 characters');
+      return;
+    }
+
+    // 3. Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please provide a valid email address');
+      return;
+    }
+
+    // 4. First name validation
+    if (firstName.length < 2 || firstName.length > 50) {
+      setError('First name must be between 2 and 50 characters');
+      return;
+    }
+
+    // 5. Password length
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    // 6. Password must contain number
+    const hasNumber = /\d/.test(password);
+    if (!hasNumber) {
+      setError('Password must contain at least one number');
+      return;
+    }
+
+    // 7. Password must contain special character
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    if (!hasSpecialChar) {
+      setError('Password must contain at least one special character (!@#$%^&* etc.)');
+      return;
+    }
+
+    // 8. Password confirmation match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // 9. Phone validation (required)
+    const phoneRegex = /^\+880\d{10}$/;
+    if (!phoneRegex.test(phone)) {
+      setError('Phone number must start with +880 followed by exactly 10 digits');
       return;
     }
 
-    if (providesServices === 'yes' && !businessName) {
-      setError('Business name is required if you provide services');
+    // 10. Location validation
+    const allowedLocations = ['Dhaka', 'Chittagong', 'Khulna', 'Rajshahi', 'Sylhet', 'Comilla'];
+    if (!allowedLocations.includes(location)) {
+      setError('Please select a valid location');
+      return;
+    }
+
+    // 11. Business name validation for providers
+    if (providesServices === 'yes' && (!businessName || businessName.trim() === '')) {
+      setError('Business name is required for service providers');
       return;
     }
 
@@ -89,7 +139,7 @@ const Register = () => {
     if (result.success) {
       // Redirect based on role
       if (result.data.role === 'provider') {
-        navigate('/provider/dashboard');
+        navigate('/');
       } else {
         navigate('/');
       }
@@ -166,7 +216,7 @@ const Register = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="firstName">First Name</label>
+              <label htmlFor="firstName">First Name *</label>
               <input
                 type="text"
                 id="firstName"
@@ -174,6 +224,7 @@ const Register = () => {
                 value={firstName}
                 onChange={handleChange}
                 placeholder="Enter first name"
+                required
               />
             </div>
 
@@ -192,14 +243,15 @@ const Register = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="phone">Phone Number</label>
+              <label htmlFor="phone">Phone Number *</label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
                 value={phone}
                 onChange={handleChange}
-                placeholder="Enter phone number"
+                placeholder="+8801XXXXXXXXX"
+                required
               />
             </div>
 

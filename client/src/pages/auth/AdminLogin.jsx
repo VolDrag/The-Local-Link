@@ -30,6 +30,11 @@ const AdminLogin = () => {
       setError('Please fill in all fields');
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please provide a valid email address');
+      return;
+    }
 
     console.log('Starting admin login...');
     const result = await adminLogin({ email, password });

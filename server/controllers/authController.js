@@ -17,14 +17,24 @@ export const registerUser = async (req, res) => {
   const { username, email, password, firstName, lastName, phone, location, role, businessName } = req.body;
   
   try {
-    if (!username || !email || !password || !role || !location) {
+    if (!username || !email || !password || !firstName || !phone || !role || !location) {
       return res.status(400).json({ message: 'Please fill in all required fields' });
     }
-
+    const usernameExists = await User.findOne({ username });
+    if (usernameExists) {
+      return res.status(400).json({ message: 'Username is already taken' });
+    }
+    if (username.length < 3 || username.length > 30) {
+      return res.status(400).json({ message: 'Username must be between 3 and 30 characters' });
+    }
     // email format (something@gmail.com or other domains)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Please provide a valid email address' });
+    }
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: 'User already exists' });
     }
 
     // password requirements
@@ -54,10 +64,8 @@ export const registerUser = async (req, res) => {
         });
       }
     }
-
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+    if (firstName.length < 2 || firstName.length > 50) {
+      return res.status(400).json({ message: 'First name must be between 2 and 50 characters' });
     }
 
     const user = await User.create({
@@ -119,21 +127,41 @@ export const verifyEmail = async (req, res) => {
 // @access  Public
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ message: 'User not found' });
-  if (process.env.EMAIL_VERIFICATION_ENABLED === 'true') {
-    const code = generate6DigitCode();
-    user.passwordResetCode = code;
-    user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-    await user.save();
-    await sendEmail(user.email, 'Password Reset Code', `Your code: ${code}`);
-    return res.json({ message: 'Reset code sent', userId: user._id });
-  } else {
-    // Optionally auto-reset or return error
-    return res.json({ message: 'Feature disabled' });
+  
+  try {
+    // 1. Check if email is provided
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // 2. Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address' });
+    }
+
+    // 3. Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'No account found with this email address' });
+    }
+
+    // 4. Check if email verification is enabled
+    if (process.env.EMAIL_VERIFICATION_ENABLED === 'true') {
+      const code = generate6DigitCode();
+      user.passwordResetCode = code;
+      user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+      await user.save();
+      await sendEmail(user.email, 'Password Reset Code', `Your password reset code: ${code}`);
+      return res.json({ message: 'Reset code sent to your email', userId: user._id });
+    } else {
+      return res.status(400).json({ message: 'Password reset feature is currently disabled' });
+    }
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Server error during password reset request' });
   }
-};
-// Verify reset code
+};// Verify reset code
 // @desc    Verify password reset code
 // @route   POST /api/auth/verify-reset-code
 // @access  Public

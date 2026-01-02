@@ -55,15 +55,69 @@ const createorupdateUserProfile = async (req, res) => {
     const {age, phone, location, name, userId, businessName, availabilityStatus} = req.body;    
     // Normalize path to use forward slashes for URLs (works on all platforms)
     const image = req.file ? req.file.path.replace(/\\/g, '/') : null;
+    
+    // 1. Check if userId is provided
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required' });
     }
+
+    // 2. Check if required fields are provided
+    if (!name || !phone || !location) {
+      return res.status(400).json({ message: 'Name, phone, and location are required fields' });
+    }
+
+    // 3. Name validation (2-100 characters)
+    if (name.length < 2 || name.length > 100) {
+      return res.status(400).json({ message: 'Name must be between 2 and 100 characters' });
+    }
+
+    // 4. Name can only contain letters and spaces
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!nameRegex.test(name)) {
+      return res.status(400).json({ message: 'Name can only contain letters and spaces' });
+    }
+
+    // 5. Age validation (if provided)
+    if (age) {
+      const ageNum = parseInt(age);
+      if (isNaN(ageNum) || ageNum < 18 || ageNum > 120) {
+        return res.status(400).json({ message: 'Age must be between 18 and 120' });
+      }
+    }
+
+    // 6. Phone format validation (+880 followed by 10 digits)
+    const phoneRegex = /^\+880\d{10}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ 
+        message: 'Phone number must start with +880 followed by exactly 10 digits' 
+      });
+    }
+
+    // 7. Location validation (must be from allowed cities)
+    const allowedLocations = ['Dhaka', 'Chittagong', 'Khulna', 'Rajshahi', 'Sylhet'];
+    if (!allowedLocations.includes(location)) {
+      return res.status(400).json({ message: 'Please select a valid location' });
+    }
+
+    // 8. Check authentication and authorization
     if (req.user._id.toString() !== userId) {
       return res.status(403).json({ 
         success: false,
         message: 'You can only update your own profile'
       });
     }
+
+    // 9. For providers, validate business name and availability status
+    if (req.user.role === 'provider') {
+      if (businessName && (businessName.length < 2 || businessName.length > 100)) {
+        return res.status(400).json({ message: 'Business name must be between 2 and 100 characters' });
+      }
+
+      if (availabilityStatus && !['online', 'offline'].includes(availabilityStatus)) {
+        return res.status(400).json({ message: 'Availability status must be either online or offline' });
+      }
+    }
+
     // Check if user is trying to set provider fields but is not a provider
     if (req.user.role !== 'provider' && (businessName || availabilityStatus)) {
       return res.status(403).json({ 
