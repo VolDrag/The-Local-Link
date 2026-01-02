@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminService from '../../services/adminService';
+import { adminEventService } from '../../services/eventService';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -22,6 +23,20 @@ const AdminDashboard = () => {
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [categoryForm, setCategoryForm] = useState({ name: '', description: '', icon: '📦' });
   const [editingCategory, setEditingCategory] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [allEvents, setAllEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [eventForm, setEventForm] = useState({ 
+    title: '', 
+    description: '', 
+    category: '', 
+    discount: '', 
+    startDate: '', 
+    endDate: '', 
+    targetAudience: 'all',
+    color: '#4F46E5'
+  });
+  const [editingEvent, setEditingEvent] = useState(null);
 
   useEffect(() => {
     // Check if user is admin
@@ -164,6 +179,110 @@ const AdminDashboard = () => {
     }
   };
 
+  // Event Management Functions
+  const handleShowEvents = async () => {
+    try {
+      setLoadingEvents(true);
+      const response = await adminEventService.getAllEvents();
+      setAllEvents(response || []);
+      setShowEventModal(true);
+    } catch (err) {
+      console.error('Error fetching all events:', err);
+      alert(err.response?.data?.message || 'Failed to load events');
+    } finally {
+      setLoadingEvents(false);
+    }
+  };
+
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+    try {
+      await adminEventService.createEvent(eventForm);
+      setEventForm({ 
+        title: '', 
+        description: '', 
+        category: '', 
+        discount: '', 
+        startDate: '', 
+        endDate: '', 
+        targetAudience: 'all',
+        color: '#4F46E5'
+      });
+      await handleShowEvents();
+      await fetchDashboardStats();
+      alert('Event created successfully');
+    } catch (err) {
+      console.error('Error creating event:', err);
+      alert(err.response?.data?.message || 'Failed to create event');
+    }
+  };
+
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault();
+    try {
+      await adminEventService.updateEvent(editingEvent._id, eventForm);
+      setEditingEvent(null);
+      setEventForm({ 
+        title: '', 
+        description: '', 
+        category: '', 
+        discount: '', 
+        startDate: '', 
+        endDate: '', 
+        targetAudience: 'all',
+        color: '#4F46E5'
+      });
+      await handleShowEvents();
+      await fetchDashboardStats();
+      alert('Event updated successfully');
+    } catch (err) {
+      console.error('Error updating event:', err);
+      alert(err.response?.data?.message || 'Failed to update event');
+    }
+  };
+
+  const handleDeleteEvent = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) {
+      return;
+    }
+    try {
+      await adminEventService.deleteEvent(id);
+      await handleShowEvents();
+      await fetchDashboardStats();
+      alert('Event deleted successfully');
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      alert(err.response?.data?.message || 'Failed to delete event');
+    }
+  };
+
+  const openEditEventModal = (event) => {
+    setEditingEvent(event);
+    setEventForm({
+      title: event.title,
+      description: event.description,
+      category: event.category,
+      discount: event.discount || '',
+      startDate: event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : '',
+      endDate: event.endDate ? new Date(event.endDate).toISOString().split('T')[0] : '',
+      targetAudience: event.targetAudience || 'all',
+      color: event.color || '#4F46E5'
+    });
+  };
+
+  const colorOptions = [
+    { color: '#4F46E5', name: 'Indigo' },
+    { color: '#7C3AED', name: 'Purple' },
+    { color: '#DB2777', name: 'Pink' },
+    { color: '#DC2626', name: 'Red' },
+    { color: '#EA580C', name: 'Orange' },
+    { color: '#CA8A04', name: 'Yellow' },
+    { color: '#16A34A', name: 'Green' },
+    { color: '#0891B2', name: 'Cyan' },
+    { color: '#2563EB', name: 'Blue' },
+    { color: '#6366F1', name: 'Light Indigo' },
+  ];
+
   const openEditCategoryModal = (category) => {
     setEditingCategory(category);
     setCategoryForm({
@@ -302,6 +421,14 @@ const AdminDashboard = () => {
             <div className="stat-info">
               <h3>{stats?.overview?.totalCategories || 0}</h3>
               <p>Categories</p>
+            </div>
+          </div>
+
+          <div className="stat-card clickable" onClick={handleShowEvents}>
+            <div className="stat-icon events">🎉</div>
+            <div className="stat-info">
+              <h3>{allEvents.length}</h3>
+              <p>Events & Offers</p>
             </div>
           </div>
 
@@ -587,7 +714,7 @@ const AdminDashboard = () => {
                     <form onSubmit={editingCategory ? handleUpdateCategory : handleCreateCategory} className="category-form">
                       <div className="form-row">
                         <div className="form-group">
-                          <label>Category Name *</label>
+                          <label style={{color: 'white'}}>Category Name *</label>
                           <input
                             type="text"
                             value={categoryForm.name}
@@ -597,7 +724,7 @@ const AdminDashboard = () => {
                           />
                         </div>
                         <div className="form-group">
-                          <label>
+                          <label style={{color: 'white'}}>
                             Icon: <span className="selected-name">{categoryForm.icon} {getIconName(categoryForm.icon)}</span>
                           </label>
                           <div className="icon-picker">
@@ -616,7 +743,7 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                       <div className="form-group">
-                        <label>Description</label>
+                        <label style={{color: 'white'}}>Description</label>
                         <textarea
                           value={categoryForm.description}
                           onChange={(e) => setCategoryForm({...categoryForm, description: e.target.value})}
@@ -673,6 +800,209 @@ const AdminDashboard = () => {
                               className="btn-delete" 
                               onClick={() => handleDeleteCategory(category._id)}
                               title="Delete category"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Events Management Modal */}
+      {showEventModal && (
+        <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
+          <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>📅 Events & Offers Management</h2>
+              <button className="modal-close" onClick={() => setShowEventModal(false)}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              {loadingEvents ? (
+                <div className="loading-spinner">Loading events...</div>
+              ) : (
+                <>
+                  <div className="form-section">
+                    <h3>{editingEvent ? 'Edit Event' : 'Create New Event'}</h3>
+                    <form onSubmit={editingEvent ? handleUpdateEvent : handleCreateEvent}>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label style={{color: 'white'}}>Title *</label>
+                          <input
+                            type="text"
+                            value={eventForm.title}
+                            onChange={(e) => setEventForm({...eventForm, title: e.target.value})}
+                            placeholder="e.g., Summer Sale, New Year Offer"
+                            required
+                            maxLength="100"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label style={{color: 'white'}}>Category *</label>
+                          <input
+                            type="text"
+                            value={eventForm.category}
+                            onChange={(e) => setEventForm({...eventForm, category: e.target.value})}
+                            placeholder="e.g., Discount, Special Event"
+                            required
+                            maxLength="100"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{color: 'white'}}>Description *</label>
+                        <textarea
+                          value={eventForm.description}
+                          onChange={(e) => setEventForm({...eventForm, description: e.target.value})}
+                          placeholder="Describe the event or offer details"
+                          rows="4"
+                          required
+                          maxLength="1000"
+                        />
+                        <small>{eventForm.description.length}/1000 characters</small>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label style={{color: 'white'}}>Discount/Offer</label>
+                          <input
+                            type="text"
+                            value={eventForm.discount}
+                            onChange={(e) => setEventForm({...eventForm, discount: e.target.value})}
+                            placeholder="e.g., 20% OFF, Up to $50"
+                            maxLength="50"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label style={{color: 'white'}}>Target Audience *</label>
+                          <select
+                            value={eventForm.targetAudience}
+                            onChange={(e) => setEventForm({...eventForm, targetAudience: e.target.value})}
+                            required
+                          >
+                            <option value="all">All Users</option>
+                            <option value="seeker">Seekers Only</option>
+                            <option value="provider">Providers Only</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label style={{color: 'white'}}>Start Date *</label>
+                          <input
+                            type="date"
+                            value={eventForm.startDate}
+                            onChange={(e) => setEventForm({...eventForm, startDate: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label style={{color: 'white'}}>End Date *</label>
+                          <input
+                            type="date"
+                            value={eventForm.endDate}
+                            onChange={(e) => setEventForm({...eventForm, endDate: e.target.value})}
+                            min={eventForm.startDate}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{color: 'white'}}>
+                          Card Color: <span className="color-preview" style={{backgroundColor: eventForm.color, color: 'white', padding: '2px 8px', borderRadius: '4px'}}>{eventForm.color}</span>
+                        </label>
+                        <div className="color-picker">
+                          {colorOptions.map((option) => (
+                            <button
+                              key={option.color}
+                              type="button"
+                              className={`color-option ${eventForm.color === option.color ? 'selected' : ''}`}
+                              style={{backgroundColor: option.color}}
+                              onClick={() => setEventForm({...eventForm, color: option.color})}
+                              title={option.name}
+                            >
+                              {eventForm.color === option.color && '✓'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="form-actions">
+                        <button type="submit" className="btn-primary">
+                          {editingEvent ? '✓ Update Event' : '+ Create Event'}
+                        </button>
+                        {editingEvent && (
+                          <button 
+                            type="button" 
+                            className="btn-secondary" 
+                            onClick={() => {
+                              setEditingEvent(null);
+                              setEventForm({ 
+                                title: '', 
+                                description: '', 
+                                category: '', 
+                                discount: '', 
+                                startDate: '', 
+                                endDate: '', 
+                                targetAudience: 'all',
+                                color: '#4F46E5'
+                              });
+                            }}
+                          >
+                            Cancel Edit
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="events-list-section">
+                    <h3>Existing Events ({allEvents.length})</h3>
+                    <div className="events-grid">
+                      {allEvents.map((event) => (
+                        <div key={event._id} className="event-card" style={{borderLeft: `4px solid ${event.color}`}}>
+                          <div className="event-card-header">
+                            <div className="event-card-info">
+                              <h4>{event.title}</h4>
+                              <p className="event-category">{event.category}</p>
+                              {event.discount && <span className="event-discount">💰 {event.discount}</span>}
+                              <p className="event-description">{event.description}</p>
+                              <div className="event-meta">
+                                <span className="event-dates">
+                                  📅 {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+                                </span>
+                                <span className={`badge badge-${event.targetAudience}`}>
+                                  {event.targetAudience === 'all' ? '👥 All Users' : event.targetAudience === 'seeker' ? '🔍 Seekers' : '🛠️ Providers'}
+                                </span>
+                                <span className={`status-badge ${event.isActive ? 'active' : 'inactive'}`}>
+                                  {event.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="event-card-actions">
+                            <button 
+                              className="btn-edit" 
+                              onClick={() => openEditEventModal(event)}
+                              title="Edit event"
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button 
+                              className="btn-delete" 
+                              onClick={() => handleDeleteEvent(event._id)}
+                              title="Delete event"
                             >
                               🗑️ Delete
                             </button>

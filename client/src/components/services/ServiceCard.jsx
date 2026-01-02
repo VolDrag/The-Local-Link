@@ -15,7 +15,24 @@ const ServiceCard = ({ service }) => {
     averageRating,
     totalReviews,
     provider,
+    hasOffer,
+    offerDescription,
+    offerExpiry,
   } = service;
+
+  // Debug: Log offer data
+  if (hasOffer) {
+    console.log('Service with offer:', {
+      title,
+      hasOffer,
+      offerDescription,
+      offerExpiry,
+      pricing
+    });
+  }
+
+  // Check if offer is valid (not expired)
+  const isOfferValid = hasOffer && offerExpiry && new Date(offerExpiry) > new Date();
 
   // Format price display
   const formatPrice = () => {
@@ -25,7 +42,21 @@ const ServiceCard = ({ service }) => {
       project: '/project',
       fixed: '',
     };
-    return `৳${pricing}${unitLabels[pricingUnit] || ''}`;
+    
+    // Extract discount percentage from offerDescription if it exists
+    let discountPercent = 0;
+    if (isOfferValid && offerDescription) {
+      const match = offerDescription.match(/(\d+)%?\s*off/i);
+      if (match) {
+        discountPercent = parseInt(match[1]);
+      }
+    }
+    
+    const unit = unitLabels[pricingUnit] || '';
+    const originalPrice = pricing;
+    const offerPrice = discountPercent > 0 ? pricing * (1 - discountPercent / 100) : pricing;
+    
+    return { originalPrice, offerPrice, unit, hasDiscount: discountPercent > 0 };
   };
 
   // Render star rating
@@ -85,7 +116,26 @@ const ServiceCard = ({ service }) => {
               </span>
             </div>
 
-            <div className="service-price">{formatPrice()}</div>
+            <div className="service-price-container">
+              {isOfferValid && (() => {
+                const priceData = formatPrice();
+                return priceData.hasDiscount ? (
+                  <>
+                    <span className="offer-badge">🏷️ OFFER</span>
+                    <div className="price-wrapper">
+                      <span className="original-price">৳{priceData.originalPrice.toFixed(0)}</span>
+                      <span className="offer-price">৳{priceData.offerPrice.toFixed(0)}{priceData.unit}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="service-price">৳{priceData.originalPrice}{priceData.unit}</div>
+                );
+              })()}
+              {!isOfferValid && (() => {
+                const priceData = formatPrice();
+                return <div className="service-price">৳{priceData.originalPrice}{priceData.unit}</div>;
+              })()}
+            </div>
           </div>
         </div>
       </Link>

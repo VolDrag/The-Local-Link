@@ -27,6 +27,7 @@ const Navbar = () => {
           
           {user ? (
             <>
+              <li><Link to="/events">Events</Link></li>
               <li><Link to="/notifications">Notifications</Link></li>
               
               {user.role === 'provider' && (
