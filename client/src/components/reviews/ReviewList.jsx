@@ -3,6 +3,8 @@ import { useState } from 'react';
 import './ReviewList.css';
 
 const ReviewList = ({ reviews, loading, onLoadMore, hasMore }) => {
+  const [reportingReviewId, setReportingReviewId] = useState(null);
+
   const renderStars = (rating) => {
     return [1, 2, 3, 4, 5].map((star) => (
       <span key={star} className={star <= rating ? 'star filled' : 'star'}>
@@ -18,6 +20,12 @@ const ReviewList = ({ reviews, loading, onLoadMore, hasMore }) => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleReport = (reviewId) => {
+    // TODO: Implement report functionality
+    console.log('Reporting review:', reviewId);
+    alert('Report functionality coming soon!');
   };
 
   if (loading && reviews.length === 0) {
@@ -69,6 +77,16 @@ const ReviewList = ({ reviews, loading, onLoadMore, hasMore }) => {
                 )}
               </div>
             )}
+
+            <div className="review-actions">
+              <button 
+                className="btn-report" 
+                onClick={() => handleReport(review._id)}
+                title="Report this review"
+              >
+                🚩 Report
+              </button>
+            </div>
           </div>
         ))}
       </div>
