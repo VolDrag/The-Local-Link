@@ -1,0 +1,131 @@
+/* Feature 20: Favorites Page Styles */
+/* #ifty */
+.favorites-page {
+  min-height: 100vh;
+  background: #1a1a1a;
+}
+
+.favorites-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.favorites-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.favorites-header h1 {
+  font-size: 2rem;
+  color: #e0e0e0;
+  margin-bottom: 0.5rem;
+}
+
+.favorites-header p {
+  color: #a0a0a0;
+  font-size: 1.1rem;
+}
+
+.favorites-count {
+  margin-bottom: 1.5rem;
+  color: #b0b0b0;
+  font-size: 0.95rem;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.favorites-loading {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
+.favorites-error {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 12px;
+  color: #ff6b6b;
+}
+
+.favorites-error p {
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  padding: 0.75rem 1.5rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.retry-btn:hover {
+  background: #c82333;
+}
+
+.no-favorites {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #2a2a2a;
+  border-radius: 12px;
+}
+
+.no-favorites .empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.no-favorites h2 {
+  color: #e0e0e0;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.no-favorites p {
+  color: #a0a0a0;
+  margin-bottom: 1.5rem;
+}
+
+.browse-btn {
+  display: inline-block;
+  padding: 0.875rem 2rem;
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.browse-btn:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .favorites-container {
+    padding: 1rem;
+  }
+
+  .favorites-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .favorites-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

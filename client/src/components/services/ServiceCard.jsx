@@ -1,5 +1,6 @@
 // ifty
 import { Link } from 'react-router-dom';
+import FavoriteButton from '../favorites/FavoriteButton'; // Feature 20
 import './ServiceCard.css';
 
 const ServiceCard = ({ service }) => {
@@ -80,6 +81,10 @@ const ServiceCard = ({ service }) => {
             src={images && images[0] ? images[0] : '/placeholder-service.jpg'}
             alt={title}
           />
+          {/* Feature 20: Favorite Button */}
+          <div className="favorite-btn-wrapper">
+            <FavoriteButton serviceId={_id} size="small" />
+          </div>
           {category && <span className="service-category">{category.name}</span>}
           {provider?.isVerified && (
             <span className="verified-badge provider-verified">✓ Verified Provider</span>

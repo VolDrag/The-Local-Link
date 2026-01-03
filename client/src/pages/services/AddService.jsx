@@ -1,11 +1,14 @@
 //######Rafi######
 // AddService.jsx - Service Provider Registration and Listing Creation Form
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createService } from '../../services/serviceService';
 import { getCategories } from '../../services/serviceService';
 import { getCountries, getCitiesByCountry, getAreasByCity } from '../../services/api';
 import './AddService.css';
+
+// Feature 11: Lazy load LocationPicker for map
+const LocationPicker = lazy(() => import('../../components/map/LocationPicker'));
 
 const AddService = () => {
   const navigate = useNavigate();
@@ -25,6 +28,8 @@ const AddService = () => {
       country: '',
       city: '',
       area: '',
+      // Feature 11: Add coordinates for map
+      coordinates: null,
     },
     images: [],
     hasOffer: false,
@@ -403,6 +408,22 @@ const AddService = () => {
                 {errors.area && <span className="error-message">{errors.area}</span>}
               </div>
             </div>
+
+            {/* Feature 11: Location Picker Map */}
+            <Suspense fallback={<div className="map-loading">Loading map...</div>}>
+              <LocationPicker
+                coordinates={formData.location.coordinates}
+                onCoordinatesChange={(coords) => {
+                  setFormData({
+                    ...formData,
+                    location: {
+                      ...formData.location,
+                      coordinates: coords
+                    }
+                  });
+                }}
+              />
+            </Suspense>
           </section>
 
           {/* Images */}

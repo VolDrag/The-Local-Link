@@ -18,6 +18,7 @@ import NotificationsPage from './pages/notifications/NotificationsPage'; // Anup
 import BookingHistory from './pages/dashboard/BookingHistory'; // Feature 19 - Anupam
 import BookingDetails from './pages/dashboard/BookingDetails'; // Feature 19 - Anupam
 import ProviderBookingHistory from './pages/dashboard/ProviderBookingHistory'; // Feature 19 - Anupam
+import FavoritesPage from './pages/favorites/FavoritesPage'; // Feature 20 - Favorites
 import Home from './pages/home/Home';
 import Events from './pages/events/Events';
 import VerifyEmail from './pages/auth/VerifyEmail';
@@ -60,6 +61,9 @@ function App() {
           <Route path="/bookings/history" element={<BookingHistory />} />
           <Route path="/bookings/provider-history" element={<ProviderBookingHistory />} />
           <Route path="/bookings/:id" element={<BookingDetails />} />
+
+          {/* Favorites Route - Feature 20 */}
+          <Route path="/favorites" element={<FavoritesPage />} />
 
           {/* Service Routes */}
           <Route path="/services" element={<ServiceSearch />} />

@@ -1,5 +1,5 @@
 // ifty
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ServiceList from '../../components/services/ServiceList';
 import Breadcrumb from '../../components/common/Breadcrumb';
@@ -11,6 +11,9 @@ import {
   getAreasByCity,
 } from '../../services/api';
 import './ServiceSearch.css';
+
+// Feature 11: Lazy load the map component
+const ServiceMap = lazy(() => import('../../components/map/ServiceMap'));
 
 const ServiceSearch = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,6 +28,11 @@ const ServiceSearch = () => {
   const [sort, setSort] = useState(searchParams.get('sort') || 'relevance');
   const [page, setPage] = useState(parseInt(searchParams.get('page')) || 1);
   const [limit] = useState(20);
+
+  // Feature 11: Map and location states
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'map'
+  const [userLocation, setUserLocation] = useState(null);
+  const [radius, setRadius] = useState(searchParams.get('radius') || 'all');
 
   // Data states
   const [services, setServices] = useState([]);
@@ -139,6 +147,13 @@ const ServiceSearch = () => {
           limit,
         };
 
+        // Feature 11: Add location params for radius filtering
+        if (userLocation && radius && radius !== 'all') {
+          params.lat = userLocation.lat;
+          params.lng = userLocation.lng;
+          params.radius = radius;
+        }
+
         Object.keys(params).forEach(
           (key) => !params[key] && delete params[key]
         );
@@ -161,7 +176,7 @@ const ServiceSearch = () => {
     };
 
     fetchServices();
-  }, [keyword, country, city, area, category, minRating, sort, page, limit]);
+  }, [keyword, country, city, area, category, minRating, sort, page, limit, userLocation, radius]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -183,6 +198,8 @@ const ServiceSearch = () => {
     setMinRating('');
     setSort('relevance');
     setPage(1);
+    setRadius('all');
+    setUserLocation(null);
   };
 
   const handleCategoryChange = (e) => {
@@ -318,7 +335,39 @@ const ServiceSearch = () => {
                 <option value="newest">Newest</option>
               </select>
             </div>
+
+            {/* Feature 11: Radius filter for nearby services */}
+            <div className="filter-group">
+              <label>Distance {!userLocation && <span className="hint">(set location first)</span>}</label>
+              <select 
+                value={radius} 
+                onChange={(e) => setRadius(e.target.value)}
+                disabled={!userLocation}
+              >
+                <option value="all">All Distances</option>
+                <option value="2">Within 2 km</option>
+                <option value="5">Within 5 km</option>
+                <option value="10">Within 10 km</option>
+                <option value="25">Within 25 km</option>
+              </select>
+            </div>
           </div>
+        </div>
+
+        {/* Feature 11: View Toggle - List/Map */}
+        <div className="view-toggle">
+          <button
+            className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => setViewMode('list')}
+          >
+            📋 List View
+          </button>
+          <button
+            className={`view-btn ${viewMode === 'map' ? 'active' : ''}`}
+            onClick={() => setViewMode('map')}
+          >
+            🗺️ Map View
+          </button>
         </div>
       </div>
 
@@ -332,11 +381,26 @@ const ServiceSearch = () => {
             <p>{error}</p>
           </div>
         ) : (
-          <ServiceList
-            services={services}
-            pagination={pagination}
-            onPageChange={handlePageChange}
-          />
+          <>
+            {/* Feature 11: Map View */}
+            {viewMode === 'map' && (
+              <Suspense fallback={<div className="loading-spinner"><p>Loading map...</p></div>}>
+                <ServiceMap 
+                  services={services} 
+                  userLocation={userLocation}
+                  onLocationChange={setUserLocation}
+                  radius={radius}
+                />
+              </Suspense>
+            )}
+            
+            {/* Service List (always shown below map, or alone in list view) */}
+            <ServiceList
+              services={services}
+              pagination={pagination}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
     </div>

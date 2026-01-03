@@ -17,9 +17,27 @@ const getServices = asyncHandler(async (req, res) => {
     sort = 'relevance',
     page = 1,
     limit = 20,
+    // Feature 11: Location-based service discovery parameters
+    lat,
+    lng,
+    radius, // in kilometers
   } = req.query;
 
   const query = { isActive: true };
+
+  // Feature 11: Geospatial query for nearby services
+  if (lat && lng && radius && radius !== 'all') {
+    const radiusInMeters = parseFloat(radius) * 1000; // Convert km to meters
+    query['location.coordinates'] = {
+      $near: {
+        $geometry: {
+          type: 'Point',
+          coordinates: [parseFloat(lng), parseFloat(lat)] // [longitude, latitude]
+        },
+        $maxDistance: radiusInMeters
+      }
+    };
+  }
 
   // Text search for keyword
   if (keyword) {
@@ -152,6 +170,21 @@ const createService = asyncHandler(async (req, res) => {
     throw new Error('Please provide complete location details (city, area, country)');
   }
 
+  // Feature 11: Prepare location data with coordinates if provided
+  const locationData = {
+    city: location.city,
+    area: location.area,
+    country: location.country,
+  };
+
+  // Add coordinates if provided (for map display)
+  if (location.coordinates && location.coordinates.lat && location.coordinates.lng) {
+    locationData.coordinates = {
+      type: 'Point',
+      coordinates: [parseFloat(location.coordinates.lng), parseFloat(location.coordinates.lat)] // [lng, lat] GeoJSON format
+    };
+  }
+
   // Step 4: Save service to database
   const service = await Service.create({
     title,
@@ -159,7 +192,7 @@ const createService = asyncHandler(async (req, res) => {
     category,
     pricing,
     pricingUnit: pricingUnit || 'fixed',
-    location,
+    location: locationData,
     images: images || [],
     provider: req.user._id,
     hasOffer: hasOffer || false,

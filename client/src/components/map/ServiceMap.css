@@ -1,0 +1,222 @@
+/* Feature 11: Service Map Styles */
+/* #ifty */
+.service-map-wrapper {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.map-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.locate-me-btn {
+  padding: 0.75rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background 0.3s ease;
+}
+
+.locate-me-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.locate-me-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.manual-location-btn {
+  padding: 0.75rem 1.5rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background 0.3s ease;
+}
+
+.manual-location-btn:hover:not(:disabled) {
+  background: #545b62;
+}
+
+.manual-location-btn.active {
+  background: #dc3545;
+}
+
+.manual-location-btn.active:hover {
+  background: #c82333;
+}
+
+.manual-location-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.manual-mode-hint {
+  background: rgba(255, 243, 205, 0.9);
+  color: #856404;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.location-error-inline {
+  color: #ff6b6b;
+  font-size: 0.875rem;
+}
+
+.location-error-inline.info-message {
+  color: #17a2b8;
+}
+
+.service-map-container {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.service-map {
+  height: 400px;
+  width: 100%;
+  z-index: 1;
+}
+
+.map-info {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.services-on-map {
+  color: #28a745;
+  font-size: 0.9rem;
+}
+
+.services-not-on-map {
+  color: #ffc107;
+  font-size: 0.9rem;
+}
+
+.location-accuracy {
+  font-size: 0.9rem;
+}
+
+.location-accuracy.good-accuracy {
+  color: #28a745;
+}
+
+.location-accuracy.low-accuracy {
+  color: #ffc107;
+}
+
+/* Popup Styles */
+.service-popup {
+  min-width: 200px;
+  max-width: 250px;
+}
+
+.popup-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.popup-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.popup-category {
+  display: inline-block;
+  background: #e7f3ff;
+  color: #0066cc;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  margin-bottom: 0.5rem;
+}
+
+.popup-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #28a745;
+  margin: 0.5rem 0;
+}
+
+.popup-rating {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.popup-reviews {
+  color: #999;
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+.popup-location {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 0.75rem;
+}
+
+.popup-link {
+  display: block;
+  text-align: center;
+  background: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.popup-link:hover {
+  background: #0056b3;
+}
+
+.user-popup {
+  text-align: center;
+  padding: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .service-map {
+    height: 300px;
+  }
+  
+  .map-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

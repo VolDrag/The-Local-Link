@@ -1,10 +1,13 @@
 //######Rafi######
 // EditService.jsx - Edit existing service listing
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { updateService, getCategories } from '../../services/serviceService';
 import { getServiceById, getCountries, getCitiesByCountry, getAreasByCity } from '../../services/api';
 import './AddService.css'; // Reusing the same CSS
+
+// Feature 11: Lazy load LocationPicker for map
+const LocationPicker = lazy(() => import('../../components/map/LocationPicker'));
 
 const EditService = () => {
   const navigate = useNavigate();
@@ -26,6 +29,8 @@ const EditService = () => {
       country: '',
       city: '',
       area: '',
+      // Feature 11: Add coordinates for map
+      coordinates: null,
     },
     images: [],
     hasOffer: false,
@@ -62,6 +67,13 @@ const EditService = () => {
             country: serviceData.location?.country || '',
             city: serviceData.location?.city || '',
             area: serviceData.location?.area || '',
+            // Feature 11: Load existing coordinates if available
+            coordinates: serviceData.location?.coordinates?.coordinates 
+              ? { 
+                  lng: serviceData.location.coordinates.coordinates[0], 
+                  lat: serviceData.location.coordinates.coordinates[1] 
+                } 
+              : null,
           },
           images: serviceData.images || [],
           hasOffer: serviceData.specialOffers?.hasOffer || false,
@@ -422,6 +434,22 @@ const EditService = () => {
                 {errors.area && <span className="error-message">{errors.area}</span>}
               </div>
             </div>
+
+            {/* Feature 11: Location Picker Map */}
+            <Suspense fallback={<div className="map-loading">Loading map...</div>}>
+              <LocationPicker
+                coordinates={formData.location.coordinates}
+                onCoordinatesChange={(coords) => {
+                  setFormData({
+                    ...formData,
+                    location: {
+                      ...formData.location,
+                      coordinates: coords
+                    }
+                  });
+                }}
+              />
+            </Suspense>
           </section>
 
           {/* Images */}

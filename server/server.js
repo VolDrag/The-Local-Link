@@ -19,6 +19,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import adminEventRoutes from './routes/adminEventRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import favoritesRoutes from './routes/favoritesRoutes.js'; // Feature 20: Favorites - #ifty
 
 //console.log('✅ Notification routes loaded:', notificationRoutes); // ADD THIS LINE
 
@@ -56,6 +57,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/admin/events', adminEventRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/favorites', favoritesRoutes); // Feature 20: Favorites - #ifty
 //console.log('✅ Notification routes registered at /api/notifications'); // ADD THIS LINE
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));

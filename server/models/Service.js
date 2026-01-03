@@ -81,6 +81,19 @@ const serviceSchema = new mongoose.Schema(
         required: [true, 'Please add a country'],
         trim: true,
       },
+      // Feature 11: Location-based service discovery - coordinates for map
+      coordinates: {
+        type: {
+          type: String,
+          enum: ['Point'],
+          default: 'Point',
+        },
+        // [longitude, latitude] - GeoJSON format
+        coordinates: {
+          type: [Number],
+          default: undefined,
+        },
+      },
     },
     // Denormalized rating fields (updated by Review hooks)
     averageRating: {
@@ -138,6 +151,9 @@ serviceSchema.index({ 'location.city': 1, 'location.area': 1, 'location.country'
 serviceSchema.index({ averageRating: -1 });
 serviceSchema.index({ createdAt: -1 });
 serviceSchema.index({ provider: 1 });
+
+// Feature 11: 2dsphere index for geospatial queries (location-based discovery)
+serviceSchema.index({ 'location.coordinates': '2dsphere' });
 
 const Service = mongoose.model('Service', serviceSchema);
 
