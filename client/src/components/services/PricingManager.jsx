@@ -36,7 +36,9 @@ const PricingManager = ({ service, onUpdate }) => {
       }
     } catch (err) {
       console.error('Error updating pricing:', err);
-      setError(err.message || 'Failed to update pricing');
+      // Extract the actual error message from server response
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to update pricing';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

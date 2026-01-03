@@ -58,7 +58,8 @@ export const updateServicePricing = async (serviceId, pricingData) => {
     const response = await api.patch(`/services/${serviceId}/pricing`, pricingData);
     return response.data; // Return updated pricing information
   } catch (error) {
-    throw error.response?.data || error;
+    // Pass the full error object with response data
+    throw error;
   }
 };//
 
