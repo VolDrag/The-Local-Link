@@ -1,23 +1,24 @@
-/* Feature 20: Favorite Button Styles */
+/* Feature 20: Favorite Button Styles - Unified Theme */
 /* #ifty */
+
 .favorite-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  background: rgba(42, 42, 42, 0.9);
-  border: none;
+  gap: var(--spacing-sm);
+  background-color: rgba(253, 251, 247, 0.95);
+  border: 1px solid var(--color-border-light);
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
   z-index: 10;
 }
 
 .favorite-btn:hover:not(.disabled):not(.loading) {
-  background: rgba(42, 42, 42, 1);
+  background-color: var(--color-background-card);
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .favorite-btn.active {
@@ -58,12 +59,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+
+.favorite-btn.active .heart-icon,
+.favorite-btn:hover .heart-icon {
+  color: var(--color-error);
 }
 
 .favorite-text {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #e0e0e0;
+  color: var(--color-text-secondary);
 }
 
 /* Animation for when favorited */
@@ -75,8 +83,56 @@
 
 /* When button shows text, make it pill-shaped */
 .favorite-btn:has(.favorite-text) {
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  padding: var(--spacing-sm) var(--spacing-md);
   width: auto;
   height: auto;
+}
+
+/* Loading spinner inside button */
+.favorite-btn .loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border-light);
+  border-top-color: var(--color-accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Tooltip */
+.favorite-btn[title] {
+  position: relative;
+}
+
+/* Dark overlay variant for on top of images */
+.favorite-btn.overlay {
+  background-color: rgba(74, 64, 58, 0.8);
+  border-color: transparent;
+}
+
+.favorite-btn.overlay .heart-icon {
+  color: var(--color-background);
+}
+
+.favorite-btn.overlay.active .heart-icon,
+.favorite-btn.overlay:hover .heart-icon {
+  color: var(--color-error);
+}
+
+/* Inline variant */
+.favorite-btn.inline {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs);
+}
+
+.favorite-btn.inline:hover {
+  background-color: var(--color-background-alt);
+  transform: none;
 }

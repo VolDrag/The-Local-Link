@@ -1,9 +1,10 @@
 // ifty
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import ServiceList from '../../components/services/ServiceList';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import { getCategories } from '../../services/serviceService';
+import { useAuth } from '../../context/AuthContext';
 import {
   searchServices,
   getCountries,
@@ -16,6 +17,7 @@ import './ServiceSearch.css';
 const ServiceMap = lazy(() => import('../../components/map/ServiceMap'));
 
 const ServiceSearch = () => {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Filter states
@@ -219,7 +221,14 @@ const ServiceSearch = () => {
       <Breadcrumb categoryName={categoryName} />
       
       <div className="search-header">
-        <h1>Find Local Services</h1>
+        <div className="search-header-top">
+          <h1>Find Local Services</h1>
+          {user && (
+            <Link to="/favorites" className="favorites-link-btn">
+              ❤️ My Favorites
+            </Link>
+          )}
+        </div>
         <p>Discover trusted service providers in your area</p>
         {categoryName && (
           <div className="active-category-filter">

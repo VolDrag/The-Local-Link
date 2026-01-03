@@ -1,79 +1,86 @@
+/* Navbar Styles - Unified Theme */
+/* #ifty */
+
 .navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-background-card);
+  padding: var(--spacing-md) 0;
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 1000;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .navbar-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--spacing-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .navbar-logo {
+  font-family: var(--font-serif);
   font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
+  font-weight: 700;
+  color: var(--color-accent-primary);
   text-decoration: none;
-  transition: opacity 0.3s;
+  transition: color var(--transition-normal);
 }
 
 .navbar-logo:hover {
-  opacity: 0.8;
+  color: var(--color-accent-primary-hover);
 }
 
 .navbar-menu {
   display: flex;
   list-style: none;
-  gap: 1.5rem;
+  gap: var(--spacing-md);
   align-items: center;
   margin: 0;
   padding: 0;
 }
 
 .navbar-menu li a {
-  color: white;
+  color: var(--color-text-secondary);
   text-decoration: none;
   font-weight: 500;
-  transition: opacity 0.3s;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-normal);
 }
 
 .navbar-menu li a:hover {
-  opacity: 0.8;
+  color: var(--color-accent-primary);
+  background-color: var(--color-accent-primary-light);
 }
 
 .btn-logout {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  background-color: var(--color-error);
+  color: var(--color-text-light);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s;
+  font-weight: 500;
+  transition: all var(--transition-normal);
 }
 
 .btn-logout:hover {
-  background: white;
-  color: #667eea;
+  background-color: #B35F58;
+  box-shadow: 0 4px 12px rgba(196, 112, 104, 0.3);
 }
 
 @media (max-width: 768px) {
   .navbar-menu {
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: var(--spacing-sm);
     font-size: 0.9rem;
   }
 
   .navbar-container {
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--spacing-md);
   }
 }

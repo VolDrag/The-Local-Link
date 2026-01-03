@@ -22,27 +22,20 @@ const Navbar = () => {
         </Link>
 
         <ul className="navbar-menu">
-          <li><Link to="/services">Services</Link></li>
-          <li><Link to="/categories">Categories</Link></li>
-          
           {user ? (
             <>
-              <li><Link to="/events">Events</Link></li>
-              <li><Link to="/notifications">Notifications</Link></li>
-              <li><Link to="/favorites">❤️ Favorites</Link></li>
+              <li><Link to="/services">Services</Link></li>
               
               {user.role === 'provider' && (
-                <>
-                  <li><Link to="/services/add">Add Service</Link></li>
-                  <li><Link to="/bookings/provider-history">Service History</Link></li>
-                </>
+                <li><Link to="/bookings/provider-history">Service History</Link></li>
               )}
               
               {user.role === 'seeker' && (
                 <li><Link to="/bookings/history">My Bookings</Link></li>
               )}
               
-              <li><Link to="/profile">Profile</Link></li>
+              <li><Link to="/notifications" className="nav-icon">🔔</Link></li>
+              <li><Link to="/profile" className="btn-profile">👤 My Profile</Link></li>
               <li>
                 <button onClick={handleLogout} className="btn-logout">
                   Logout
@@ -51,6 +44,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
+              <li><Link to="/services">Services</Link></li>
               <li><Link to="/login">Login</Link></li>
               <li><Link to="/register">Register</Link></li>
             </>

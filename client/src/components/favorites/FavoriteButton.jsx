@@ -36,6 +36,9 @@ const FavoriteButton = ({ serviceId, size = 'medium', showText = false, onToggle
     e.preventDefault();
     e.stopPropagation();
 
+    console.log('Heart button clicked for serviceId:', serviceId);
+    console.log('Current user:', user);
+
     if (!user) {
       // Could redirect to login or show a modal
       alert('Please login to save favorites');
@@ -46,7 +49,9 @@ const FavoriteButton = ({ serviceId, size = 'medium', showText = false, onToggle
 
     setLoading(true);
     try {
+      console.log('Calling toggleFavorite API...');
       const response = await toggleFavorite(serviceId);
+      console.log('Toggle response:', response);
       setIsFavorite(response.isFavorite);
       
       // Callback for parent component if needed

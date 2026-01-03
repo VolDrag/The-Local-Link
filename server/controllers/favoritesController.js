@@ -1,31 +1,32 @@
 // Feature 20: Favorite Services (Wishlist) Controller
-// Allows all authenticated users to save/manage favorite services
-// #ifty
+// Uses a separate Favorites collection for reliability
+// ifty
 import asyncHandler from 'express-async-handler';
-import User from '../models/User.js';
+import Favorite from '../models/Favorite.js';
 import Service from '../models/Service.js';
 
 // @desc    Get user's favorite services
 // @route   GET /api/favorites
 // @access  Private
 const getFavorites = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id)
+  const userId = req.user._id;
+
+  // Find all favorites for this user
+  const favorites = await Favorite.find({ user: userId })
     .populate({
-      path: 'favorites',
-      match: { isActive: true }, // Only return active services
+      path: 'service',
+      match: { isActive: true },
       populate: [
         { path: 'category', select: 'name icon' },
-        { path: 'provider', select: 'name businessName avatar isVerified' }
+        { path: 'provider', select: 'name username businessName avatar isVerified' }
       ]
-    });
+    })
+    .sort({ createdAt: -1 });
 
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
-  }
-
-  // Filter out any null references (in case a service was deleted)
-  const validFavorites = user.favorites.filter(fav => fav !== null);
+  // Filter out any null services (deleted or inactive)
+  const validFavorites = favorites
+    .filter(fav => fav.service !== null)
+    .map(fav => fav.service);
 
   res.json({
     success: true,
@@ -39,6 +40,7 @@ const getFavorites = asyncHandler(async (req, res) => {
 // @access  Private
 const toggleFavorite = asyncHandler(async (req, res) => {
   const { serviceId } = req.params;
+  const userId = req.user._id;
 
   // Check if service exists and is active
   const service = await Service.findById(serviceId);
@@ -52,39 +54,35 @@ const toggleFavorite = asyncHandler(async (req, res) => {
     throw new Error('This service is no longer available');
   }
 
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
-  }
+  // Check if already favorited
+  const existingFavorite = await Favorite.findOne({
+    user: userId,
+    service: serviceId
+  });
 
-  // Initialize favorites array if it doesn't exist
-  if (!user.favorites) {
-    user.favorites = [];
-  }
-
-  const favoriteIndex = user.favorites.findIndex(
-    fav => fav.toString() === serviceId
-  );
-  
   let isFavorite;
-  if (favoriteIndex === -1) {
-    // Add to favorites
-    user.favorites.push(serviceId);
-    isFavorite = true;
-  } else {
+
+  if (existingFavorite) {
     // Remove from favorites
-    user.favorites.splice(favoriteIndex, 1);
+    await Favorite.deleteOne({ _id: existingFavorite._id });
     isFavorite = false;
+  } else {
+    // Add to favorites
+    await Favorite.create({
+      user: userId,
+      service: serviceId
+    });
+    isFavorite = true;
   }
 
-  await user.save();
+  // Get updated count
+  const count = await Favorite.countDocuments({ user: userId });
 
   res.json({
     success: true,
     isFavorite,
     message: isFavorite ? 'Added to favorites' : 'Removed from favorites',
-    favoritesCount: user.favorites.length
+    favoritesCount: count
   });
 });
 
@@ -93,30 +91,27 @@ const toggleFavorite = asyncHandler(async (req, res) => {
 // @access  Private
 const checkFavorite = asyncHandler(async (req, res) => {
   const { serviceId } = req.params;
+  const userId = req.user._id;
 
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
-  }
-
-  const isFavorite = user.favorites && user.favorites.some(
-    fav => fav.toString() === serviceId
-  );
+  const favorite = await Favorite.findOne({
+    user: userId,
+    service: serviceId
+  });
 
   res.json({
     success: true,
-    isFavorite
+    isFavorite: !!favorite
   });
 });
 
 // @desc    Add service to favorites
 // @route   POST /api/favorites/:serviceId
 // @access  Private
-const addToFavorites = asyncHandler(async (req, res) => {
+const addFavorite = asyncHandler(async (req, res) => {
   const { serviceId } = req.params;
+  const userId = req.user._id;
 
-  // Check if service exists
+  // Check if service exists and is active
   const service = await Service.findById(serviceId);
   if (!service) {
     res.status(404);
@@ -128,61 +123,76 @@ const addToFavorites = asyncHandler(async (req, res) => {
     throw new Error('This service is no longer available');
   }
 
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
+  // Check if already favorited
+  const existingFavorite = await Favorite.findOne({
+    user: userId,
+    service: serviceId
+  });
+
+  if (existingFavorite) {
+    return res.json({
+      success: true,
+      message: 'Service is already in favorites',
+      isFavorite: true
+    });
   }
 
-  // Initialize favorites array if it doesn't exist
-  if (!user.favorites) {
-    user.favorites = [];
-  }
+  // Add to favorites
+  await Favorite.create({
+    user: userId,
+    service: serviceId
+  });
 
-  // Check if already in favorites
-  if (user.favorites.some(fav => fav.toString() === serviceId)) {
-    res.status(400);
-    throw new Error('Service already in favorites');
-  }
-
-  user.favorites.push(serviceId);
-  await user.save();
+  const count = await Favorite.countDocuments({ user: userId });
 
   res.status(201).json({
     success: true,
-    message: 'Service added to favorites',
-    favoritesCount: user.favorites.length
+    message: 'Added to favorites',
+    isFavorite: true,
+    favoritesCount: count
   });
 });
 
 // @desc    Remove service from favorites
 // @route   DELETE /api/favorites/:serviceId
 // @access  Private
-const removeFromFavorites = asyncHandler(async (req, res) => {
+const removeFavorite = asyncHandler(async (req, res) => {
   const { serviceId } = req.params;
+  const userId = req.user._id;
 
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    res.status(404);
-    throw new Error('User not found');
+  const result = await Favorite.deleteOne({
+    user: userId,
+    service: serviceId
+  });
+
+  if (result.deletedCount === 0) {
+    return res.json({
+      success: true,
+      message: 'Service was not in favorites',
+      isFavorite: false
+    });
   }
 
-  const favoriteIndex = user.favorites.findIndex(
-    fav => fav.toString() === serviceId
-  );
-
-  if (favoriteIndex === -1) {
-    res.status(400);
-    throw new Error('Service not in favorites');
-  }
-
-  user.favorites.splice(favoriteIndex, 1);
-  await user.save();
+  const count = await Favorite.countDocuments({ user: userId });
 
   res.json({
     success: true,
-    message: 'Service removed from favorites',
-    favoritesCount: user.favorites.length
+    message: 'Removed from favorites',
+    isFavorite: false,
+    favoritesCount: count
+  });
+});
+
+// @desc    Get favorites count for current user
+// @route   GET /api/favorites/count
+// @access  Private
+const getFavoritesCount = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const count = await Favorite.countDocuments({ user: userId });
+
+  res.json({
+    success: true,
+    count
   });
 });
 
@@ -190,6 +200,7 @@ export {
   getFavorites,
   toggleFavorite,
   checkFavorite,
-  addToFavorites,
-  removeFromFavorites
+  addFavorite,
+  removeFavorite,
+  getFavoritesCount
 };

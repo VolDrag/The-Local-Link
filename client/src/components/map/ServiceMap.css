@@ -1,63 +1,73 @@
-/* Feature 11: Service Map Styles */
+/* Feature 11: Service Map Styles - Unified Theme */
 /* #ifty */
+
 .service-map-wrapper {
-  background: #2a2a2a;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 2rem;
+  background-color: var(--color-background-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
 }
 
 .map-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
 }
 
 .locate-me-btn {
-  padding: 0.75rem 1.5rem;
-  background: #007bff;
-  color: white;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-light);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 500;
   font-size: 0.95rem;
-  transition: background 0.3s ease;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .locate-me-btn:hover:not(:disabled) {
-  background: #0056b3;
+  background-color: var(--color-accent-primary-hover);
+  transform: translateY(-1px);
 }
 
 .locate-me-btn:disabled {
-  opacity: 0.6;
+  background-color: var(--color-border);
   cursor: not-allowed;
 }
 
 .manual-location-btn {
-  padding: 0.75rem 1.5rem;
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-background-alt);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 500;
   font-size: 0.95rem;
-  transition: background 0.3s ease;
+  transition: all var(--transition-fast);
 }
 
 .manual-location-btn:hover:not(:disabled) {
-  background: #545b62;
+  border-color: var(--color-accent-secondary);
+  color: var(--color-accent-secondary);
 }
 
 .manual-location-btn.active {
-  background: #dc3545;
+  background-color: var(--color-accent-secondary);
+  border-color: var(--color-accent-secondary);
+  color: var(--color-text-light);
 }
 
 .manual-location-btn.active:hover {
-  background: #c82333;
+  background-color: var(--color-accent-secondary-hover);
 }
 
 .manual-location-btn:disabled {
@@ -66,14 +76,15 @@
 }
 
 .manual-mode-hint {
-  background: rgba(255, 243, 205, 0.9);
+  background-color: rgba(241, 196, 15, 0.15);
   color: #856404;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
   text-align: center;
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-sm);
   animation: pulse 1.5s infinite;
+  font-size: 0.9rem;
 }
 
 @keyframes pulse {
@@ -81,142 +92,261 @@
   50% { opacity: 0.7; }
 }
 
-.location-error-inline {
-  color: #ff6b6b;
-  font-size: 0.875rem;
-}
-
-.location-error-inline.info-message {
-  color: #17a2b8;
-}
-
+/* Map Container */
 .service-map-container {
-  border-radius: 10px;
+  height: 450px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--color-border-light);
+  background-color: #e0e0e0;
 }
 
+/* The actual Leaflet map */
 .service-map {
-  height: 400px;
+  height: 100%;
   width: 100%;
   z-index: 1;
 }
 
-.map-info {
+/* Ensure Leaflet styles work properly */
+.service-map-container .leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.service-map-container .leaflet-tile-pane {
+  z-index: 1;
+}
+
+.service-map-container .leaflet-overlay-pane {
+  z-index: 2;
+}
+
+.service-map-container .leaflet-marker-pane {
+  z-index: 3;
+}
+
+.service-map-container .leaflet-popup-pane {
+  z-index: 4;
+}
+
+.service-map-container.loading {
   display: flex;
-  gap: 1.5rem;
-  margin-top: 1rem;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background-alt);
+}
+
+.map-loading {
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.map-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto var(--spacing-md);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Location Status */
+.location-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background-color: var(--color-background-alt);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-md);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.location-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.location-icon {
+  color: var(--color-accent-primary);
+  font-size: 1.25rem;
+}
+
+.location-text {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+.location-text strong {
+  color: var(--color-text-primary);
+}
+
+.radius-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.radius-control label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.radius-control select {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.radius-control select:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+}
+
+/* Service Markers Legend */
+.map-legend {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-background-alt);
+  border-radius: var(--radius-md);
   flex-wrap: wrap;
 }
 
-.services-on-map {
-  color: #28a745;
-  font-size: 0.9rem;
-}
-
-.services-not-on-map {
-  color: #ffc107;
-  font-size: 0.9rem;
-}
-
-.location-accuracy {
-  font-size: 0.9rem;
-}
-
-.location-accuracy.good-accuracy {
-  color: #28a745;
-}
-
-.location-accuracy.low-accuracy {
-  color: #ffc107;
-}
-
-/* Popup Styles */
-.service-popup {
-  min-width: 200px;
-  max-width: 250px;
-}
-
-.popup-image {
-  width: 100%;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
-}
-
-.popup-title {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
-  color: #333;
-  font-weight: 600;
-}
-
-.popup-category {
-  display: inline-block;
-  background: #e7f3ff;
-  color: #0066cc;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  margin-bottom: 0.5rem;
-}
-
-.popup-price {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #28a745;
-  margin: 0.5rem 0;
-}
-
-.popup-rating {
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   font-size: 0.85rem;
-  color: #666;
-  margin-bottom: 0.25rem;
+  color: var(--color-text-secondary);
 }
 
-.popup-reviews {
-  color: #999;
-  font-size: 0.75rem;
-  margin-left: 0.25rem;
+.legend-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }
 
-.popup-location {
-  font-size: 0.8rem;
-  color: #888;
-  margin-bottom: 0.75rem;
+.legend-marker.user {
+  background-color: var(--color-accent-primary);
 }
 
-.popup-link {
+.legend-marker.service {
+  background-color: var(--color-accent-secondary);
+}
+
+/* Map Popup Styles */
+.map-popup {
+  min-width: 200px;
+}
+
+.map-popup h4 {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.map-popup p {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.map-popup .price {
+  font-weight: 600;
+  color: var(--color-accent-primary);
+}
+
+.map-popup .rating {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.map-popup .rating .star {
+  color: var(--color-warning);
+}
+
+.map-popup .view-btn {
   display: block;
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--radius-sm);
   text-align: center;
-  background: #007bff;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 500;
-  transition: background 0.3s ease;
+  cursor: pointer;
+  margin-top: var(--spacing-sm);
+  transition: background-color var(--transition-fast);
 }
 
-.popup-link:hover {
-  background: #0056b3;
+.map-popup .view-btn:hover {
+  background-color: var(--color-accent-primary-hover);
 }
 
-.user-popup {
+/* Map Error */
+.map-error {
   text-align: center;
-  padding: 0.25rem;
+  padding: var(--spacing-xl);
+  color: var(--color-error);
+  background-color: var(--color-error-light);
+  border-radius: var(--radius-lg);
+}
+
+.map-error .error-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .service-map {
+  .service-map-wrapper {
+    padding: var(--spacing-md);
+  }
+
+  .map-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .locate-me-btn,
+  .manual-location-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .map-container {
     height: 300px;
   }
-  
-  .map-info {
+
+  .location-status {
     flex-direction: column;
-    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .radius-control {
+    width: 100%;
+    justify-content: space-between;
   }
 }

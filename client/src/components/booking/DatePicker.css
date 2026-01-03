@@ -1,118 +1,98 @@
-/* DatePicker.css */
+/* DatePicker Styles - Unified Theme */
+
 .date-picker-container {
   position: relative;
-  width: 100%;
-}
-
-.date-picker-label {
-  display: block;
-  font-weight: 600;
-  color: #333;
-  font-size: 0.95rem;
-  margin-bottom: 0.5rem;
 }
 
 .date-picker-input {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: white;
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.date-picker-input:hover {
-  border-color: #007bff;
-}
-
-.date-picker-input:focus-within {
+.date-picker-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px rgba(192, 132, 87, 0.15);
 }
 
-.date-picker-input .placeholder {
-  color: #999;
+.date-picker-input::placeholder {
+  color: var(--color-text-muted);
 }
 
-.date-picker-input .selected {
-  color: #333;
-  font-weight: 500;
-}
-
-.calendar-icon {
-  font-size: 1.2rem;
-}
-
-.calendar-dropdown {
+.date-picker-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: 100%;
   left: 0;
-  z-index: 1000;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 1rem;
-  min-width: 280px;
-  animation: slideDown 0.2s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  right: 0;
+  background-color: var(--color-background-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-md);
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
-.current-month {
-  font-weight: 600;
-  color: #333;
-  font-size: 1rem;
-}
-
-.nav-btn {
+.calendar-nav-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  color: #666;
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 0 0.5rem;
-  transition: color 0.2s;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
 }
 
-.nav-btn:hover {
-  color: #007bff;
+.calendar-nav-btn:hover {
+  background-color: var(--color-background-alt);
+  color: var(--color-accent-primary);
 }
 
-.calendar-grid {
+.calendar-month-year {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 2px;
+  margin-bottom: var(--spacing-sm);
 }
 
-.day-name {
+.weekday {
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #666;
-  padding: 0.5rem 0;
+  color: var(--color-text-muted);
+  padding: var(--spacing-xs);
+  text-transform: uppercase;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
 }
 
 .calendar-day {
@@ -120,52 +100,76 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
 }
 
-.calendar-day:not(.empty):not(.disabled):hover {
-  background: #e7f3ff;
-  color: #007bff;
-}
-
-.calendar-day.empty {
-  cursor: default;
-}
-
-.calendar-day.disabled {
-  color: #ccc;
-  cursor: not-allowed;
-  text-decoration: line-through;
+.calendar-day:hover:not(:disabled) {
+  background-color: var(--color-accent-primary-light);
+  color: var(--color-accent-primary);
 }
 
 .calendar-day.selected {
-  background: #007bff;
-  color: white;
-  font-weight: 600;
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-light);
 }
 
-.calendar-day.today:not(.selected) {
-  background: #fff3cd;
-  font-weight: 600;
+.calendar-day.today {
+  border: 2px solid var(--color-accent-primary);
 }
 
 .calendar-day.today.selected {
-  background: #007bff;
-  box-shadow: 0 0 0 2px #fff3cd;
+  border-color: transparent;
+}
+
+.calendar-day.other-month {
+  color: var(--color-text-muted);
+}
+
+.calendar-day:disabled {
+  color: var(--color-border);
+  cursor: not-allowed;
+  background: none;
+}
+
+/* Quick Select */
+.quick-select {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border-light);
+  flex-wrap: wrap;
+}
+
+.quick-select-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-background-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quick-select-btn:hover {
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .calendar-dropdown {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 320px;
+@media (max-width: 400px) {
+  .date-picker-dropdown {
+    padding: var(--spacing-sm);
+  }
+
+  .calendar-day {
+    font-size: 0.85rem;
   }
 }

@@ -1,130 +1,131 @@
-/* ============= Feature 25: Provider Portfolio Showcase - START ============= */
-/* Portfolio Upload and Management Component Styles */
+/* Portfolio Manager Styles - Unified Theme */
 
 /* Main Container */
 .portfolio-manager {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  background: var(--color-background-card);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid var(--color-border-light);
 }
 
 .portfolio-manager h2 {
+  font-family: var(--font-serif);
   font-size: 1.8rem;
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #3498db;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--color-accent-primary);
 }
 
 /* Upload Section */
 .portfolio-upload-section {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 .portfolio-upload-section h3 {
+  font-family: var(--font-serif);
   font-size: 1.4rem;
-  color: #34495e;
-  margin-bottom: 1.5rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
 }
 
 /* Work Input Groups */
 .work-input-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-lg);
 }
 
 .work-input-group label {
   display: block;
   font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
   font-size: 1rem;
 }
 
 .work-title-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #ddd;
-  border-radius: 6px;
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 1rem;
-  font-family: inherit;
-  transition: border-color 0.3s ease;
+  font-family: var(--font-sans);
+  background-color: var(--color-background-card);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-normal);
 }
 
 .work-title-input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: var(--color-accent-primary);
 }
 
 .work-title-input:invalid:not(:placeholder-shown) {
-  border-color: #e74c3c;
+  border-color: #dc3545;
 }
 
 .work-title-input:valid:not(:placeholder-shown) {
-  border-color: #27ae60;
+  border-color: var(--color-accent-secondary);
 }
 
 .work-description-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #ddd;
-  border-radius: 6px;
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 1rem;
-  font-family: inherit;
+  font-family: var(--font-sans);
+  background-color: var(--color-background-card);
+  color: var(--color-text-primary);
   resize: vertical;
-  transition: border-color 0.3s ease;
+  min-height: 100px;
+  transition: border-color var(--transition-normal);
 }
 
 .work-description-input:focus {
   outline: none;
-  border-color: #3498db;
-}
-
-.work-description-input:invalid:not(:placeholder-shown) {
-  border-color: #e74c3c;
-}
-
-.work-description-input:valid:not(:placeholder-shown) {
-  border-color: #27ae60;
+  border-color: var(--color-accent-primary);
 }
 
 .char-count {
   display: block;
-  margin-top: 0.25rem;
+  margin-top: var(--spacing-xs);
   font-size: 0.85rem;
   font-weight: 500;
+  color: var(--color-text-secondary);
 }
 
+/* Upload Area */
 .upload-area {
-  border: 2px dashed #bdc3c7;
-  border-radius: 8px;
-  padding: 2rem;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
   text-align: center;
-  background: #f8f9fa;
-  transition: all 0.3s ease;
+  background: var(--color-background-alt);
+  transition: all var(--transition-normal);
   cursor: pointer;
 }
 
 .upload-area:hover {
-  border-color: #3498db;
-  background: #e8f4f8;
+  border-color: var(--color-accent-primary);
+  background: rgba(192, 132, 87, 0.05);
 }
 
 .upload-area.dragover {
-  border-color: #2ecc71;
-  background: #d5f4e6;
+  border-color: var(--color-accent-secondary);
+  background: rgba(143, 151, 121, 0.1);
 }
 
 .upload-icon {
   font-size: 3rem;
-  color: #3498db;
-  margin-bottom: 1rem;
+  color: var(--color-accent-primary);
+  margin-bottom: var(--spacing-md);
 }
 
 .upload-area p {
-  color: #7f8c8d;
-  margin: 0.5rem 0;
+  color: var(--color-text-secondary);
+  margin: var(--spacing-sm) 0;
 }
 
 .upload-area input[type="file"] {
@@ -132,23 +133,24 @@
 }
 
 .upload-button {
-  background: #3498db;
+  background: var(--color-accent-primary);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 1rem;
+  transition: background var(--transition-normal);
+  margin-top: var(--spacing-md);
 }
 
 .upload-button:hover:not(:disabled) {
-  background: #2980b9;
+  background: var(--color-accent-primary-hover);
 }
 
 .upload-button:disabled {
-  background: #95a5a6;
+  background: var(--color-text-muted);
   cursor: not-allowed;
 }
 
@@ -156,16 +158,16 @@
 .image-previews {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
 }
 
 .preview-item {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: #f8f9fa;
-  border: 2px solid #e0e0e0;
+  background: var(--color-background-alt);
+  border: 2px solid var(--color-border-light);
 }
 
 .preview-image {
@@ -175,9 +177,9 @@
 }
 
 .image-number {
-  background: rgba(52, 152, 219, 0.9);
+  background: rgba(192, 132, 87, 0.9);
   color: white;
-  padding: 0.4rem 0.8rem;
+  padding: var(--spacing-sm) var(--spacing-md);
   text-align: center;
   font-size: 0.85rem;
   font-weight: 600;
@@ -187,7 +189,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(231, 76, 60, 0.9);
+  background: rgba(220, 53, 69, 0.9);
   color: white;
   border: none;
   width: 30px;
@@ -198,72 +200,75 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s ease;
+  transition: background var(--transition-fast);
 }
 
 .remove-preview:hover {
-  background: rgba(192, 57, 43, 1);
+  background: #c0392b;
 }
 
 .submit-portfolio-button {
-  background: #27ae60;
+  background: var(--color-accent-secondary);
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 6px;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-md);
   font-size: 1.1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 1.5rem;
+  transition: background var(--transition-normal);
+  margin-top: var(--spacing-lg);
   width: 100%;
 }
 
 .submit-portfolio-button:hover:not(:disabled) {
-  background: #229954;
+  background: var(--color-accent-secondary-hover);
 }
 
 .submit-portfolio-button:disabled {
-  background: #95a5a6;
+  background: var(--color-text-muted);
   cursor: not-allowed;
 }
 
 /* Current Portfolio Section */
 .current-portfolio-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e0e0e0;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .current-portfolio-section h3 {
+  font-family: var(--font-serif);
   font-size: 1.4rem;
-  color: #34495e;
-  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
 }
 
 .portfolio-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
 }
 
 .portfolio-card {
-  background: white;
-  border-radius: 8px;
+  background: var(--color-background-card);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .portfolio-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .portfolio-card-images {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 2px;
-  background: #f8f9fa;
+  background: var(--color-background-alt);
 }
 
 .portfolio-card-image {
@@ -271,7 +276,7 @@
   height: 150px;
   object-fit: cover;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-fast);
 }
 
 .portfolio-card-image:hover {
@@ -279,56 +284,58 @@
 }
 
 .portfolio-card-content {
-  padding: 1rem;
+  padding: var(--spacing-md);
 }
 
 .portfolio-card-title {
+  font-family: var(--font-serif);
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 0.75rem 0;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
 }
 
 .portfolio-card-description {
-  color: #555;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--spacing-sm);
   line-height: 1.5;
 }
 
 .portfolio-card-meta {
-  color: #7f8c8d;
+  color: var(--color-text-muted);
   font-size: 0.85rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
   font-weight: 500;
 }
 
 .portfolio-card-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .portfolio-card-actions button {
   flex: 1;
-  padding: 0.5rem 1rem;
+  padding: var(--spacing-sm) var(--spacing-md);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.3s ease;
+  font-weight: 500;
+  transition: background var(--transition-fast);
 }
 
 .edit-button {
-  background: #3498db;
+  background: var(--color-accent-primary);
   color: white;
 }
 
 .edit-button:hover {
-  background: #2980b9;
+  background: var(--color-accent-primary-hover);
 }
 
 .delete-button {
-  background: #e74c3c;
+  background: #dc3545;
   color: white;
 }
 
@@ -338,44 +345,45 @@
 
 /* Message Display */
 .portfolio-message {
-  padding: 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
   text-align: center;
 }
 
 .portfolio-message.success {
-  background: #d5f4e6;
-  color: #27ae60;
-  border: 1px solid #27ae60;
+  background: rgba(143, 151, 121, 0.15);
+  color: var(--color-accent-secondary);
+  border: 1px solid var(--color-accent-secondary);
 }
 
 .portfolio-message.error {
-  background: #fadbd8;
-  color: #e74c3c;
-  border: 1px solid #e74c3c;
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid #dc3545;
 }
 
 .empty-portfolio {
   text-align: center;
-  padding: 3rem;
-  color: #95a5a6;
+  padding: var(--spacing-2xl);
+  color: var(--color-text-secondary);
 }
 
 .empty-portfolio-icon {
   font-size: 4rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
 }
 
 /* Loading Spinner */
 .portfolio-loading {
   text-align: center;
-  padding: 2rem;
+  padding: var(--spacing-xl);
 }
 
 .spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
+  border: 4px solid var(--color-border-light);
+  border-top: 4px solid var(--color-accent-primary);
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -395,12 +403,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 2rem;
+  padding: var(--spacing-xl);
 }
 
 .image-modal-content {
@@ -412,14 +420,14 @@
 .modal-image {
   max-width: 100%;
   max-height: 90vh;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .close-modal {
   position: absolute;
   top: -40px;
   right: 0;
-  background: white;
+  background: var(--color-background-card);
   border: none;
   width: 36px;
   height: 36px;
@@ -429,12 +437,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-text-primary);
+  transition: transform var(--transition-fast);
+}
+
+.close-modal:hover {
+  transform: scale(1.1);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .portfolio-manager {
-    padding: 1.5rem;
+    padding: var(--spacing-lg);
   }
 
   .portfolio-grid {
@@ -445,4 +459,3 @@
     grid-template-columns: 1fr;
   }
 }
-/* ============= Feature 25: Provider Portfolio Showcase - END ============= */

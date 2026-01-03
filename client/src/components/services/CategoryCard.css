@@ -1,13 +1,12 @@
-/* CategoryCard Styles */
+/* CategoryCard Styles - Unified Theme */
 
 .category-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,9 +16,8 @@
 
 .category-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(102, 126, 234, 0.4);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent-primary);
 }
 
 .category-card-icon {
@@ -28,10 +26,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent-primary) 0%, var(--color-accent-secondary) 100%);
   border-radius: 50%;
-  margin-bottom: 1rem;
-  transition: transform 0.3s ease;
+  margin-bottom: var(--spacing-md);
+  transition: transform var(--transition-normal);
 }
 
 .category-card:hover .category-card-icon {
@@ -52,17 +50,18 @@
 }
 
 .category-card-title {
+  font-family: var(--font-serif);
   font-size: 1.25rem;
   font-weight: 600;
-  color: white;
-  margin: 0 0 0.5rem 0;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
   line-height: 1.3;
 }
 
 .category-card-description {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 1rem 0;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-md) 0;
   line-height: 1.5;
   flex: 1;
   display: -webkit-box;
@@ -75,16 +74,16 @@
 
 .category-card-footer {
   margin-top: auto;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .category-service-count {
   display: inline-block;
   padding: 6px 14px;
-  background: rgba(102, 126, 234, 0.3);
-  color: #e0e7ff;
-  border-radius: 20px;
+  background: rgba(192, 132, 87, 0.15);
+  color: var(--color-accent-primary);
+  border-radius: var(--radius-full);
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -93,9 +92,9 @@
 .category-no-services {
   display: inline-block;
   padding: 6px 14px;
-  background: rgba(96, 96, 96, 0.3);
-  color: #a0a0a0;
-  border-radius: 20px;
+  background: var(--color-background-alt);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-full);
   font-size: 0.875rem;
   font-weight: 500;
   font-style: italic;
@@ -104,7 +103,7 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .category-card {
-    padding: 1.25rem;
+    padding: var(--spacing-md);
     min-height: 180px;
   }
 
@@ -128,14 +127,14 @@
 
 @media (max-width: 480px) {
   .category-card {
-    padding: 1rem;
+    padding: var(--spacing-md);
     min-height: 160px;
   }
 
   .category-card-icon {
     width: 60px;
     height: 60px;
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--spacing-sm);
   }
 
   .category-icon {

@@ -301,7 +301,6 @@ const handleReportSubmit = async (reportData) => {
   )}
   <button className="contact-btn" onClick={handleGoToProviderProfile}>Provider Profile</button>
         {/* Provider Profile Modal removed: now navigates to provider profile page */}
-  <button className="bookmark-btn">♥ Save</button>
 </div>
 
         </div>

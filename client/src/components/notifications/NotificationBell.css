@@ -1,32 +1,69 @@
-/* Anupam - Notification Bell Styles */
-.notification-bell-container {
+/* NotificationBell Styles - Unified Theme */
+
+.notification-bell {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.notification-bell-btn {
-  position: relative;
+.bell-btn {
   background: none;
   border: none;
-  font-size: 24px;
   cursor: pointer;
-  padding: 8px;
-  transition: transform 0.2s;
+  padding: var(--spacing-sm);
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+  position: relative;
 }
 
-.notification-bell-btn:hover {
-  transform: scale(1.1);
+.bell-btn:hover {
+  color: var(--color-accent-primary);
+}
+
+.bell-btn.active {
+  color: var(--color-accent-primary);
 }
 
 .notification-badge {
   position: absolute;
-  top: 0;
-  right: 0;
-  background: #ff4444;
-  color: white;
-  border-radius: 10px;
-  padding: 2px 6px;
-  font-size: 11px;
-  font-weight: bold;
+  top: 2px;
+  right: 2px;
   min-width: 18px;
-  text-align: center;
+  height: 18px;
+  padding: 0 var(--spacing-xs);
+  background-color: var(--color-error);
+  color: var(--color-text-light);
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: badgePop 0.3s ease;
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.notification-badge.large {
+  min-width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+}
+
+/* Bell animation on new notification */
+.bell-btn.new-notification .bell-icon {
+  animation: bellRing 0.5s ease;
+}
+
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(15deg); }
+  50% { transform: rotate(-15deg); }
+  75% { transform: rotate(10deg); }
 }

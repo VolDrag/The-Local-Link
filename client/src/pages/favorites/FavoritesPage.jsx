@@ -32,10 +32,13 @@ const FavoritesPage = () => {
       try {
         setLoading(true);
         setError(null);
+        console.log('Fetching favorites for user:', user);
         const response = await getFavorites();
+        console.log('Favorites response:', response);
         setFavorites(response.favorites || []);
       } catch (err) {
         console.error('Error fetching favorites:', err);
+        console.error('Error details:', JSON.stringify(err, null, 2));
         setError('Failed to load favorites. Please try again.');
       } finally {
         setLoading(false);

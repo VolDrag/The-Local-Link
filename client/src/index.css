@@ -1,25 +1,296 @@
-/* ifty */
+/* Import Google Fonts - must be at top */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ifty - Unified Theme: Sophisticated Minimalist Design */
+/* Color Palette:
+   - Background: Eggshell/Cream (#FDFBF7)
+   - Text: Espresso Brown (#4A403A)
+   - Primary Accent: Terra Cotta/Clay (#C08457)
+   - Secondary Accent: Olive Green (#8F9779)
+*/
+
+:root {
+  /* Primary Colors */
+  --color-background: #FDFBF7;
+  --color-background-alt: #F5F2ED;
+  --color-background-card: #FFFFFF;
+  
+  /* Text Colors */
+  --color-text-primary: #4A403A;
+  --color-text-secondary: #6B5F57;
+  --color-text-muted: #8A7F77;
+  --color-text-light: #FDFBF7;
+  
+  /* Accent Colors */
+  --color-accent-primary: #C08457;
+  --color-accent-primary-hover: #A86F45;
+  --color-accent-primary-light: rgba(192, 132, 87, 0.1);
+  
+  --color-accent-secondary: #8F9779;
+  --color-accent-secondary-hover: #788063;
+  --color-accent-secondary-light: rgba(143, 151, 121, 0.1);
+  
+  /* Status Colors */
+  --color-success: #8F9779;
+  --color-success-light: rgba(143, 151, 121, 0.15);
+  --color-warning: #D4A574;
+  --color-warning-light: rgba(212, 165, 116, 0.15);
+  --color-error: #C47068;
+  --color-error-light: rgba(196, 112, 104, 0.15);
+  --color-info: #7BA3A8;
+  --color-info-light: rgba(123, 163, 168, 0.15);
+  
+  /* Border & Shadow */
+  --color-border: #E5DDD5;
+  --color-border-light: #F0EBE5;
+  --shadow-sm: 0 1px 3px rgba(74, 64, 58, 0.08);
+  --shadow-md: 0 4px 12px rgba(74, 64, 58, 0.1);
+  --shadow-lg: 0 8px 24px rgba(74, 64, 58, 0.12);
+  --shadow-xl: 0 12px 40px rgba(74, 64, 58, 0.15);
+  
+  /* Typography */
+  --font-serif: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+html {
+  scroll-behavior: smooth;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+p {
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+a {
+  color: var(--color-accent-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent-primary-hover);
+}
+
+/* Buttons - Global Styles */
+button, .btn {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  border: none;
+  outline: none;
+}
+
+button:focus-visible, .btn:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+/* Primary Button */
+.btn-primary {
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-light);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-accent-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background-color: var(--color-accent-secondary);
+  color: var(--color-text-light);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-accent-secondary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Outline Button */
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-accent-primary);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 2px solid var(--color-accent-primary);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+}
+
+.btn-outline:hover {
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-light);
+}
+
+/* Form Elements */
+input, textarea, select {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  background-color: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  transition: all var(--transition-fast);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px var(--color-accent-primary-light);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Cards */
+.card {
+  background-color: var(--color-background-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Utility Classes */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-muted { color: var(--color-text-muted); }
+.text-accent { color: var(--color-accent-primary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-error { color: var(--color-error); }
+
+.bg-primary { background-color: var(--color-background); }
+.bg-alt { background-color: var(--color-background-alt); }
+.bg-card { background-color: var(--color-background-card); }
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+/* Loading Spinner */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-alt);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
 }
 
 #root {
   min-height: 100vh;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Leaflet Map Overrides - Ensure map tiles display correctly */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #ddd;
+}
+
+.leaflet-tile-pane img {
+  max-width: none !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-lg);
+}
+
+.leaflet-popup-content {
+  margin: 0;
 }

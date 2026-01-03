@@ -6,8 +6,9 @@ import {
   getFavorites,
   toggleFavorite,
   checkFavorite,
-  addToFavorites,
-  removeFromFavorites
+  addFavorite,
+  removeFavorite,
+  getFavoritesCount
 } from '../controllers/favoritesController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -19,6 +20,9 @@ router.use(protect);
 // Get all favorites
 router.get('/', getFavorites);
 
+// Get favorites count
+router.get('/count', getFavoritesCount);
+
 // Check if service is favorite
 router.get('/check/:serviceId', checkFavorite);
 
@@ -26,9 +30,9 @@ router.get('/check/:serviceId', checkFavorite);
 router.put('/:serviceId', toggleFavorite);
 
 // Add to favorites
-router.post('/:serviceId', addToFavorites);
+router.post('/:serviceId', addFavorite);
 
 // Remove from favorites
-router.delete('/:serviceId', removeFromFavorites);
+router.delete('/:serviceId', removeFavorite);
 
 export default router;

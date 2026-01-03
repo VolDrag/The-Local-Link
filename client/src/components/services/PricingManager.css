@@ -1,202 +1,216 @@
-/* Feature 21: Pricing Manager Styles */
+/* PricingManager Styles - Unified Theme */
 
+/* Pricing Display (Read-only view) */
 .pricing-display {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin: 1rem 0;
+  background: var(--color-background-alt);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
 }
 
 .pricing-info h4 {
-  margin-bottom: 1rem;
-  color: #333;
+  font-family: var(--font-serif);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-primary);
   font-size: 1.1rem;
 }
 
 .pricing-details {
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
 .pricing-details p {
-  margin: 0.5rem 0;
+  margin: var(--spacing-sm) 0;
   font-size: 0.95rem;
+  color: var(--color-text-secondary);
 }
 
 .pricing-type {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
   font-size: 0.85rem;
   font-weight: 500;
 }
 
 .pricing-type.hourly {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: rgba(192, 132, 87, 0.15);
+  color: var(--color-accent-primary);
 }
 
 .pricing-type.weekly {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: rgba(143, 151, 121, 0.15);
+  color: var(--color-accent-secondary);
 }
 
 .pricing-type.monthly {
-  background: #fff3e0;
+  background: rgba(255, 152, 0, 0.15);
   color: #e65100;
 }
 
 .pricing-type.project {
-  background: #fce4ec;
+  background: rgba(233, 30, 99, 0.15);
   color: #c2185b;
 }
 
 .pricing-type.fixed {
-  background: #f3e5f5;
+  background: rgba(156, 39, 176, 0.15);
   color: #7b1fa2;
 }
 
 .btn-edit-pricing {
-  background: #007bff;
+  background: var(--color-accent-primary);
   color: white;
   border: none;
-  padding: 0.5rem 1.5rem;
-  border-radius: 5px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.3s ease;
+  font-weight: 500;
+  transition: background var(--transition-normal);
 }
 
 .btn-edit-pricing:hover {
-  background: #0056b3;
+  background: var(--color-accent-primary-hover);
 }
 
 /* Pricing Manager Form */
 .pricing-manager {
-  background: white;
-  border: 2px solid #007bff;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin: 1rem 0;
+  background: var(--color-background-card);
+  border: 2px solid var(--color-accent-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
 }
 
 .pricing-manager h4 {
-  margin-bottom: 1rem;
-  color: #333;
+  font-family: var(--font-serif);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-primary);
   font-size: 1.1rem;
 }
 
 .error-message {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 0.75rem;
-  border-radius: 5px;
-  margin-bottom: 1rem;
-  border: 1px solid #f5c6cb;
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+  border: 1px solid rgba(220, 53, 69, 0.3);
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-lg);
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-sm);
   font-weight: 500;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
+/* Pricing Type Selector */
 .pricing-type-selector {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .radio-option {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  border: 2px solid #dee2e6;
-  border-radius: 8px;
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
 }
 
 .radio-option:hover {
-  border-color: #007bff;
-  background: #f8f9fa;
+  border-color: var(--color-accent-primary);
+  background: var(--color-background-alt);
 }
 
 .radio-option input[type="radio"] {
-  margin-right: 0.5rem;
+  margin-right: var(--spacing-sm);
   cursor: pointer;
+  accent-color: var(--color-accent-primary);
 }
 
 .radio-option input[type="radio"]:checked ~ span {
-  color: #007bff;
+  color: var(--color-accent-primary);
   font-weight: 600;
 }
 
 .radio-option span {
   font-size: 1rem;
   font-weight: 500;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-primary);
 }
 
 .radio-option small {
-  color: #6c757d;
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
-  margin-left: 1.5rem;
+  margin-left: var(--spacing-lg);
 }
 
+/* Form Inputs */
 .form-group input[type="number"] {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  font-family: var(--font-sans);
+  background-color: var(--color-background-card);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-normal);
 }
 
 .form-group input[type="number"]:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px rgba(192, 132, 87, 0.15);
 }
 
+/* Form Actions */
 .form-actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-md);
   justify-content: flex-end;
-  margin-top: 1.5rem;
+  margin-top: var(--spacing-lg);
 }
 
 .btn-cancel,
 .btn-save {
-  padding: 0.6rem 1.5rem;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
 }
 
 .btn-cancel {
-  background: #6c757d;
+  background: var(--color-text-secondary);
   color: white;
 }
 
 .btn-cancel:hover {
-  background: #545b62;
+  background: var(--color-text-primary);
 }
 
 .btn-save {
-  background: #28a745;
+  background: var(--color-accent-secondary);
   color: white;
 }
 
 .btn-save:hover {
-  background: #218838;
+  background: var(--color-accent-secondary-hover);
 }
 
 .btn-cancel:disabled,
@@ -209,7 +223,7 @@
 @media (max-width: 768px) {
   .pricing-display,
   .pricing-manager {
-    padding: 1rem;
+    padding: var(--spacing-md);
   }
 
   .form-actions {

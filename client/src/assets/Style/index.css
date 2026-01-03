@@ -1,17 +1,7 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Assets Style Index - Unified Theme */
+/* Note: Main variables are defined in src/index.css */
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
+/* Legacy app container styles - uses CSS variables from main theme */
 .app {
   min-height: 100vh;
   display: flex;
@@ -20,7 +10,7 @@ body {
 
 .main-content {
   flex: 1;
-  padding: 20px;
+  padding: var(--spacing-lg, 20px);
 }
 
-/* Add more global styles as needed */
+/* Additional legacy styles that may be referenced */
