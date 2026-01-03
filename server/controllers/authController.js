@@ -215,14 +215,14 @@ export const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(404).json({ message: 'No account found with this email address' });
     }
     if (process.env.EMAIL_VERIFICATION_ENABLED === 'true' && !user.emailVerified) {
       return res.status(401).json({ message: 'Please verify your email before logging in.' });
     }
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Incorrect password. Please try again' });
     }
     
     const token = generateToken(user._id);
