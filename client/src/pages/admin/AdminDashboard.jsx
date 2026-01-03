@@ -18,6 +18,12 @@ const AdminDashboard = () => {
   const [showSeekerModal, setShowSeekerModal] = useState(false);
   const [allSeekers, setAllSeekers] = useState([]);
   const [loadingSeekers, setLoadingSeekers] = useState(false);
+  const [showProviderModal, setShowProviderModal] = useState(false);
+  const [allProviders, setAllProviders] = useState([]);
+  const [loadingProviders, setLoadingProviders] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [allBookings, setAllBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [allCategories, setAllCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
@@ -118,6 +124,36 @@ const AdminDashboard = () => {
       alert(err.response?.data?.message || 'Failed to load seekers');
     } finally {
       setLoadingSeekers(false);
+    }
+  };
+
+  const handleShowAllProviders = async () => {
+    try {
+      setLoadingProviders(true);
+      const response = await adminService.getAllUsers();
+      // Filter only providers
+      const providers = (response.data || []).filter(user => user.role === 'provider');
+      setAllProviders(providers);
+      setShowProviderModal(true);
+    } catch (err) {
+      console.error('Error fetching providers:', err);
+      alert(err.response?.data?.message || 'Failed to load providers');
+    } finally {
+      setLoadingProviders(false);
+    }
+  };
+
+  const handleShowAllBookings = async () => {
+    try {
+      setLoadingBookings(true);
+      const response = await adminService.getAllBookings();
+      setAllBookings(response.data || []);
+      setShowBookingModal(true);
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      alert(err.response?.data?.message || 'Failed to load bookings');
+    } finally {
+      setLoadingBookings(false);
     }
   };
 
@@ -392,7 +428,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card clickable" onClick={handleShowAllProviders}>
             <div className="stat-icon providers">🛠️</div>
             <div className="stat-info">
               <h3>{stats?.overview?.totalProviders || 0}</h3>
@@ -432,7 +468,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card clickable" onClick={handleShowAllBookings}>
             <div className="stat-icon bookings">📅</div>
             <div className="stat-info">
               <h3>{stats?.overview?.totalBookings || 0}</h3>
@@ -440,7 +476,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card clickable" onClick={() => navigate('/admin/reports')}>
             <div className="stat-icon reports">⚠️</div>
             <div className="stat-info">
               <h3>{stats?.overview?.pendingReports || 0}</h3>
@@ -688,6 +724,124 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Service Provider Details Modal */}
+      {showProviderModal && (
+        <div className="modal-overlay" onClick={() => setShowProviderModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>All Service Providers ({allProviders.length})</h2>
+              <button className="modal-close" onClick={() => setShowProviderModal(false)}>
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              {loadingProviders ? (
+                <div className="loading">Loading providers...</div>
+              ) : (
+                <div className="users-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Username</th>
+                        <th>Business Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Verified</th>
+                        <th>Joined</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allProviders.map((provider) => (
+                        <tr key={provider._id}>
+                          <td>{provider.username}</td>
+                          <td>{provider.businessName || 'N/A'}</td>
+                          <td>{provider.email}</td>
+                          <td>{provider.phone || 'N/A'}</td>
+                          <td>
+                            {provider.location?.city && provider.location?.area 
+                              ? `${provider.location.area}, ${provider.location.city}` 
+                              : provider.location?.city || 'N/A'}
+                          </td>
+                          <td>
+                            {provider.isVerified ? '✓ Verified' : 'Not Verified'}
+                          </td>
+                          <td>{new Date(provider.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bookings Modal */}
+      {showBookingModal && (
+        <div className="modal-overlay" onClick={() => setShowBookingModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>All Bookings ({allBookings.length})</h2>
+              <button className="modal-close" onClick={() => setShowBookingModal(false)}>
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              {loadingBookings ? (
+                <div className="loading">Loading bookings...</div>
+              ) : (
+                <div className="users-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Booking ID</th>
+                        <th>Seeker</th>
+                        <th>Provider</th>
+                        <th>Service</th>
+                        <th>Scheduled Time</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allBookings.map((booking) => (
+                        <tr key={booking._id}>
+                          <td>{booking._id.slice(-8)}</td>
+                          <td>
+                            {booking.seeker?.username || 'N/A'}
+                            <br />
+                            <small>{booking.seeker?.email || ''}</small>
+                          </td>
+                          <td>
+                            {booking.provider?.businessName || booking.provider?.username || 'N/A'}
+                            <br />
+                            <small>{booking.provider?.email || ''}</small>
+                          </td>
+                          <td>
+                            {booking.service?.title || 'N/A'}
+                            <br />
+                            <small>${booking.service?.price || 'N/A'}</small>
+                          </td>
+                          <td>{new Date(booking.scheduledTime).toLocaleString()}</td>
+                          <td>
+                            <span className={`badge badge-${booking.status}`}>
+                              {booking.status}
+                            </span>
+                          </td>
+                          <td>{new Date(booking.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Category Management Modal */}
       {showCategoryModal && (
         <div className="modal-overlay" onClick={() => {
@@ -695,7 +849,7 @@ const AdminDashboard = () => {
           setEditingCategory(null);
           setCategoryForm({ name: '', description: '', icon: '📦' });
         }}>
-          <div className="modal-content large-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content large-modal category-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Category Management</h2>
               <button className="modal-close" onClick={() => {
@@ -818,7 +972,7 @@ const AdminDashboard = () => {
       {/* Events Management Modal */}
       {showEventModal && (
         <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
-          <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content large event-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>📅 Events & Offers Management</h2>
               <button className="modal-close" onClick={() => setShowEventModal(false)}>

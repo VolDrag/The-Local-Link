@@ -20,6 +20,12 @@ export const adminService = {
     return response.data;
   },
 
+  // Get all bookings
+  getAllBookings: async () => {
+    const response = await api.get('/admin/bookings');
+    return response.data;
+  },
+
   // Get all categories
   getAllCategories: async () => {
     const response = await api.get('/admin/categories');
@@ -41,6 +47,31 @@ export const adminService = {
   // Delete category
   deleteCategory: async (id) => {
     const response = await api.delete(`/admin/categories/${id}`);
+    return response.data;
+  },
+
+  // Get all reports
+  getAllReports: async (status = '') => {
+    const url = status ? `/admin/reports?status=${status}` : '/admin/reports';
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  // Get single report
+  getReport: async (id) => {
+    const response = await api.get(`/admin/reports/${id}`);
+    return response.data;
+  },
+
+  // Update report (status and admin response)
+  updateReport: async (id, updateData) => {
+    const response = await api.put(`/admin/reports/${id}`, updateData);
+    return response.data;
+  },
+
+  // Delete report
+  deleteReport: async (id) => {
+    const response = await api.delete(`/admin/reports/${id}`);
     return response.data;
   },
 };

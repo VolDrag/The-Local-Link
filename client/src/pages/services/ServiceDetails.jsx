@@ -5,6 +5,8 @@ import { getServiceById } from '../../services/api';
 import { deleteService } from '../../services/serviceService';  //*Rafi*/
 import { useAuth } from '../../context/AuthContext';    //*Rafi*/
 import BookingForm from '../../components/booking/BookingForm';//Anupam
+import ReportModal from '../../components/common/ReportModal';
+import { createReport } from '../../services/reportService';
 import './ServiceDetails.css';
 
 const ServiceDetails = () => {
@@ -18,6 +20,8 @@ const ServiceDetails = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);  //*Rafi*/
   const [showBookingForm, setShowBookingForm] = useState(false); //Anupam
   const [deleting, setDeleting] = useState(false);    //*Rafi*/
+  const [showReportModal, setShowReportModal] = useState(false);
+  
   // Navigate to provider profile
   const handleGoToProviderProfile = () => {
     if (service && service.provider && service.provider._id) {
@@ -127,6 +131,26 @@ const handleBookingSuccess = (booking) => {
     setShowDeleteModal(false);
   };
 
+// Report handlers
+const handleReportClick = () => {
+  if (!user) {
+    alert('Please login to report a service');
+    navigate('/login');
+    return;
+  }
+  setShowReportModal(true);
+};
+
+const handleReportSubmit = async (reportData) => {
+  try {
+    await createReport(reportData);
+    alert('Report submitted successfully. Our team will review it shortly.');
+    setShowReportModal(false);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 
   if (loading) {
     return (
@@ -222,6 +246,9 @@ const handleBookingSuccess = (booking) => {
             <Link to={`/services/${id}/reviews`} className="view-reviews-btn">
               View All Reviews
             </Link>
+            <button onClick={handleReportClick} className="report-service-btn">
+              🚩 Report Service
+            </button>
           </div>
 
           <div className="location-section">
@@ -357,6 +384,16 @@ const handleBookingSuccess = (booking) => {
             />
           </div>
         </div>
+      )}
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <ReportModal
+          serviceId={id}
+          serviceTitle={service.title}
+          onClose={() => setShowReportModal(false)}
+          onSubmitSuccess={handleReportSubmit}
+        />
       )}
     </div>
   );

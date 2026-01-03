@@ -9,6 +9,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import AdminLogin from './pages/auth/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminReports from './pages/admin/AdminReports';
 import UserProfile from './pages/dashboard/UserProfile';
 import EditProfile from './pages/dashboard/EditProfile';
 import PublicProfile from './pages/profile/PublicProfile';
@@ -42,6 +43,7 @@ function App() {
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
           
           {/* Profile Routes */}
           <Route path="/profile" element={<UserProfile />} />

@@ -222,6 +222,24 @@
   background: #666;
 }
 
+.report-service-btn {
+  margin-left: 12px;
+  padding: 6px 16px;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.report-service-btn:hover {
+  background: #dc2626;
+  color: white;
+}
+
 .location-section,
 .description-section {
   margin-bottom: 24px;

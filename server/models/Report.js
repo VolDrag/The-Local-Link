@@ -31,6 +31,10 @@ const reportSchema = new mongoose.Schema(
       enum: ['pending_review', 'resolved'],
       default: 'pending_review',
     },
+    adminResponse: {
+      type: String,
+      maxlength: 1000,
+    },
   },
   {
     timestamps: true,

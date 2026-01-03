@@ -18,6 +18,7 @@ import notificationRoutes from './routes/notificationRoutes.js'; // Anupam
 import adminRoutes from './routes/adminRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import adminEventRoutes from './routes/adminEventRoutes.js';
+import reportRoutes from './routes/reportRoutes.js';
 
 //console.log('✅ Notification routes loaded:', notificationRoutes); // ADD THIS LINE
 
@@ -54,6 +55,7 @@ app.use('/api/notifications', notificationRoutes); // Anupam's Feature
 app.use('/api/admin', adminRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/admin/events', adminEventRoutes);
+app.use('/api/reports', reportRoutes);
 //console.log('✅ Notification routes registered at /api/notifications'); // ADD THIS LINE
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
