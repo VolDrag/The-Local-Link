@@ -19,6 +19,10 @@ const ServiceCard = ({ service }) => {
     hasOffer,
     offerDescription,
     offerExpiry,
+    hasDiscount,
+    originalPrice,
+    discountedPrice,
+    discountPercentage,
   } = service;
 
   // Debug: Log offer data
@@ -44,7 +48,20 @@ const ServiceCard = ({ service }) => {
       fixed: '',
     };
     
-    // Extract discount percentage from offerDescription if it exists
+    const unit = unitLabels[pricingUnit] || '';
+    
+    // Use category-based discount from backend if available
+    if (hasDiscount && originalPrice && discountedPrice) {
+      return {
+        originalPrice: originalPrice,
+        offerPrice: discountedPrice,
+        unit: unit,
+        hasDiscount: true,
+        discountPercent: discountPercentage
+      };
+    }
+    
+    // Extract discount percentage from offerDescription if it exists (legacy offer system)
     let discountPercent = 0;
     if (isOfferValid && offerDescription) {
       const match = offerDescription.match(/(\d+)%?\s*off/i);
@@ -53,11 +70,10 @@ const ServiceCard = ({ service }) => {
       }
     }
     
-    const unit = unitLabels[pricingUnit] || '';
-    const originalPrice = pricing;
-    const offerPrice = discountPercent > 0 ? pricing * (1 - discountPercent / 100) : pricing;
+    const price = pricing || originalPrice || 0;
+    const offerPrice = discountPercent > 0 ? price * (1 - discountPercent / 100) : price;
     
-    return { originalPrice, offerPrice, unit, hasDiscount: discountPercent > 0 };
+    return { originalPrice: price, offerPrice, unit, hasDiscount: discountPercent > 0, discountPercent };
   };
 
   // Render star rating
@@ -122,11 +138,11 @@ const ServiceCard = ({ service }) => {
             </div>
 
             <div className="service-price-container">
-              {isOfferValid && (() => {
+              {(() => {
                 const priceData = formatPrice();
                 return priceData.hasDiscount ? (
                   <>
-                    <span className="offer-badge">🏷️ OFFER</span>
+                    <span className="offer-badge">🏷️ {priceData.discountPercent}% OFF</span>
                     <div className="price-wrapper">
                       <span className="original-price">৳{priceData.originalPrice.toFixed(0)}</span>
                       <span className="offer-price">৳{priceData.offerPrice.toFixed(0)}{priceData.unit}</span>
@@ -135,10 +151,6 @@ const ServiceCard = ({ service }) => {
                 ) : (
                   <div className="service-price">৳{priceData.originalPrice}{priceData.unit}</div>
                 );
-              })()}
-              {!isOfferValid && (() => {
-                const priceData = formatPrice();
-                return <div className="service-price">৳{priceData.originalPrice}{priceData.unit}</div>;
               })()}
             </div>
           </div>

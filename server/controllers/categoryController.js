@@ -4,6 +4,7 @@
 import asyncHandler from 'express-async-handler';
 import Category from '../models/Category.js';
 import Service from '../models/Service.js';
+import Event from '../models/Event.js';
 
 // Get all active categories with service counts
 // @route   GET /api/categories
@@ -28,15 +29,56 @@ export const getCategories = asyncHandler(async (req, res) => {
   // Find all active categories and sort by name
   const categories = await Category.find({ isActive: true }).sort({ name: 1 });
   
-  // Add service count to each category
-  const categoriesWithCounts = categories.map(category => ({
-    _id: category._id,
-    name: category.name,
-    description: category.description,
-    icon: category.icon,
-    isActive: category.isActive,
-    serviceCount: countMap[category._id.toString()] || 0
-  }));
+  // Get active events with discounts
+  const now = new Date();
+  const activeEvents = await Event.find({
+    isActive: true,
+    startDate: { $lte: now },
+    endDate: { $gte: now }
+  });
+
+  // Create a map of category name to discount (normalize with trim and lowercase)
+  const discountMap = {};
+  activeEvents.forEach(event => {
+    if (event.discount && event.category) {
+      const normalizedCategory = event.category.trim().toLowerCase();
+      discountMap[normalizedCategory] = {
+        discount: event.discount,
+        title: event.title,
+        endDate: event.endDate
+      };
+    }
+  });
+  
+  // Add service count and discount info to each category
+  const categoriesWithCounts = categories.map(category => {
+    const categoryObj = {
+      _id: category._id,
+      name: category.name,
+      description: category.description,
+      icon: category.icon,
+      isActive: category.isActive,
+      serviceCount: countMap[category._id.toString()] || 0
+    };
+
+    // Add discount info if available (normalize category name)
+    const normalizedCategoryName = category.name.trim().toLowerCase();
+    const discountInfo = discountMap[normalizedCategoryName];
+    if (discountInfo) {
+      const percentMatch = discountInfo.discount.match(/(\d+)%/);
+      const discountPercent = percentMatch ? parseInt(percentMatch[1]) : 0;
+      
+      categoryObj.hasDiscount = true;
+      categoryObj.discountPercentage = discountPercent;
+      categoryObj.discountText = discountInfo.discount;
+      categoryObj.discountEventTitle = discountInfo.title;
+      categoryObj.discountEndDate = discountInfo.endDate;
+    } else {
+      categoryObj.hasDiscount = false;
+    }
+
+    return categoryObj;
+  });
 
   // Send categories to frontend
   res.json(categoriesWithCounts);

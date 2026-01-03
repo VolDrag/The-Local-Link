@@ -68,7 +68,22 @@ const ServiceDetails = () => {
       fixed: '',
     };
     
-    // Check if offer is valid
+    const unit = unitLabels[service.pricingUnit] || '';
+    
+    // Use category-based discount from backend if available
+    if (service.hasDiscount && service.originalPrice && service.discountedPrice) {
+      return {
+        originalPrice: service.originalPrice,
+        offerPrice: service.discountedPrice,
+        unit: unit,
+        hasDiscount: true,
+        discountPercent: service.discountPercentage,
+        isOfferValid: true,
+        eventInfo: service.discountEvent
+      };
+    }
+    
+    // Check if offer is valid (legacy offer system)
     const isOfferValid = service.hasOffer && service.offerExpiry && new Date(service.offerExpiry) > new Date();
     
     // Extract discount percentage
@@ -80,11 +95,10 @@ const ServiceDetails = () => {
       }
     }
     
-    const unit = unitLabels[service.pricingUnit] || '';
-    const originalPrice = service.pricing;
-    const offerPrice = discountPercent > 0 ? service.pricing * (1 - discountPercent / 100) : service.pricing;
+    const originalPrice = service.pricing || service.originalPrice || 0;
+    const offerPrice = discountPercent > 0 ? originalPrice * (1 - discountPercent / 100) : originalPrice;
     
-    return { originalPrice, offerPrice, unit, hasDiscount: discountPercent > 0, isOfferValid };
+    return { originalPrice, offerPrice, unit, hasDiscount: discountPercent > 0, isOfferValid, discountPercent };
   };
 //****Rafi****/
 //feature 15: Delete Service
@@ -221,12 +235,16 @@ const handleReportSubmit = async (reportData) => {
                 const priceData = formatPrice();
                 return priceData.isOfferValid && priceData.hasDiscount ? (
                   <>
-                    <span className="offer-badge-detail">🏷️ SPECIAL OFFER</span>
+                    <span className="offer-badge-detail">🏷️ {priceData.discountPercent}% OFF</span>
                     <div className="price-display">
                       <span className="original-price-detail">৳{priceData.originalPrice.toFixed(0)}{priceData.unit}</span>
                       <span className="offer-price-detail">৳{priceData.offerPrice.toFixed(0)}{priceData.unit}</span>
-                      <span className="discount-badge">{Math.round((1 - priceData.offerPrice / priceData.originalPrice) * 100)}% OFF</span>
                     </div>
+                    {priceData.eventInfo && (
+                      <span className="discount-event-info">
+                        {priceData.eventInfo.title}
+                      </span>
+                    )}
                   </>
                 ) : (
                   <div className="price-tag">৳{priceData.originalPrice}{priceData.unit}</div>

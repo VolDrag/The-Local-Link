@@ -2,6 +2,7 @@
 import asyncHandler from 'express-async-handler';
 import Service from '../models/Service.js';
 import User from '../models/User.js';
+import Event from '../models/Event.js';
 
 // @desc    Get all services (with filters)
 // @route   GET /api/services
@@ -81,15 +82,72 @@ const getServices = asyncHandler(async (req, res) => {
     .skip(skip)
     .limit(limitNum);
 
+  // Get active events with discounts
+  const now = new Date();
+  const activeEvents = await Event.find({
+    isActive: true,
+    startDate: { $lte: now },
+    endDate: { $gte: now }
+  });
+
+  // Log active events for debugging
+  console.log(`[Discount Debug] Found ${activeEvents.length} active event(s)`);
+  activeEvents.forEach(event => {
+    console.log(`  - ${event.title}: Category="${event.category}", Discount=${event.discount}`);
+  });
+
+  // Create a map of category name to discount (normalize with trim and lowercase)
+  const discountMap = {};
+  activeEvents.forEach(event => {
+    if (event.discount && event.category) {
+      const normalizedCategory = event.category.trim().toLowerCase();
+      discountMap[normalizedCategory] = {
+        discount: event.discount,
+        eventTitle: event.title
+      };
+    }
+  });
+
+  // Add discount information to services
+  const servicesWithDiscount = services.map(service => {
+    const serviceObj = service.toObject();
+    const categoryName = serviceObj.category?.name?.trim().toLowerCase() || '';
+    const discountInfo = discountMap[categoryName];
+    
+    if (discountInfo && discountInfo.discount) {
+      // Extract percentage from discount string (e.g., "20%" -> 20)
+      const percentMatch = discountInfo.discount.match(/(\d+)%/);
+      const discountPercent = percentMatch ? parseInt(percentMatch[1]) : 0;
+      
+      if (discountPercent > 0) {
+        const originalPrice = serviceObj.pricing;
+        const discountedPrice = originalPrice * (1 - discountPercent / 100);
+        
+        return {
+          ...serviceObj,
+          originalPrice: originalPrice,
+          discountedPrice: parseFloat(discountedPrice.toFixed(2)),
+          discountPercentage: discountPercent,
+          hasDiscount: true
+        };
+      }
+    }
+    
+    return {
+      ...serviceObj,
+      hasDiscount: false
+    };
+  });
+
   const totalResults = await Service.countDocuments(query);
   const totalPages = Math.ceil(totalResults / limitNum);
 
   res.json({
-    services,
+    services: servicesWithDiscount,
     currentPage: pageNum,
     totalPages,
     totalResults,
-    resultsPerPage: services.length,
+    resultsPerPage: servicesWithDiscount.length,
   });
 });
 
@@ -106,7 +164,47 @@ const getServiceById = asyncHandler(async (req, res) => {
     throw new Error('Service not found');
   }
 
-  res.json(service);
+  // Get active events with discounts
+  const now = new Date();
+  const activeEvents = await Event.find({
+    isActive: true,
+    startDate: { $lte: now },
+    endDate: { $gte: now }
+  });
+
+  // Find discount for this service's category (normalize with trim and lowercase)
+  const serviceObj = service.toObject();
+  const categoryName = serviceObj.category?.name?.trim().toLowerCase() || '';
+  const activeEvent = activeEvents.find(event => 
+    event.category && event.category.trim().toLowerCase() === categoryName && event.discount
+  );
+
+  if (activeEvent) {
+    // Extract percentage from discount string (e.g., "20%" -> 20)
+    const percentMatch = activeEvent.discount.match(/(\d+)%/);
+    const discountPercent = percentMatch ? parseInt(percentMatch[1]) : 0;
+    
+    if (discountPercent > 0) {
+      const originalPrice = serviceObj.pricing;
+      const discountedPrice = originalPrice * (1 - discountPercent / 100);
+      
+      serviceObj.originalPrice = originalPrice;
+      serviceObj.discountedPrice = parseFloat(discountedPrice.toFixed(2));
+      serviceObj.discountPercentage = discountPercent;
+      serviceObj.hasDiscount = true;
+      serviceObj.discountEvent = {
+        title: activeEvent.title,
+        description: activeEvent.description,
+        endDate: activeEvent.endDate
+      };
+    } else {
+      serviceObj.hasDiscount = false;
+    }
+  } else {
+    serviceObj.hasDiscount = false;
+  }
+
+  res.json(serviceObj);
 });
 
 // @desc    Get distinct countries

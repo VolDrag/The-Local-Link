@@ -219,6 +219,11 @@ const AdminDashboard = () => {
   const handleShowEvents = async () => {
     try {
       setLoadingEvents(true);
+      // Fetch categories if not already loaded
+      if (allCategories.length === 0) {
+        const categoriesResponse = await adminService.getAllCategories();
+        setAllCategories(categoriesResponse.data || []);
+      }
       const response = await adminEventService.getAllEvents();
       setAllEvents(response || []);
       setShowEventModal(true);
@@ -1001,14 +1006,19 @@ const AdminDashboard = () => {
                         </div>
                         <div className="form-group">
                           <label style={{color: 'white'}}>Category *</label>
-                          <input
-                            type="text"
+                          <select
                             value={eventForm.category}
                             onChange={(e) => setEventForm({...eventForm, category: e.target.value})}
-                            placeholder="e.g., Discount, Special Event"
                             required
-                            maxLength="100"
-                          />
+                          >
+                            <option value="">-- Select Category --</option>
+                            {allCategories.map((cat) => (
+                              <option key={cat._id} value={cat.name}>
+                                {cat.name}
+                              </option>
+                            ))}
+                          </select>
+                          <small style={{color: '#aaa'}}>Select the category to apply the discount</small>
                         </div>
                       </div>
 
