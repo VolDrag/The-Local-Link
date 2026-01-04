@@ -1,69 +1,78 @@
 /* NotificationBell Styles - Unified Theme */
 
-.notification-bell {
+.notification-bell-container {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.bell-btn {
+.notification-bell-btn {
   background: none;
   border: none;
   cursor: pointer;
   padding: var(--spacing-sm);
   font-size: 1.5rem;
   color: var(--color-text-secondary);
-  transition: color var(--transition-fast);
+  transition: all var(--transition-fast);
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
 }
 
-.bell-btn:hover {
+.notification-bell-btn:hover {
   color: var(--color-accent-primary);
+  background-color: rgba(192, 132, 87, 0.1);
 }
 
-.bell-btn.active {
+.notification-bell-btn:active {
+  transform: scale(0.95);
+}
+
+.notification-bell-btn.active {
   color: var(--color-accent-primary);
+  background-color: rgba(192, 132, 87, 0.15);
 }
 
 .notification-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 var(--spacing-xs);
-  background-color: var(--color-error);
-  color: var(--color-text-light);
+  top: 4px;
+  right: 4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: #dc3545;
+  color: #ffffff;
   font-size: 0.7rem;
   font-weight: 700;
-  border-radius: var(--radius-full);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid var(--color-background-card, #ffffff);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   animation: badgePop 0.3s ease;
 }
 
 @keyframes badgePop {
   0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
+  50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
 
-.notification-badge.large {
-  min-width: 22px;
-  height: 22px;
-  font-size: 0.75rem;
-}
-
 /* Bell animation on new notification */
-.bell-btn.new-notification .bell-icon {
+.notification-bell-btn.new-notification {
   animation: bellRing 0.5s ease;
 }
 
 @keyframes bellRing {
   0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(15deg); }
-  50% { transform: rotate(-15deg); }
-  75% { transform: rotate(10deg); }
+  10%, 30% { transform: rotate(-10deg); }
+  20%, 40% { transform: rotate(10deg); }
+  50%, 70% { transform: rotate(-5deg); }
+  60%, 80% { transform: rotate(5deg); }
 }
