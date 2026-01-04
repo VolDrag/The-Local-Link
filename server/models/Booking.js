@@ -29,6 +29,10 @@ const bookingSchema = new mongoose.Schema({
   userNotes: {
     type: String,
     maxlength: 500
+  },
+  completedAt: {  // ADD THIS FIELD
+    type: Date,
+    default: null
   }
 }, { timestamps: true });
 
