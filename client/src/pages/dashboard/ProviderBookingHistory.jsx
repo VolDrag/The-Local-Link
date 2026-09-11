@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import bookingService from '../../services/bookingService';
-import Navbar from '../../components/layout/Navbar';
+import Layout from '../../components/layout/Layout';
 import Loader from '../../components/common/Loader';
 import './ProviderBookingHistory.css';
 
@@ -91,11 +91,11 @@ const ProviderBookingHistory = () => {
 
     try {
       await bookingService.updateBookingStatus(bookingId, newStatus);
-      fetchProviderBookingHistory(); // Refresh the list
-      alert(`Booking marked as ${newStatus} successfully!`);
+      fetchProviderBookingHistory();
+      setError('');
     } catch (err) {
       console.error('Error updating booking status:', err);
-      alert('Failed to update booking status: ' + (err.response?.data?.message || err.message));
+      setError(err.response?.data?.message || err.message || 'Failed to update booking status');
     }
   };
 
@@ -105,11 +105,17 @@ const ProviderBookingHistory = () => {
     setEndDate('');
   };
 
-  if (loading) return <Loader />;
+  if (loading) {
+    return (
+      <Layout>
+        <Loader />
+      </Layout>
+    );
+  }
 
   return (
+    <Layout>
     <div className="provider-booking-history-page">
-      <Navbar />
       
       <div className="provider-booking-history-container">
         <div className="history-header">
@@ -323,6 +329,7 @@ const ProviderBookingHistory = () => {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 

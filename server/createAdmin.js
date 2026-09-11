@@ -11,7 +11,7 @@ const adminData = {
 
 async function createAdmin() {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/admin/setup', {
+    const response = await fetch('http://localhost:5001/api/auth/admin/setup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

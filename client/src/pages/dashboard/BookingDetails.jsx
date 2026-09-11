@@ -1,10 +1,11 @@
-// Feature 19 - Booking Details Page
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import bookingService from '../../services/bookingService';
-import Navbar from '../../components/layout/Navbar';
+import { paymentService, disputeService } from '../../services/platformService';
+import Layout from '../../components/layout/Layout';
 import Loader from '../../components/common/Loader';
+import BookingThread from '../../components/booking/BookingThread';
 import './BookingDetails.css';
 
 const BookingDetails = () => {
@@ -15,6 +16,9 @@ const BookingDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [proposedTime, setProposedTime] = useState('');
+  const [dispute, setDispute] = useState({ reason: '', details: '' });
 
   useEffect(() => {
     if (!user) {
@@ -31,242 +35,158 @@ const BookingDetails = () => {
       const data = await bookingService.getBookingById(id);
       setBooking(data);
     } catch (err) {
-      console.error('Error fetching booking details:', err);
       setError(err.response?.data?.message || 'Failed to load booking details');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateStatus = async (newStatus) => {
-    if (!window.confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) {
-      return;
-    }
-
+  const run = async (fn) => {
     try {
       setUpdating(true);
-      await bookingService.updateBookingStatus(id, newStatus);
-      await fetchBookingDetails(); // Refresh booking data
-      alert(`Booking status updated to ${newStatus} successfully!`);
+      await fn();
+      await fetchBookingDetails();
     } catch (err) {
-      console.error('Error updating booking status:', err);
-      alert('Failed to update booking status: ' + (err.response?.data?.message || err.message));
+      setError(err.response?.data?.message || err.message);
     } finally {
       setUpdating(false);
     }
   };
 
-  const getStatusBadgeClass = (status) => {
-    const classes = {
-      pending: 'status-badge pending',
-      confirmed: 'status-badge confirmed',
-      completed: 'status-badge completed',
-      cancelled: 'status-badge cancelled'
-    };
-    return classes[status] || 'status-badge';
-  };
-
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatPrice = (pricing) => {
-    if (!pricing) return 'N/A';
-    return `৳${pricing.amount} / ${pricing.unit}`;
-  };
-
-  if (loading) return <Loader />;
+  if (loading) {
+    return (
+      <Layout>
+        <Loader />
+      </Layout>
+    );
+  }
 
   if (error || !booking) {
     return (
-      <div className="booking-details-page">
-        <Navbar />
-        <div className="booking-details-container">
-          <div className="error-message">
-            <span>⚠️</span> {error || 'Booking not found'}
-          </div>
-          <button onClick={() => navigate(-1)} className="btn-back">
-            Go Back
-          </button>
+      <Layout>
+        <div className="module-page">
+          <div className="panel">{error || 'Booking not found'}</div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   const isProvider = user._id === booking.provider._id;
   const isSeeker = user._id === booking.seeker._id;
+  const pay = booking.payment;
 
   return (
-    <div className="booking-details-page">
-      <Navbar />
-      
-      <div className="booking-details-container">
+    <Layout>
+      <div className="booking-details-container module-page">
         <div className="details-header">
-          <button onClick={() => navigate(-1)} className="btn-back">
-            ← Back
-          </button>
-          <h1>Booking Details</h1>
-          <span className={getStatusBadgeClass(booking.status)}>
-            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-          </span>
+          <button onClick={() => navigate(-1)} className="btn-back">← Back</button>
+          <h1>Booking</h1>
+          <span className={`status-chip ${booking.status}`}>{booking.status}</span>
         </div>
+        {error && <div className="panel">{error}</div>}
 
-        <div className="details-content">
-          {/* Service Information */}
-          <section className="details-section">
-            <h2>📋 Service Information</h2>
-            <div className="info-grid">
-              <div className="info-item">
-                <label>Service Name</label>
-                <p>{booking.service?.title || 'N/A'}</p>
-              </div>
-              <div className="info-item">
-                <label>Category</label>
-                <p>{booking.service?.category || 'N/A'}</p>
-              </div>
-              <div className="info-item">
-                <label>Price</label>
-                <p className="price-value">{formatPrice(booking.service?.pricing)}</p>
-              </div>
-              {booking.service?.description && (
-                <div className="info-item full-width">
-                  <label>Description</label>
-                  <p>{booking.service.description}</p>
-                </div>
-              )}
-            </div>
-          </section>
+        <section className="panel">
+          <h2>{booking.service?.title}</h2>
+          <p>Scheduled {new Date(booking.scheduledTime).toLocaleString()} · {booking.durationMinutes || 60} min</p>
+          <p><strong>৳{booking.amount || 0}</strong> · hold {booking.paymentStatus || 'none'} · commission ৳{booking.commissionAmount || 0}</p>
+          {booking.enRouteAt && <p className="muted">Provider marked en route at {new Date(booking.enRouteAt).toLocaleTimeString()}</p>}
+          {booking.userNotes && <p>Notes: {booking.userNotes}</p>}
+        </section>
 
-          {/* Booking Details */}
-          <section className="details-section">
-            <h2>📅 Booking Details</h2>
-            <div className="info-grid">
-              <div className="info-item">
-                <label>Booking ID</label>
-                <p className="booking-id">{booking._id}</p>
-              </div>
-              <div className="info-item">
-                <label>Scheduled Date & Time</label>
-                <p className="scheduled-time">{formatDate(booking.scheduledTime)}</p>
-              </div>
-              <div className="info-item">
-                <label>Booking Created</label>
-                <p>{formatDate(booking.createdAt)}</p>
-              </div>
-              <div className="info-item">
-                <label>Last Updated</label>
-                <p>{formatDate(booking.updatedAt)}</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Contact Information */}
-          <section className="details-section">
-            <h2>👥 Contact Information</h2>
-            <div className="contact-grid">
-              {isProvider && (
-                <div className="contact-card">
-                  <h3>Customer (Service Seeker)</h3>
-                  <div className="contact-info">
-                    <p><strong>Name:</strong> {booking.seeker?.name || 'N/A'}</p>
-                    <p><strong>Email:</strong> {booking.seeker?.email || 'N/A'}</p>
-                    {booking.seeker?.phone && (
-                      <p><strong>Phone:</strong> {booking.seeker.phone}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              {isSeeker && (
-                <div className="contact-card">
-                  <h3>Provider (Service Provider)</h3>
-                  <div className="contact-info">
-                    <p><strong>Name:</strong> {booking.provider?.name || 'N/A'}</p>
-                    <p><strong>Email:</strong> {booking.provider?.email || 'N/A'}</p>
-                    {booking.provider?.phone && (
-                      <p><strong>Phone:</strong> {booking.provider.phone}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Customer Notes */}
-          {booking.userNotes && (
-            <section className="details-section">
-              <h2>📝 Customer Notes</h2>
-              <div className="notes-box">
-                <p>{booking.userNotes}</p>
-              </div>
-            </section>
-          )}
-
-          {/* Action Buttons */}
-          <section className="details-actions">
-            {isProvider && (
-              <>
-                {booking.status === 'pending' && (
-                  <div className="action-buttons">
-                    <button 
-                      onClick={() => handleUpdateStatus('confirmed')}
-                      className="btn-action btn-confirm"
-                      disabled={updating}
-                    >
-                      ✅ Confirm Booking
-                    </button>
-                    <button 
-                      onClick={() => handleUpdateStatus('cancelled')}
-                      className="btn-action btn-cancel"
-                      disabled={updating}
-                    >
-                      ❌ Cancel Booking
-                    </button>
-                  </div>
-                )}
-                
-                {booking.status === 'confirmed' && (
-                  <div className="action-buttons">
-                    <button 
-                      onClick={() => handleUpdateStatus('completed')}
-                      className="btn-action btn-complete"
-                      disabled={updating}
-                    >
-                      ✓ Mark as Completed
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-
-            {isSeeker && booking.status === 'completed' && (
-              <div className="action-buttons">
-                <button 
-                  onClick={() => navigate(`/services/${booking.service._id}/reviews`)}
-                  className="btn-action btn-review"
-                >
-                  ⭐ Leave a Review
-                </button>
-              </div>
-            )}
-
-            <button 
-              onClick={() => navigate(`/services/${booking.service._id}`)}
-              className="btn-action btn-view-service"
+        {isSeeker && booking.status === 'confirmed' && booking.paymentStatus !== 'held' && (
+          <section className="panel">
+            <h2>Pay to hold this booking</h2>
+            <p className="muted">Funds stay held until the job is completed. Cancelled jobs are refunded minus any late-cancel fee.</p>
+            <button
+              className="btn-primary"
+              disabled={updating}
+              onClick={() => run(async () => {
+                const started = await paymentService.start(booking._id);
+                if (started.redirectUrl) window.location.href = started.redirectUrl;
+              })}
             >
-              👁️ View Service Details
+              Pay ৳{booking.amount} with bKash
             </button>
           </section>
-        </div>
+        )}
+
+        {pay && (
+          <section className="panel">
+            <h2>Payment</h2>
+            <p>Status: <span className={`status-chip ${pay.status}`}>{pay.status}</span> · hold {pay.holdStatus}</p>
+            {pay.bkashTrxId && <p className="muted">Trx {pay.bkashTrxId}</p>}
+          </section>
+        )}
+
+        <section className="panel">
+          <h2>Actions</h2>
+          <div className="action-row">
+            {isProvider && booking.status === 'pending' && (
+              <>
+                <button className="btn-primary" disabled={updating} onClick={() => run(() => bookingService.updateBookingStatus(id, 'confirmed'))}>Confirm</button>
+                <button className="btn-outline" disabled={updating} onClick={() => run(() => bookingService.cancelBooking(id, cancelReason || 'Cancelled by provider'))}>Decline</button>
+              </>
+            )}
+            {isProvider && booking.status === 'confirmed' && (
+              <>
+                <button className="btn-secondary" disabled={updating} onClick={() => run(() => bookingService.markEnRoute(id))}>I'm on the way</button>
+                <button className="btn-primary" disabled={updating} onClick={() => run(() => bookingService.updateBookingStatus(id, 'completed'))}>Mark completed</button>
+              </>
+            )}
+            {['pending', 'confirmed'].includes(booking.status) && (
+              <>
+                <input value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} placeholder="Cancel reason" />
+                <button className="btn-outline" disabled={updating} onClick={() => run(() => bookingService.cancelBooking(id, cancelReason || 'Cancelled'))}>Cancel</button>
+                <button className="btn-outline" disabled={updating} onClick={() => run(() => bookingService.flagNoShow(id))}>Flag no-show</button>
+              </>
+            )}
+            {isSeeker && booking.status === 'completed' && (
+              <button className="btn-primary" onClick={() => navigate(`/services/${booking.service._id}/reviews`)}>Leave a review</button>
+            )}
+          </div>
+        </section>
+
+        {['pending', 'confirmed'].includes(booking.status) && (
+          <section className="panel">
+            <h2>Reschedule</h2>
+            {booking.rescheduleProposal?.status === 'pending' && (
+              <p>
+                Proposed {new Date(booking.rescheduleProposal.proposedTime).toLocaleString()}
+                {String(booking.rescheduleProposal.proposedBy) !== String(user._id) && (
+                  <span className="action-row">
+                    <button className="btn-primary" onClick={() => run(() => bookingService.respondReschedule(id, true))}>Accept</button>
+                    <button className="btn-outline" onClick={() => run(() => bookingService.respondReschedule(id, false))}>Decline</button>
+                  </span>
+                )}
+              </p>
+            )}
+            <div className="action-row">
+              <input type="datetime-local" value={proposedTime} onChange={(e) => setProposedTime(e.target.value)} />
+              <button className="btn-secondary" disabled={!proposedTime || updating} onClick={() => run(() => bookingService.proposeReschedule(id, new Date(proposedTime).toISOString()))}>Propose new time</button>
+            </div>
+          </section>
+        )}
+
+        <section className="panel">
+          <h2>Booking chat</h2>
+          <BookingThread bookingId={id} />
+        </section>
+
+        {['confirmed', 'completed', 'cancelled'].includes(booking.status) && (
+          <section className="panel">
+            <h2>Open a dispute</h2>
+            <form className="stack-form" onSubmit={(e) => {
+              e.preventDefault();
+              run(() => disputeService.create({ bookingId: id, ...dispute }));
+            }}>
+              <label>Reason<input value={dispute.reason} onChange={(e) => setDispute({ ...dispute, reason: e.target.value })} required /></label>
+              <label>Details<textarea value={dispute.details} onChange={(e) => setDispute({ ...dispute, details: e.target.value })} required rows={3} /></label>
+              <button className="btn-outline" type="submit">Submit dispute</button>
+            </form>
+          </section>
+        )}
       </div>
-    </div>
+    </Layout>
   );
 };
 

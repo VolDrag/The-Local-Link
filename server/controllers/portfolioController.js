@@ -85,7 +85,11 @@ const uploadPortfolioImages = async (req, res) => {
         }
 
         // STEP 7: Process uploaded image paths (convert backslashes to forward slashes)
-        const imageUrls = req.files.map(file => file.path.replace(/\\/g, '/'));
+        const imageUrls = req.files.map(file =>
+            file.path.replace(/\\/g, '/').startsWith('uploads/')
+                ? file.path.replace(/\\/g, '/')
+                : `uploads/portfolio/${file.filename}`
+        );
 
         // STEP 8: Create new portfolio work object
         const newWork = {

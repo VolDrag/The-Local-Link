@@ -3,6 +3,8 @@
 // Read-only portfolio viewer for viewing provider portfolios (customers view this)
 import React, { useState, useEffect } from 'react';
 import './PortfolioDisplay.css';
+import api from '../../services/api';
+import { fileUrl } from '../../utils/helpers';
 
 const PortfolioDisplay = ({ providerId, portfolioData }) => {
   // STEP 1: State variables - storage boxes for our data
@@ -33,8 +35,7 @@ const PortfolioDisplay = ({ providerId, portfolioData }) => {
       setError('');
       
       // Call backend API to get provider's portfolio
-      const response = await fetch(`http://localhost:5000/api/users/portfolio/${providerId}`);
-      const data = await response.json();
+      const { data } = await api.get(`/users/portfolio/${providerId}`);
 
       if (data.success) {
         setPortfolio(data.data.portfolio || []);
@@ -180,7 +181,7 @@ const PortfolioDisplay = ({ providerId, portfolioData }) => {
                   onKeyPress={(e) => e.key === 'Enter' && openLightbox(workIndex, imgIndex)}
                 >
                   <img
-                    src={`http://localhost:5000/${imageUrl}`}
+                    src={fileUrl(imageUrl)}
                     alt={`${work.title} - Image ${imgIndex + 1}`}
                     className="portfolio-work-image"
                     loading="lazy"
@@ -229,7 +230,7 @@ const PortfolioDisplay = ({ providerId, portfolioData }) => {
             </button>
 
             <img
-              src={`http://localhost:5000/${portfolio[currentImageIndex.workIndex].images[currentImageIndex.imageIndex]}`}
+              src={fileUrl(portfolio[currentImageIndex.workIndex].images[currentImageIndex.imageIndex])}
               alt={portfolio[currentImageIndex.workIndex].title}
               className="lightbox-image"
             />

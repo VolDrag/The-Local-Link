@@ -115,6 +115,8 @@ const serviceSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    featuredUntil: Date,
+    featuredPaidAt: Date,
     // Provider's availability status     //*################Rafi##############(feature 16)
     availabilityStatus: {
       type: String,

@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, useMapEvents } 
 import { Link } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { fileUrl } from '../../utils/helpers';
 import './ServiceMap.css';
 
 // Fix for default marker icons in Leaflet with webpack/vite
@@ -267,7 +268,7 @@ const ServiceMap = ({
                   <div className="service-popup">
                     {service.images && service.images[0] && (
                       <img
-                        src={service.images[0]}
+                        src={fileUrl(service.images[0])}
                         alt={service.title}
                         className="popup-image"
                       />

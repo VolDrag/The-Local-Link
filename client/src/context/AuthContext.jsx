@@ -1,6 +1,3 @@
-// Authentication Context
-// Global state management for user authentication
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import authService from '../services/authService';
 
@@ -11,20 +8,24 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const loadUser = async () => {
-      const storedToken = authService.getStoredToken();
-      const storedUser = authService.getStoredUser();
-
-      if (storedToken && storedUser) {
-        try {
-          // Verify token is still valid
-          const currentUser = await authService.getCurrentUser();
-          setUser(currentUser);
-        } catch (err) {
-          // Token invalid, clear storage
-          authService.logout();
+      try {
+        const currentUser = await authService.getCurrentUser();
+        setUser(currentUser);
+        localStorage.setItem('user', JSON.stringify(currentUser));
+      } catch {
+        const storedToken = authService.getStoredToken();
+        const storedUser = authService.getStoredUser();
+        if (storedToken && storedUser) {
+          try {
+            const currentUser = await authService.getCurrentUser();
+            setUser(currentUser);
+          } catch {
+            await authService.logout();
+            setUser(null);
+          }
+        } else {
           setUser(null);
         }
       }
@@ -34,7 +35,6 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  // Register function
   const register = async (userData) => {
     try {
       setError(null);
@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login function
   const login = async (credentials) => {
     try {
       setError(null);
@@ -68,7 +67,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Admin login function
   const adminLogin = async (credentials) => {
     try {
       setError(null);
@@ -85,9 +83,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    await authService.logout();
     setUser(null);
   };
 
@@ -105,13 +102,9 @@ export const AuthProvider = ({ children }) => {
     isSeeker: user?.role === 'seeker',
   };
 
-  // Note: Auto-logout on page refresh removed to maintain user sessions
-  // Users should manually logout using the logout button
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

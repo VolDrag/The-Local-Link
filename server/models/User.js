@@ -73,12 +73,38 @@ const userSchema = new mongoose.Schema(
     emailVerificationExpires: Date,
     passwordResetCode: String,
     passwordResetExpires: Date,
+
+    identityVerification: {
+        status: {
+            type: String,
+            enum: ['unsubmitted', 'pending', 'approved', 'rejected'],
+            default: 'unsubmitted',
+        },
+        documentType: { type: String, enum: ['nid', 'passport', 'trade_license', 'other'] },
+        documentUrl: String,
+        submittedAt: Date,
+        reviewedAt: Date,
+        reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        rejectionReason: String,
+    },
+    payoutBalance: { type: Number, default: 0, min: 0 },
+    bookingCredit: { type: Number, default: 0, min: 0 },
+    noShowDates: [{ type: Date }],
+    bookingSuspended: { type: Boolean, default: false },
+    bookingSuspendedReason: String,
+    referralCode: { type: String, unique: true, sparse: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     },
 
     {timestamps: true}
 );
 
 userSchema.pre("save", async function(next) {
+    if (!this.referralCode) {
+        const stamp = Math.random().toString(36).slice(2, 6).toUpperCase();
+        const prefix = (this.username || 'USER').slice(0, 4).toUpperCase();
+        this.referralCode = `TLL${prefix}${stamp}`;
+    }
     if (!this.isModified("password")) return next();
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

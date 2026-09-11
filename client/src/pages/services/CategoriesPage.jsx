@@ -6,6 +6,7 @@ import { eventService } from '../../services/eventService';
 import { useAuth } from '../../context/AuthContext';
 import CategoryCard from '../../components/services/CategoryCard';
 import Breadcrumb from '../../components/common/Breadcrumb';
+import Layout from '../../components/layout/Layout';
 import './CategoriesPage.css';
 
 const CategoriesPage = () => {
@@ -65,6 +66,7 @@ const CategoriesPage = () => {
   };
 
   return (
+    <Layout>
     <div className="categories-page">
       <Breadcrumb />
       
@@ -204,6 +206,7 @@ const CategoriesPage = () => {
         </div>
       )}
     </div>
+    </Layout>
   );
 };
 

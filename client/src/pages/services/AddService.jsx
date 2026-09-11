@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { createService } from '../../services/serviceService';
 import { getCategories } from '../../services/serviceService';
 import { getCountries, getCitiesByCountry, getAreasByCity } from '../../services/api';
+import Layout from '../../components/layout/Layout';
 import './AddService.css';
 
 // Feature 11: Lazy load LocationPicker for map
@@ -32,6 +33,7 @@ const AddService = () => {
       coordinates: null,
     },
     images: [],
+    photoFiles: [],
     hasOffer: false,
     offerDescription: '',
     offerExpiry: '',
@@ -136,6 +138,32 @@ const AddService = () => {
     });
   };
 
+  const handlePhotoFiles = (e) => {
+    const incoming = Array.from(e.target.files || []);
+    const allowed = incoming.filter((file) =>
+      ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)
+    );
+    if (allowed.length !== incoming.length) {
+      setSubmitError('Use JPEG, PNG, WebP, or GIF images only');
+    }
+    const oversized = allowed.find((file) => file.size > 5 * 1024 * 1024);
+    if (oversized) {
+      setSubmitError('Each photo must be under 5MB');
+      return;
+    }
+    setFormData((prev) => {
+      const next = [...prev.photoFiles, ...allowed].slice(0, 6);
+      return { ...prev, photoFiles: next };
+    });
+  };
+
+  const removePhotoFile = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      photoFiles: prev.photoFiles.filter((_, i) => i !== index),
+    }));
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -198,21 +226,15 @@ const AddService = () => {
 
     try {
       // Step 3: Prepare data for API
+      const { photoFiles, ...rest } = formData;
       const serviceData = {
-        ...formData,
-        pricing: parseFloat(formData.pricing), // Convert string to number
+        ...rest,
+        pricing: parseFloat(formData.pricing),
       };
 
-      // Step 4: Send data to backend API
-      const response = await createService(serviceData);
-      
-      // Step 5: Show success message
+      await createService(serviceData, photoFiles);
       setSubmitSuccess('Service created successfully!');
-      
-      // Step 6: Redirect to dashboard after 2 seconds
-      setTimeout(() => {
-        navigate('/provider/dashboard');
-      }, 2000);
+      setTimeout(() => navigate('/profile'), 800);
       
     } catch (error) {
       // Step 7: Show error message if something goes wrong
@@ -228,6 +250,7 @@ const AddService = () => {
   };
 
   return (
+    <Layout>
     <div className="add-service-container">
       <div className="add-service-card">
         <h1>Add New Service</h1>
@@ -426,21 +449,38 @@ const AddService = () => {
             </Suspense>
           </section>
 
-          {/* Images */}
           <section className="form-section">
-            <h2>Images (Optional)</h2>
-
+            <h2>Photos</h2>
+            <p className="field-hint">Add up to 6 photos of your work. JPEG, PNG, or WebP · max 5MB each.</p>
+            <div className="photo-upload">
+              <input
+                id="service-photos"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                onChange={handlePhotoFiles}
+                className="file-input"
+              />
+              <label htmlFor="service-photos" className="upload-label">Add photos</label>
+              <div className="photo-preview-row">
+                {formData.photoFiles.map((file, index) => (
+                  <div key={`${file.name}-${index}`} className="photo-preview-item">
+                    <img src={URL.createObjectURL(file)} alt={file.name} />
+                    <button type="button" className="photo-remove" onClick={() => removePhotoFile(index)}>×</button>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div className="form-group">
-              <label htmlFor="images">Image URLs</label>
+              <label htmlFor="images">Or paste image URLs</label>
               <textarea
                 id="images"
                 name="images"
                 value={formData.images.join(', ')}
                 onChange={handleImageChange}
-                placeholder="Enter image URLs separated by commas"
-                rows="3"
+                placeholder="Optional: https://example.com/photo.jpg"
+                rows="2"
               />
-              <small>Separate multiple URLs with commas</small>
             </div>
           </section>
 
@@ -523,6 +563,7 @@ const AddService = () => {
         </form>
       </div>
     </div>
+    </Layout>
   );
 };
 

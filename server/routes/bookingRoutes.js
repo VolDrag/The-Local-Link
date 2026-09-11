@@ -1,6 +1,3 @@
-// Booking routes
-// /api/bookings
-
 import express from 'express';
 import {
   createBooking,
@@ -8,31 +5,48 @@ import {
   getProviderBookings,
   getBookingById,
   updateBookingStatus,
-  getBookingHistory, //feature 19
-  getProviderBookingHistory //feature 19
-  //cancelBooking
+  getBookingHistory,
+  getProviderBookingHistory,
+  cancelBooking,
+  flagNoShow,
+  proposeReschedule,
+  respondReschedule,
+  markEnRoute,
 } from '../controllers/bookingController.js';
+import { getMessages, postMessage } from '../controllers/messageController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { authorize } from '../middleware/roleMiddleware.js';
+import { bookingLimiter } from '../middleware/rateLimiter.js';
+import { validate } from '../middleware/validate.js';
+import {
+  createBookingSchema,
+  updateStatusSchema,
+  cancelBookingSchema,
+  rescheduleSchema,
+  messageSchema,
+} from '../validators/bookingValidators.js';
 
 const router = express.Router();
 
-// All booking routes require authentication
 router.use(protect);
 
-// User routes
-router.post('/', createBooking);                           
-router.get('/my-bookings', getMyBookings);  
-router.get('/history', getBookingHistory);               // MUST BE BEFORE /:id
+router.post('/', bookingLimiter, validate(createBookingSchema), createBooking);
+router.get('/my-bookings', getMyBookings);
+router.get('/history', getBookingHistory);
 
-// Provider routes
-router.get('/provider-bookings', authorize('provider'), getProviderBookings);  
-router.get('/provider-history', authorize('provider'), getProviderBookingHistory);  // MUST BE BEFORE /:id
+router.get('/provider-bookings', authorize('provider'), getProviderBookings);
+router.get('/provider-history', authorize('provider'), getProviderBookingHistory);
 
-// Status management routes (BEFORE /:id)
-router.patch('/:id/status', authorize('provider'), updateBookingStatus);
+router.patch('/:id/status', authorize('provider'), validate(updateStatusSchema), updateBookingStatus);
+router.patch('/:id/cancel', validate(cancelBookingSchema), cancelBooking);
+router.post('/:id/no-show', flagNoShow);
+router.post('/:id/reschedule', validate(rescheduleSchema), proposeReschedule);
+router.post('/:id/reschedule/respond', respondReschedule);
+router.post('/:id/en-route', authorize('provider'), markEnRoute);
 
-// Shared routes - MUST BE LAST
-router.get('/:id', getBookingById);                       // Get booking by ID
+router.get('/:id/messages', getMessages);
+router.post('/:id/messages', validate(messageSchema), postMessage);
+
+router.get('/:id', getBookingById);
 
 export default router;

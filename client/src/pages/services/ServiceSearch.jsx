@@ -5,6 +5,7 @@ import ServiceList from '../../components/services/ServiceList';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import { getCategories } from '../../services/serviceService';
 import { useAuth } from '../../context/AuthContext';
+import Layout from '../../components/layout/Layout';
 import {
   searchServices,
   getCountries,
@@ -217,6 +218,7 @@ const ServiceSearch = () => {
   };
 
   return (
+    <Layout>
     <div className="service-search-page">
       <Breadcrumb categoryName={categoryName} />
       
@@ -413,6 +415,7 @@ const ServiceSearch = () => {
         )}
       </div>
     </div>
+    </Layout>
   );
 };
 

@@ -6,6 +6,7 @@ import Booking from '../models/Booking.js';
 import Report from '../models/Report.js';
 import Notification from '../models/Notification.js';
 import Event from '../models/Event.js';
+import { writeAudit } from '../utils/audit.js';
 
 // @desc    Get dashboard stats
 // @route   GET /api/admin/dashboard/stats
@@ -232,6 +233,15 @@ export const createCategory = async (req, res) => {
       icon: icon || '📦'
     });
 
+    await writeAudit({
+      admin: req.user,
+      action: 'category_create',
+      targetType: 'category',
+      targetId: category._id,
+      details: { name },
+      req,
+    });
+
     res.status(201).json({
       success: true,
       data: category
@@ -287,6 +297,15 @@ export const updateCategory = async (req, res) => {
       });
     }
 
+    await writeAudit({
+      admin: req.user,
+      action: 'category_update',
+      targetType: 'category',
+      targetId: category._id,
+      details: { name, isActive },
+      req,
+    });
+
     res.json({
       success: true,
       data: category
@@ -324,6 +343,15 @@ export const deleteCategory = async (req, res) => {
         message: 'Category not found'
       });
     }
+
+    await writeAudit({
+      admin: req.user,
+      action: 'category_delete',
+      targetType: 'category',
+      targetId: category._id,
+      details: { name: category.name },
+      req,
+    });
 
     res.json({
       success: true,
@@ -464,6 +492,15 @@ export const updateReport = async (req, res) => {
         link: `/reports/${report._id}`
       });
     }
+
+    await writeAudit({
+      admin: req.user,
+      action: `report_${status}`,
+      targetType: 'report',
+      targetId: report._id,
+      details: { adminResponse },
+      req,
+    });
 
     res.json({
       success: true,

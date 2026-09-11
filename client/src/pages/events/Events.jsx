@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { eventService } from '../../services/eventService';
 import { useAuth } from '../../context/AuthContext';
+import Layout from '../../components/layout/Layout';
 import './Events.css';
 
 const Events = () => {
@@ -46,25 +47,30 @@ const Events = () => {
 
   if (loading) {
     return (
+      <Layout>
       <div className="events-page">
         <div className="events-container">
           <div className="loading-spinner">Loading events...</div>
         </div>
       </div>
+      </Layout>
     );
   }
 
   if (error) {
     return (
+      <Layout>
       <div className="events-page">
         <div className="events-container">
           <div className="error-message">{error}</div>
         </div>
       </div>
+      </Layout>
     );
   }
 
   return (
+    <Layout>
     <div className="events-page">
       <div className="events-container">
         <header className="events-header">
@@ -172,6 +178,7 @@ const Events = () => {
         )}
       </div>
     </div>
+    </Layout>
   );
 };
 

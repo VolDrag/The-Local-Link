@@ -4,6 +4,8 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { updateService, getCategories } from '../../services/serviceService';
 import { getServiceById, getCountries, getCitiesByCountry, getAreasByCity } from '../../services/api';
+import Layout from '../../components/layout/Layout';
+import { fileUrl } from '../../utils/helpers';
 import './AddService.css'; // Reusing the same CSS
 
 // Feature 11: Lazy load LocationPicker for map
@@ -33,6 +35,7 @@ const EditService = () => {
       coordinates: null,
     },
     images: [],
+    photoFiles: [],
     hasOffer: false,
     offerDescription: '',
     offerExpiry: '',
@@ -76,7 +79,8 @@ const EditService = () => {
               : null,
           },
           images: serviceData.images || [],
-          hasOffer: serviceData.specialOffers?.hasOffer || false,
+          photoFiles: [],
+          hasOffer: serviceData.specialOffers?.hasOffer || serviceData.hasOffer || false,
           offerDescription: serviceData.specialOffers?.offerDescription || '',
           offerExpiry: serviceData.specialOffers?.offerExpiry 
             ? new Date(serviceData.specialOffers.offerExpiry).toISOString().split('T')[0]
@@ -164,6 +168,38 @@ const EditService = () => {
     });
   };
 
+  const handlePhotoFiles = (e) => {
+    const incoming = Array.from(e.target.files || []);
+    const allowed = incoming.filter((file) =>
+      ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)
+    );
+    if (allowed.length !== incoming.length) {
+      setSubmitError('Use JPEG, PNG, WebP, or GIF images only');
+    }
+    if (allowed.find((file) => file.size > 5 * 1024 * 1024)) {
+      setSubmitError('Each photo must be under 5MB');
+      return;
+    }
+    setFormData((prev) => ({
+      ...prev,
+      photoFiles: [...prev.photoFiles, ...allowed].slice(0, 6),
+    }));
+  };
+
+  const removePhotoFile = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      photoFiles: prev.photoFiles.filter((_, i) => i !== index),
+    }));
+  };
+
+  const removeExistingImage = (url) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((item) => item !== url),
+    }));
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -217,12 +253,13 @@ const EditService = () => {
     setLoading(true);
 
     try {
+      const { photoFiles, ...rest } = formData;
       const serviceData = {
-        ...formData,
+        ...rest,
         pricing: parseFloat(formData.pricing),
       };
 
-      await updateService(id, serviceData);
+      await updateService(id, serviceData, photoFiles);
       
       setSubmitSuccess('Service updated successfully!');
       
@@ -245,15 +282,18 @@ const EditService = () => {
 
   if (fetchingService) {
     return (
+      <Layout>
       <div className="add-service-container">
         <div className="add-service-card">
           <p>Loading service data...</p>
         </div>
       </div>
+      </Layout>
     );
   }
 
   return (
+    <Layout>
     <div className="add-service-container">
       <div className="add-service-card">
         <h1>Edit Service</h1>
@@ -452,21 +492,44 @@ const EditService = () => {
             </Suspense>
           </section>
 
-          {/* Images */}
           <section className="form-section">
-            <h2>Images (Optional)</h2>
-
+            <h2>Photos</h2>
+            <p className="field-hint">Add or replace photos. JPEG, PNG, or WebP · max 5MB each · up to 6 total.</p>
+            <div className="photo-preview-row">
+              {formData.images.map((url) => (
+                <div key={url} className="photo-preview-item">
+                  <img src={fileUrl(url)} alt="Service" />
+                  <button type="button" className="photo-remove" onClick={() => removeExistingImage(url)}>×</button>
+                </div>
+              ))}
+              {formData.photoFiles.map((file, index) => (
+                <div key={`${file.name}-${index}`} className="photo-preview-item">
+                  <img src={URL.createObjectURL(file)} alt={file.name} />
+                  <button type="button" className="photo-remove" onClick={() => removePhotoFile(index)}>×</button>
+                </div>
+              ))}
+            </div>
+            <div className="photo-upload">
+              <input
+                id="service-photos"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                onChange={handlePhotoFiles}
+                className="file-input"
+              />
+              <label htmlFor="service-photos" className="upload-label">Add photos</label>
+            </div>
             <div className="form-group">
-              <label htmlFor="images">Image URLs</label>
+              <label htmlFor="images">Or paste image URLs</label>
               <textarea
                 id="images"
                 name="images"
                 value={formData.images.join(', ')}
                 onChange={handleImageChange}
-                placeholder="Enter image URLs separated by commas"
-                rows="3"
+                placeholder="Optional: https://example.com/photo.jpg"
+                rows="2"
               />
-              <small>Separate multiple URLs with commas</small>
             </div>
           </section>
 
@@ -549,6 +612,7 @@ const EditService = () => {
         </form>
       </div>
     </div>
+    </Layout>
   );
 };
 

@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Event from '../models/Event.js';
 import { createNotification } from './notificationController.js';
 import User from '../models/User.js';
+import { writeAudit } from '../utils/audit.js';
 
 // @desc    Get all active events for users
 // @route   GET /api/events
@@ -110,6 +111,15 @@ export const createEvent = asyncHandler(async (req, res) => {
     // Step 5: Send notifications to target users
     await notifyUsersAboutEvent(event);
     
+    await writeAudit({
+      admin: req.user,
+      action: 'event_create',
+      targetType: 'event',
+      targetId: event._id,
+      details: { title, category, discount },
+      req,
+    });
+
     console.log('Event created successfully:', event._id);
     
     res.status(201).json({
@@ -162,6 +172,15 @@ export const updateEvent = asyncHandler(async (req, res) => {
     await event.save();
     const populatedEvent = await Event.findById(event._id).populate('createdBy', 'username email');
     
+    await writeAudit({
+      admin: req.user,
+      action: 'event_update',
+      targetType: 'event',
+      targetId: event._id,
+      details: { title: event.title, isActive: event.isActive },
+      req,
+    });
+
     console.log('Event updated successfully:', event._id);
     
     res.json({
@@ -192,6 +211,15 @@ export const deleteEvent = asyncHandler(async (req, res) => {
     
     // Step 2: Delete the event
     await Event.findByIdAndDelete(id);
+
+    await writeAudit({
+      admin: req.user,
+      action: 'event_delete',
+      targetType: 'event',
+      targetId: id,
+      details: { title: event.title },
+      req,
+    });
     
     console.log('Event deleted successfully:', id);
     

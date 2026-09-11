@@ -6,6 +6,7 @@ import { getServiceById } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import ReviewForm from '../../components/reviews/ReviewForm';
 import ReviewList from '../../components/reviews/ReviewList';
+import Layout from '../../components/layout/Layout';
 import './ServiceReviews.css';
 
 const ServiceReviews = () => {
@@ -74,23 +75,28 @@ const ServiceReviews = () => {
 
   if (loading && !service) {
     return (
+      <Layout>
       <div className="service-reviews-page">
         <div className="loading-container">Loading...</div>
       </div>
+      </Layout>
     );
   }
 
   if (!service) {
     return (
+      <Layout>
       <div className="service-reviews-page">
         <div className="error-container">Service not found</div>
       </div>
+      </Layout>
     );
   }
 
   const isOwner = user && service.provider?._id === user._id;
 
   return (
+    <Layout>
     <div className="service-reviews-page">
       <button onClick={() => navigate(`/services/${id}`)} className="back-link">
         ← Back to Service
@@ -135,6 +141,7 @@ const ServiceReviews = () => {
         hasMore={hasMore}
       />
     </div>
+    </Layout>
   );
 };
 

@@ -1,56 +1,66 @@
-// ifty
 import axios from 'axios';
 
-// Create axios instance with base configuration
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
-// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+  async (error) => {
+    const original = error.config || {};
+    const url = original.url || '';
+    const isAuthRoute = url.includes('/auth/');
+
+    if (error.response?.status === 401 && !original._retry && !isAuthRoute) {
+      original._retry = true;
+      try {
+        const { data } = await api.post('/auth/refresh');
+        if (data?.token) localStorage.setItem('token', data.token);
+        if (data) localStorage.setItem('user', JSON.stringify(data));
+        return api(original);
+      } catch {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/admin/login')) {
+          window.location.href = '/login';
+        }
+      }
     }
     return Promise.reject(error);
   }
 );
 
-// Location data cache (30 minutes TTL)
 const locationCache = {
   countries: { data: null, timestamp: null },
   cities: {},
   areas: {},
 };
 
-const CACHE_TTL = 30 * 60 * 1000; // 30 minutes in milliseconds
+const CACHE_TTL = 30 * 60 * 1000;
 
 const isCacheValid = (timestamp) => {
   if (!timestamp) return false;
   return Date.now() - timestamp < CACHE_TTL;
 };
 
-// Service API functions
 export const searchServices = async (params) => {
   const { data } = await api.get('/services', { params });
   return data;
@@ -68,73 +78,34 @@ export const getServiceReviews = async (serviceId, page = 1, limit = 10) => {
   return data;
 };
 
-// Location API functions with caching
 export const getCountries = async () => {
-  // Check cache first
-  if (
-    isCacheValid(locationCache.countries.timestamp) &&
-    locationCache.countries.data
-  ) {
+  if (isCacheValid(locationCache.countries.timestamp) && locationCache.countries.data) {
     return locationCache.countries.data;
   }
-
-  // Fetch from API
   const { data } = await api.get('/services/locations/countries');
-  
-  // Update cache
-  locationCache.countries = {
-    data,
-    timestamp: Date.now(),
-  };
-
+  locationCache.countries = { data, timestamp: Date.now() };
   return data;
 };
 
 export const getCitiesByCountry = async (country) => {
   const cacheKey = country;
-
-  // Check cache first
-  if (
-    locationCache.cities[cacheKey] &&
-    isCacheValid(locationCache.cities[cacheKey].timestamp)
-  ) {
+  if (locationCache.cities[cacheKey] && isCacheValid(locationCache.cities[cacheKey].timestamp)) {
     return locationCache.cities[cacheKey].data;
   }
-
-  // Fetch from API
   const { data } = await api.get(`/services/locations/cities/${encodeURIComponent(country)}`);
-  
-  // Update cache
-  locationCache.cities[cacheKey] = {
-    data,
-    timestamp: Date.now(),
-  };
-
+  locationCache.cities[cacheKey] = { data, timestamp: Date.now() };
   return data;
 };
 
 export const getAreasByCity = async (country, city) => {
   const cacheKey = `${country}-${city}`;
-
-  // Check cache first
-  if (
-    locationCache.areas[cacheKey] &&
-    isCacheValid(locationCache.areas[cacheKey].timestamp)
-  ) {
+  if (locationCache.areas[cacheKey] && isCacheValid(locationCache.areas[cacheKey].timestamp)) {
     return locationCache.areas[cacheKey].data;
   }
-
-  // Fetch from API
   const { data } = await api.get(
     `/services/locations/areas/${encodeURIComponent(country)}/${encodeURIComponent(city)}`
   );
-  
-  // Update cache
-  locationCache.areas[cacheKey] = {
-    data,
-    timestamp: Date.now(),
-  };
-
+  locationCache.areas[cacheKey] = { data, timestamp: Date.now() };
   return data;
 };
 

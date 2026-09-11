@@ -144,8 +144,41 @@
   background-color: var(--color-accent-primary-hover);
 }
 
-.upload-label input {
+.file-input {
   display: none;
+}
+
+.error-message {
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.success-message {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.btn-submit {
+  padding: var(--spacing-md) var(--spacing-2xl);
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.field-hint {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin-top: 4px;
 }
 
 .image-hint {

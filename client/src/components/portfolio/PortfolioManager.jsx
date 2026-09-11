@@ -4,6 +4,8 @@
 import React, { useState, useEffect } from 'react';
 import './PortfolioManager.css';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
+import { fileUrl, apiErrorMessage } from '../../utils/helpers';
 
 const PortfolioManager = () => {
   // STEP 1: Get user information from AuthContext
@@ -29,9 +31,7 @@ const PortfolioManager = () => {
 
   const fetchPortfolio = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/portfolio/${user._id}`);
-      const data = await response.json();
-      
+      const { data } = await api.get(`/users/portfolio/${user._id}`);
       if (data.success) {
         setPortfolio(data.data.portfolio || []);
       }
@@ -144,16 +144,7 @@ const PortfolioManager = () => {
       formData.append('title', workTitle);
       formData.append('description', workDescription);
 
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/users/portfolio/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      const data = await response.json();
+      const { data } = await api.post('/users/portfolio/upload', formData);
 
       if (data.success) {
         setMessage({ text: 'Portfolio work added successfully!', type: 'success' });
@@ -169,7 +160,7 @@ const PortfolioManager = () => {
       }
     } catch (error) {
       console.error('Upload error:', error);
-      setMessage({ text: 'Error uploading portfolio work', type: 'error' });
+      setMessage({ text: apiErrorMessage(error, 'Error uploading portfolio work'), type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -183,15 +174,7 @@ const PortfolioManager = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/users/portfolio/${index}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
+      const { data } = await api.delete(`/users/portfolio/${index}`);
 
       if (data.success) {
         setMessage({ text: 'Work deleted successfully', type: 'success' });
@@ -201,7 +184,7 @@ const PortfolioManager = () => {
       }
     } catch (error) {
       console.error('Delete error:', error);
-      setMessage({ text: 'Error deleting work', type: 'error' });
+      setMessage({ text: apiErrorMessage(error, 'Error deleting work'), type: 'error' });
     }
   };
   // STEP 14: Update work title and description
@@ -229,17 +212,10 @@ const PortfolioManager = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/users/portfolio/${index}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ title: newTitle, description: newDescription })
+      const { data } = await api.put(`/users/portfolio/${index}`, {
+        title: newTitle,
+        description: newDescription,
       });
-
-      const data = await response.json();
 
       if (data.success) {
         setMessage({ text: 'Work updated successfully', type: 'success' });
@@ -249,7 +225,7 @@ const PortfolioManager = () => {
       }
     } catch (error) {
       console.error('Update error:', error);
-      setMessage({ text: 'Error updating work', type: 'error' });
+      setMessage({ text: apiErrorMessage(error, 'Error updating work'), type: 'error' });
     }
   };
 
@@ -380,10 +356,10 @@ const PortfolioManager = () => {
                   {work.images && work.images.map((imageUrl, imgIndex) => (
                     <img
                       key={imgIndex}
-                      src={`http://localhost:5000/${imageUrl}`}
+                      src={fileUrl(imageUrl)}
                       alt={`${work.title} - Image ${imgIndex + 1}`}
                       className="portfolio-card-image"
-                      onClick={() => openImageModal(`http://localhost:5000/${imageUrl}`)}
+                      onClick={() => openImageModal(fileUrl(imageUrl))}
                     />
                   ))}
                 </div>

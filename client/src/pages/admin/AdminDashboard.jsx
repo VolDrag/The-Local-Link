@@ -403,6 +403,10 @@ const AdminDashboard = () => {
         <div className="header-content">
           <h1>Admin Dashboard</h1>
           <div className="header-actions">
+            <button onClick={() => navigate('/admin/providers')} className="btn-logout" style={{ background: 'var(--color-accent-primary)' }}>Verify</button>
+            <button onClick={() => navigate('/admin/disputes')} className="btn-logout" style={{ background: 'var(--color-accent-primary)' }}>Disputes</button>
+            <button onClick={() => navigate('/admin/payouts')} className="btn-logout" style={{ background: 'var(--color-accent-primary)' }}>Payouts</button>
+            <button onClick={() => navigate('/admin/audit')} className="btn-logout" style={{ background: 'var(--color-accent-primary)' }}>Audit</button>
             <span className="admin-name">
               {user.username || 'Admin'}
             </span>

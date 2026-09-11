@@ -318,3 +318,20 @@
     padding: var(--spacing-lg);
   }
 }
+
+.error-message,
+.success-message {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.error-message {
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+}
+
+.success-message {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}

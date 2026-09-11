@@ -6,6 +6,8 @@ import { deleteService } from '../../services/serviceService';  //*Rafi*/
 import { useAuth } from '../../context/AuthContext';    //*Rafi*/
 import BookingForm from '../../components/booking/BookingForm';//Anupam
 import ReportModal from '../../components/common/ReportModal';
+import Layout from '../../components/layout/Layout';
+import { fileUrl, displayName, initialsOf } from '../../utils/helpers';
 import { createReport } from '../../services/reportService';
 import './ServiceDetails.css';
 
@@ -168,16 +170,19 @@ const handleReportSubmit = async (reportData) => {
 
   if (loading) {
     return (
+      <Layout>
       <div className="service-details-page">
         <div className="loading-container">
           <p>Loading service details...</p>
         </div>
       </div>
+      </Layout>
     );
   }
 
   if (error || !service) {
     return (
+      <Layout>
       <div className="service-details-page">
         <div className="error-container">
           <p>{error || 'Service not found'}</p>
@@ -186,12 +191,14 @@ const handleReportSubmit = async (reportData) => {
           </button>
         </div>
       </div>
+      </Layout>
     );
   }
 
   const { provider, category, location } = service;
 
   return (
+    <Layout>
     <div className="service-details-page">
       <button onClick={() => navigate('/services')} className="back-link">
         ← Back to Search
@@ -200,21 +207,18 @@ const handleReportSubmit = async (reportData) => {
       <div className="service-details-container">
         <div className="service-images">
           <div className="main-image">
-            <img
-              src={
-                service.images && service.images[selectedImage]
-                  ? service.images[selectedImage]
-                  : '/placeholder-service.jpg'
-              }
-              alt={service.title}
-            />
+            {service.images?.[selectedImage] ? (
+              <img src={fileUrl(service.images[selectedImage])} alt={service.title} />
+            ) : (
+              <div className="image-fallback">{initialsOf(service.title)}</div>
+            )}
           </div>
           {service.images && service.images.length > 1 && (
             <div className="image-thumbnails">
               {service.images.map((img, index) => (
                 <img
                   key={index}
-                  src={img}
+                  src={fileUrl(img)}
                   alt={`${service.title} ${index + 1}`}
                   className={selectedImage === index ? 'active' : ''}
                   onClick={() => setSelectedImage(index)}
@@ -308,17 +312,20 @@ const handleReportSubmit = async (reportData) => {
         <div className="provider-info">
           <h3>Service Provider</h3>
           <div className="provider-card">
-            <img
-              src={provider?.avatar || '/placeholder-avatar.jpg'}
-              alt={provider?.name}
-              className="provider-avatar"
-            />
+            {provider?.profilePictureUrl ? (
+              <img
+                src={fileUrl(provider.profilePictureUrl)}
+                alt={displayName(provider)}
+                className="provider-avatar"
+              />
+            ) : (
+              <div className="provider-avatar avatar-fallback">{initialsOf(provider)}</div>
+            )}
             <div className="provider-details">
-              <h4>{provider?.businessName || provider?.name}</h4>
+              <h4>{displayName(provider)}</h4>
               {provider?.isVerified && (
                 <span className="verified-badge">✓ Verified Provider</span>
               )}
-              {provider?.bio && <p className="provider-bio">{provider.bio}</p>}
               
               <div className="provider-contact">
                 {provider?.email && (
@@ -333,17 +340,18 @@ const handleReportSubmit = async (reportData) => {
                 )}
                 {provider?.location && (
                   <p>
-                    <strong>Location:</strong> {provider.location.city}, {provider.location.country}
+                    <strong>Location:</strong>{' '}
+                    {typeof provider.location === 'string'
+                      ? provider.location
+                      : [provider.location.city, provider.location.country].filter(Boolean).join(', ')}
                   </p>
                 )}
               </div>
 
-              {provider?.availability && (
+              {provider?.availabilityStatus && (
                 <div className="availability-status">
-                  <span className={`status-indicator ${provider.availability}`}>
-                    {provider.availability === 'online' && '🟢 Available'}
-                    {provider.availability === 'offline' && '⚫ Offline'}
-                    {provider.availability === 'busy' && '🟡 Busy'}
+                  <span className={`status-indicator ${provider.availabilityStatus}`}>
+                    {provider.availabilityStatus === 'online' ? 'Available' : 'Offline'}
                   </span>
                 </div>
               )}
@@ -354,12 +362,15 @@ const handleReportSubmit = async (reportData) => {
             <div className="portfolio-preview">
               <h4>Portfolio</h4>
               <div className="portfolio-grid">
-                {provider.portfolio.slice(0, 4).map((item, index) => (
-                  <div key={index} className="portfolio-item">
-                    {item?.image && <img src={item.image} alt={item?.title || 'Portfolio item'} />}
-                    {item?.title && <p className="portfolio-title">{item.title}</p>}
-                  </div>
-                ))}
+                {provider.portfolio.slice(0, 4).map((item, index) => {
+                  const thumb = item?.images?.[0] || item?.image;
+                  return (
+                    <div key={index} className="portfolio-item">
+                      {thumb && <img src={fileUrl(thumb)} alt={item?.title || 'Portfolio item'} />}
+                      {item?.title && <p className="portfolio-title">{item.title}</p>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -413,6 +424,7 @@ const handleReportSubmit = async (reportData) => {
         />
       )}
     </div>
+    </Layout>
   );
 };
 

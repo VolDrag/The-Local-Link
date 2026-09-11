@@ -1,6 +1,7 @@
 // ifty
 import { Link } from 'react-router-dom';
-import FavoriteButton from '../favorites/FavoriteButton'; // Feature 20
+import FavoriteButton from '../favorites/FavoriteButton';
+import { fileUrl, displayName, initialsOf } from '../../utils/helpers';
 import './ServiceCard.css';
 
 const ServiceCard = ({ service }) => {
@@ -23,20 +24,9 @@ const ServiceCard = ({ service }) => {
     originalPrice,
     discountedPrice,
     discountPercentage,
+    featured,
   } = service;
 
-  // Debug: Log offer data
-  if (hasOffer) {
-    console.log('Service with offer:', {
-      title,
-      hasOffer,
-      offerDescription,
-      offerExpiry,
-      pricing
-    });
-  }
-
-  // Check if offer is valid (not expired)
   const isOfferValid = hasOffer && offerExpiry && new Date(offerExpiry) > new Date();
 
   // Format price display
@@ -93,15 +83,17 @@ const ServiceCard = ({ service }) => {
     <div className="service-card">
       <Link to={`/services/${_id}`} className="service-card-link">
         <div className="service-card-image">
-          <img
-            src={images && images[0] ? images[0] : '/placeholder-service.jpg'}
-            alt={title}
-          />
+          {images?.[0] ? (
+            <img src={fileUrl(images[0])} alt={title} />
+          ) : (
+            <div className="image-fallback">{initialsOf(title)}</div>
+          )}
           {/* Feature 20: Favorite Button */}
           <div className="favorite-btn-wrapper">
             <FavoriteButton serviceId={_id} size="small" />
           </div>
           {category && <span className="service-category">{category.name}</span>}
+          {featured && <span className="verified-badge">Featured</span>}
           {provider?.isVerified && (
             <span className="verified-badge provider-verified">✓ Verified Provider</span>
           )}
@@ -115,17 +107,23 @@ const ServiceCard = ({ service }) => {
           </p>
 
           <div className="service-provider">
-            <img
-              src={provider?.avatar || '/placeholder-avatar.jpg'}
-              alt={provider?.name}
-              className="provider-avatar"
-            />
-            <span>{provider?.businessName || provider?.name}</span>
+            {provider?.profilePictureUrl ? (
+              <img
+                src={fileUrl(provider.profilePictureUrl)}
+                alt={displayName(provider)}
+                className="provider-avatar"
+              />
+            ) : (
+              <div className="provider-avatar avatar-fallback">{initialsOf(provider)}</div>
+            )}
+            <span>{displayName(provider)}</span>
           </div>
 
           <div className="service-location">
             <span className="location-icon">📍</span>
-            <span>{location.area}, {location.city}</span>
+            <span>
+              {[location?.area, location?.city].filter(Boolean).join(', ') || 'Bangladesh'}
+            </span>
           </div>
 
           <div className="service-footer">

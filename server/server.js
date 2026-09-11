@@ -1,29 +1,30 @@
-// Entry point for the server
-// Load environment variables FIRST before any imports
 import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { connectDB } from './config/db.js';
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import { generalLimiter } from './middleware/rateLimiter.js';
 
-// Route Imports
-import bookingRoutes from './routes/bookingRoutes.js'; // Anupam
+import bookingRoutes from './routes/bookingRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import categoryRoutes from './routes/categoryRoutes.js'; // Rafi
-import reviewRoutes from './routes/reviewRoutes.js'; // Anupam
-import notificationRoutes from './routes/notificationRoutes.js'; // Anupam
+import categoryRoutes from './routes/categoryRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import adminEventRoutes from './routes/adminEventRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
-import favoritesRoutes from './routes/favoritesRoutes.js'; // Feature 20: Favorites - #ifty
+import favoritesRoutes from './routes/favoritesRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
+import payoutRoutes from './routes/payoutRoutes.js';
+import disputeRoutes from './routes/disputeRoutes.js';
+import identityRoutes from './routes/identityRoutes.js';
 
-//console.log('✅ Notification routes loaded:', notificationRoutes); // ADD THIS LINE
-
-// Import models to register them with Mongoose
 import './models/User.js';
 import './models/Service.js';
 import './models/Category.js';
@@ -31,36 +32,60 @@ import './models/Review.js';
 import './models/Booking.js';
 import './models/Notification.js';
 import './models/Event.js';
+import './models/Payment.js';
+import './models/Payout.js';
+import './models/Dispute.js';
+import './models/Message.js';
+import './models/AuditLog.js';
+import './models/RefreshToken.js';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
-// Enable CORS before routes
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  'http://localhost:3000',
+  'http://localhost:5173',
+];
 
-// Serve uploaded files statically
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      return cb(null, true);
+    },
+    credentials: true,
+  })
+);
+app.use(cookieParser());
+app.use(express.json({ limit: '1mb' }));
+app.use(generalLimiter);
+
 app.use('/uploads', express.static('uploads'));
 
-// Connect to Database
 connectDB();
 
-// Define Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/services", serviceRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/reviews", reviewRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/notifications', notificationRoutes); // Anupam's Feature
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/admin/events', adminEventRoutes);
 app.use('/api/reports', reportRoutes);
-app.use('/api/favorites', favoritesRoutes); // Feature 20: Favorites - #ifty
-//console.log('✅ Notification routes registered at /api/notifications'); // ADD THIS LINE
+app.use('/api/favorites', favoritesRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/payouts', payoutRoutes);
+app.use('/api/disputes', disputeRoutes);
+app.use('/api/identity', identityRoutes);
 
 app.get('/', (req, res) => res.send('Welcome to The Local Link'));
+
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

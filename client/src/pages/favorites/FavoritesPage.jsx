@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getFavorites } from '../../services/favoritesService';
 import ServiceCard from '../../components/services/ServiceCard';
-import Navbar from '../../components/layout/Navbar';
+import Layout from '../../components/layout/Layout';
 import Loader from '../../components/common/Loader';
 import './FavoritesPage.css';
 
@@ -59,8 +59,8 @@ const FavoritesPage = () => {
   }
 
   return (
+    <Layout>
     <div className="favorites-page">
-      <Navbar />
       
       <div className="favorites-container">
         <div className="favorites-header">
@@ -102,6 +102,7 @@ const FavoritesPage = () => {
         )}
       </div>
     </div>
+    </Layout>
   );
 };
 

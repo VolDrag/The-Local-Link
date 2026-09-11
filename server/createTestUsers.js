@@ -32,7 +32,7 @@ async function createTestUsers() {
   
   for (const user of testUsers) {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch('http://localhost:5001/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

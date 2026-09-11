@@ -1,62 +1,39 @@
-// Profile Service - API calls for user profile management
-//Debashish
-import axios from 'axios';
+import api from './api';
+import { apiErrorMessage } from '../utils/helpers';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-// Get user profile by userId
 export const getUserProfile = async (userId) => {
   try {
-    const response = await axios.get(`${API_URL}/users/${userId}`);
+    const response = await api.get(`/users/${userId}`);
     return response.data;
   } catch (error) {
-    throw error.response?.data || error.message;
+    if (error.response?.status === 404) {
+      return error.response.data || { success: false, data: null };
+    }
+    throw new Error(apiErrorMessage(error, 'Failed to load profile'));
   }
 };
 
-// Create or update user profile
 export const createOrUpdateProfile = async (profileData) => {
   try {
-    const token = localStorage.getItem('token');
-    
-    // Create FormData for file upload
     const formData = new FormData();
-    
-    // Append all fields to FormData
-    Object.keys(profileData).forEach(key => {
-      if (profileData[key] !== null && profileData[key] !== undefined) {
+    Object.keys(profileData).forEach((key) => {
+      if (profileData[key] !== null && profileData[key] !== undefined && profileData[key] !== '') {
         formData.append(key, profileData[key]);
       }
     });
 
-    const response = await axios.put(
-      `${API_URL}/users/profile`,
-      formData,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-    
+    const response = await api.put('/users/profile', formData);
     return response.data;
   } catch (error) {
-    throw error.response?.data || error.message;
+    throw new Error(apiErrorMessage(error, 'Failed to update profile'));
   }
 };
 
-// Delete user account
 export const deleteUser = async (userId) => {
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.delete(`${API_URL}/users/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    const response = await api.delete(`/users/${userId}`);
     return response.data;
   } catch (error) {
-    throw error.response?.data || error.message;
+    throw new Error(apiErrorMessage(error, 'Failed to delete account'));
   }
 };

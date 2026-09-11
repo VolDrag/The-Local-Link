@@ -15,6 +15,7 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [userNotes, setUserNotes] = useState('');
+  const [recurrence, setRecurrence] = useState('none');
 
   // Business hours configuration (8 AM to 8 PM)
   const businessHours = { start: 8, end: 20 };
@@ -67,7 +68,8 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
       const bookingData = {
         serviceId: service._id,
         scheduledDate: scheduledDateTime.toISOString(),
-        userNotes: userNotes.trim()
+        userNotes: userNotes.trim(),
+        recurrence,
       };
 
       const newBooking = await bookingService.createBooking(bookingData);
@@ -80,7 +82,7 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
       if (onClose) {
         onClose();
       }
-      navigate('/profile');
+      navigate(`/bookings/${newBooking._id}`);
     } catch (err) {
       console.error('Booking error:', err);
       setError(err.response?.data?.message || 'Failed to create booking. Please try again.');
@@ -171,6 +173,16 @@ const BookingForm = ({ service, onClose, onSuccess }) => {
             maxLength="500"
           />
           <small>{userNotes.length}/500 characters</small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="recurrence">Repeat this booking</label>
+          <select id="recurrence" value={recurrence} onChange={(e) => setRecurrence(e.target.value)}>
+            <option value="none">One-time</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Every two weeks</option>
+            <option value="monthly">Monthly</option>
+          </select>
         </div>
 
         <div className="booking-info">

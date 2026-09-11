@@ -9,6 +9,7 @@ import {
 } from '../../services/notificationService';
 // Import bookingService
 import bookingService from '../../services/bookingService';
+import Layout from '../../components/layout/Layout';
 import './NotificationsPage.css';
 
 const NotificationsPage = () => {
@@ -128,6 +129,7 @@ const handleConfirmBooking = async (e, bookingId) => {
   };
 
   return (
+    <Layout>
     <div className="notifications-page">
       <div className="notifications-header">
         <h1>Notifications</h1>
@@ -245,6 +247,7 @@ const handleConfirmBooking = async (e, bookingId) => {
         )}
       </div>
     </div>
+    </Layout>
   );
 };
 

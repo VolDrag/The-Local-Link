@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import bookingService from '../../services/bookingService';
-import Navbar from '../../components/layout/Navbar';
+import Layout from '../../components/layout/Layout';
 import Loader from '../../components/common/Loader';
 import './BookingHistory.css';
 
@@ -89,11 +89,17 @@ const BookingHistory = () => {
     setEndDate('');
   };
 
-  if (loading) return <Loader />;
+  if (loading) {
+    return (
+      <Layout>
+        <Loader />
+      </Layout>
+    );
+  }
 
   return (
+    <Layout>
     <div className="booking-history-page">
-      <Navbar />
       
       <div className="booking-history-container">
         <div className="history-header">
@@ -278,6 +284,7 @@ const BookingHistory = () => {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 

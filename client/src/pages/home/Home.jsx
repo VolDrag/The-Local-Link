@@ -1,15 +1,13 @@
-// Home page - Landing page with hero section and features
-// #ifty - Removed categories section, moved to separate page
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getUserProfile } from '../../services/profileService';
-import NotificationBell from '../../components/notifications/NotificationBell'; // Anupam - Notification Bell
+import Layout from '../../components/layout/Layout';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [hasProfile, setHasProfile] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -25,215 +23,96 @@ const Home = () => {
     try {
       setLoading(true);
       const data = await getUserProfile(user._id);
-      
-      // Check if profile exists and has name (indicating it's created)
-      if (data.success && data.data && data.data.name) {
-        setHasProfile(true);
-      } else {
-        setHasProfile(false);
-      }
-    } catch (err) {
-      console.error('Error checking profile:', err);
+      setHasProfile(Boolean(data.success && data.data && data.data.name));
+    } catch {
       setHasProfile(false);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleProfileAction = () => {
-    if (hasProfile) {
-      navigate('/profile');
-    } else {
-      navigate('/profile/edit');
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   if (loading) {
     return (
-      <div className="home-container">
-        <div className="loading">Loading...</div>
-      </div>
+      <Layout>
+        <div className="home-container"><div className="loading">Loading...</div></div>
+      </Layout>
     );
   }
 
   return (
-    <div className="home-container">
-      {/* Header/Navbar */}
-      <header className="home-header">
-        <div className="header-content">
-          <h1 className="logo">The Local Link</h1>
-          <nav className="nav-menu">
+    <Layout>
+      <div className="home-container">
+        <section className="hero-section">
+          <div className="hero-content">
+            <h2 className="hero-title">Trusted local help, paid only when the job is done.</h2>
+            <p className="hero-subtitle">
+              Search nearby providers, hold payment in bKash until completion, and book people whose identity has been reviewed.
+            </p>
+
             {user ? (
               <>
-                <Link to="/categories" className="nav-link">Services</Link>
-                
-                {user.role === 'provider' && (
-                  <Link to="/bookings/provider-history" className="nav-link">Service History</Link>
+                <div className="welcome-message">
+                  <h3>Hello, {user?.username}</h3>
+                  <p className="user-role">{user.role} account</p>
+                </div>
+                {!hasProfile && (
+                  <div className="profile-alert">
+                    <p>Finish your profile so providers and seekers can reach you.</p>
+                    <button onClick={() => navigate('/profile/edit')} className="btn-create-profile">Create profile</button>
+                  </div>
                 )}
-                
-                {user.role === 'seeker' && (
-                  <Link to="/bookings/history" className="nav-link">My Bookings</Link>
-                )}
-                
-                <NotificationBell />
-                
-                <button onClick={handleProfileAction} className="nav-btn">
-                  👤 My Profile
-                </button>
-                <button onClick={handleLogout} className="nav-btn logout-btn">
-                  Logout
-                </button>
               </>
             ) : (
-              <>
-                <button onClick={() => navigate('/login')} className="nav-btn">
-                  Login
-                </button>
-                <button onClick={() => navigate('/register')} className="nav-btn register-btn">
-                  Register
-                </button>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <h2 className="hero-title">Welcome to The Local Link</h2>
-          <p className="hero-subtitle">
-            Connect with local service providers and seekers in your community
-          </p>
-          
-          {user ? (
-            <>
-              <div className="welcome-message">
-                <h3>Hello, {user?.username}! 👋</h3>
-                <p className="user-role">You are logged in</p>
-              </div>
-              
-              {!hasProfile && (
-                <div className="profile-alert">
-                  <p>⚠️ You haven't created your profile yet!</p>
-                  <button onClick={() => navigate('/profile/edit')} className="btn-create-profile">
-                    Create Your Profile Now
-                  </button>
+              <div className="guest-message">
+                <div className="auth-buttons">
+                  <button onClick={() => navigate('/login')} className="btn-login">Login</button>
+                  <button onClick={() => navigate('/register')} className="btn-register">Register</button>
                 </div>
-              )}
-              
-              {hasProfile && (
-                <div className="profile-complete">
-                  <p>✓ Your profile is complete!</p>
-                  <button onClick={() => navigate('/profile')} className="btn-view-profile">
-                    View Your Profile
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="guest-message">
-              <h3>Join Our Community Today!</h3>
-              <p>Sign in to access local services or register to get started</p>
-              <div className="auth-buttons">
-                <button onClick={() => navigate('/login')} className="btn-login">
-                  Login
-                </button>
-                <button onClick={() => navigate('/register')} className="btn-register">
-                  Register Now
-                </button>
               </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="features-section">
-        <h2 className="section-title">{user ? 'What You Can Do' : 'Our Features'}</h2>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon">🔍</div>
-            <h3>Find Services</h3>
-            <p>Search and discover local service providers in your area</p>
-            {user ? (
-              <button onClick={() => navigate('/categories')} className="feature-btn">
-                Browse Services
-              </button>
-            ) : (
-              <button onClick={() => navigate('/login')} className="feature-btn">
-                Login to Browse
-              </button>
             )}
           </div>
+        </section>
 
-          {user?.role === 'provider' && (
+        <section className="features-section">
+          <h2 className="section-title">What you can do</h2>
+          <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">➕</div>
-              <h3>Add Service</h3>
-              <p>List your services and reach more customers</p>
-              <button onClick={() => navigate('/services/add')} className="feature-btn">
-                Add New Service
-              </button>
+              <h3>Find services</h3>
+              <p>Filter by category, map radius, and rating. Featured listings appear first.</p>
+              <button onClick={() => navigate(user ? '/categories' : '/login')} className="feature-btn">Browse</button>
             </div>
-          )}
-
-          {user && (
-            <div className="feature-card">
-              <div className="feature-icon">👤</div>
-              <h3>Manage Profile</h3>
-              <p>Update your information and preferences</p>
-              <button onClick={handleProfileAction} className="feature-btn">
-                {hasProfile ? 'View Profile' : 'Create Profile'}
-              </button>
-            </div>
-          )}
-
-          {user?.role === 'admin' && (
-            <div className="feature-card">
-              <div className="feature-icon">⚙️</div>
-              <h3>Admin Dashboard</h3>
-              <p>Manage users, services, and platform settings</p>
-              <button onClick={() => navigate('/admin/dashboard')} className="feature-btn">
-                Go to Dashboard
-              </button>
-            </div>
-          )}
-
-          {!user && (
-            <>
+            {user?.role === 'provider' && (
+              <>
+                <div className="feature-card">
+                  <h3>List a service</h3>
+                  <p>Set hourly to monthly rates and pin your location on the map.</p>
+                  <button onClick={() => navigate('/services/add')} className="feature-btn">Add service</button>
+                </div>
+                <div className="feature-card">
+                  <h3>Get verified</h3>
+                  <p>Upload NID or a trade license before you can accept bookings.</p>
+                  <button onClick={() => navigate('/verification')} className="feature-btn">Verify identity</button>
+                </div>
+              </>
+            )}
+            {user?.role === 'seeker' && (
               <div className="feature-card">
-                <div className="feature-icon">🤝</div>
-                <h3>Connect Locally</h3>
-                <p>Build connections with service providers in your community</p>
-                <button onClick={() => navigate('/register')} className="feature-btn">
-                  Get Started
-                </button>
+                <h3>Your bookings</h3>
+                <p>Pay to hold a slot, chat about arrival, reschedule, or open a dispute.</p>
+                <button onClick={() => navigate('/bookings/history')} className="feature-btn">Open bookings</button>
               </div>
-
+            )}
+            {user?.role === 'admin' && (
               <div className="feature-card">
-                <div className="feature-icon">⭐</div>
-                <h3>Quality Services</h3>
-                <p>Access verified and trusted local service providers</p>
-                <button onClick={() => navigate('/register')} className="feature-btn">
-                  Join Now
-                </button>
+                <h3>Operate the platform</h3>
+                <p>Verify providers, resolve disputes, and approve payouts.</p>
+                <button onClick={() => navigate('/admin/dashboard')} className="feature-btn">Dashboard</button>
               </div>
-            </>
-          )}
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="home-footer">
-        <p>&copy; 2025 The Local Link. All rights reserved.</p>
-      </footer>
-    </div>
+            )}
+          </div>
+        </section>
+      </div>
+    </Layout>
   );
 };
 

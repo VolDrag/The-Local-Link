@@ -19,6 +19,7 @@ const Register = () => {
     location: '',
     providesServices: 'no',
     businessName: '',
+    referralCode: '',
   });
   const [error, setError] = useState('');
 
@@ -33,6 +34,7 @@ const Register = () => {
     location,
     providesServices,
     businessName,
+    referralCode,
   } = formData;
 
   const handleChange = (e) => {
@@ -131,6 +133,9 @@ const Register = () => {
 
     if (providesServices === 'yes') {
       userData.businessName = businessName;
+    }
+    if (referralCode.trim()) {
+      userData.referralCode = referralCode.trim().toUpperCase();
     }
 
     // Call register
@@ -297,6 +302,18 @@ const Register = () => {
               />
             </div>
           )}
+
+          <div className="form-group">
+            <label htmlFor="referralCode">Referral code (optional)</label>
+            <input
+              type="text"
+              id="referralCode"
+              name="referralCode"
+              value={referralCode}
+              onChange={handleChange}
+              placeholder="TLLXXXX"
+            />
+          </div>
 
           <button type="submit" className="auth-button" disabled={loading}>
             {loading ? 'Registering...' : 'Register'}

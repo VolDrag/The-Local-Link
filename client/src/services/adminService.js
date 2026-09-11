@@ -74,6 +74,39 @@ export const adminService = {
     const response = await api.delete(`/admin/reports/${id}`);
     return response.data;
   },
+  getAllPayouts: async () => {
+    const { data } = await api.get('/admin/payouts');
+    return data;
+  },
+  reviewPayout: async (id, payload) => {
+    const { data } = await api.put(`/admin/payouts/${id}`, payload);
+    return data;
+  },
+  getPendingProviders: async () => {
+    const { data } = await api.get('/admin/providers/pending');
+    return data;
+  },
+  reviewIdentity: async (id, payload) => {
+    const { data } = await api.put(`/admin/providers/${id}/verify`, payload);
+    return data;
+  },
+  unsuspendProvider: async (id) => {
+    const { data } = await api.put(`/admin/providers/${id}/unsuspend`);
+    return data;
+  },
+  getDisputes: async (status = '') => {
+    const url = status ? `/admin/disputes?status=${status}` : '/admin/disputes';
+    const { data } = await api.get(url);
+    return data;
+  },
+  resolveDispute: async (id, payload) => {
+    const { data } = await api.put(`/admin/disputes/${id}`, payload);
+    return data;
+  },
+  getAuditLogs: async () => {
+    const { data } = await api.get('/admin/audit-logs');
+    return data;
+  },
 };
 
 export default adminService;

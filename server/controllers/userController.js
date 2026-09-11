@@ -1,7 +1,33 @@
 // User Controller
-//Debashish
 import Profile from '../models/Profile.js';
-import uploadMiddleware from '../middleware/uploadMiddleware.js'; 
+import User from '../models/User.js';
+
+const syncAccountFromProfile = async ({
+  userId,
+  name,
+  phone,
+  location,
+  image,
+  businessName,
+  availabilityStatus,
+  role,
+}) => {
+  const userDoc = await User.findById(userId);
+  if (!userDoc) return;
+  if (name) {
+    const parts = String(name).trim().split(/\s+/);
+    userDoc.firstName = parts[0] || userDoc.firstName;
+    userDoc.lastName = parts.slice(1).join(' ') || '';
+  }
+  if (phone) userDoc.phone = phone;
+  if (location) userDoc.location = location;
+  if (image) userDoc.profilePictureUrl = image;
+  if (role === 'provider') {
+    if (businessName) userDoc.businessName = businessName;
+    if (availabilityStatus) userDoc.availabilityStatus = availabilityStatus;
+  }
+  await userDoc.save();
+}; 
 
 // @desc    Get user profile
 // @route   GET /api/users/:id
@@ -54,7 +80,7 @@ const createorupdateUserProfile = async (req, res) => {
   try {
     const {age, phone, location, name, userId, businessName, availabilityStatus} = req.body;    
     // Normalize path to use forward slashes for URLs (works on all platforms)
-    const image = req.file ? req.file.path.replace(/\\/g, '/') : null;
+    const image = req.file ? `uploads/${req.file.filename}` : null;
     
     // 1. Check if userId is provided
     if (!userId) {
@@ -72,9 +98,9 @@ const createorupdateUserProfile = async (req, res) => {
     }
 
     // 4. Name can only contain letters and spaces
-    const nameRegex = /^[a-zA-Z\s]+$/;
+    const nameRegex = /^[a-zA-Z][a-zA-Z.\s'-]*$/;
     if (!nameRegex.test(name)) {
-      return res.status(400).json({ message: 'Name can only contain letters and spaces' });
+      return res.status(400).json({ message: 'Name can contain letters, spaces, dots, hyphens, and apostrophes' });
     }
 
     // 5. Age validation (if provided)
@@ -94,7 +120,7 @@ const createorupdateUserProfile = async (req, res) => {
     }
 
     // 7. Location validation (must be from allowed cities)
-    const allowedLocations = ['Dhaka', 'Chittagong', 'Khulna', 'Rajshahi', 'Sylhet'];
+    const allowedLocations = ['Dhaka', 'Chittagong', 'Khulna', 'Rajshahi', 'Sylhet', 'Comilla'];
     if (!allowedLocations.includes(location)) {
       return res.status(400).json({ message: 'Please select a valid location' });
     }
@@ -109,8 +135,8 @@ const createorupdateUserProfile = async (req, res) => {
 
     // 9. For providers, validate business name and availability status
     if (req.user.role === 'provider') {
-      if (businessName && (businessName.length < 2 || businessName.length > 100)) {
-        return res.status(400).json({ message: 'Business name must be between 2 and 100 characters' });
+      if (!businessName || businessName.trim().length < 2 || businessName.trim().length > 100) {
+        return res.status(400).json({ message: 'Business name is required and must be between 2 and 100 characters' });
       }
 
       if (availabilityStatus && !['online', 'offline'].includes(availabilityStatus)) {
@@ -167,6 +193,16 @@ const createorupdateUserProfile = async (req, res) => {
       }
         
       profile = await Profile.create(profileData);
+      await syncAccountFromProfile({
+        userId,
+        name,
+        phone,
+        location,
+        image,
+        businessName,
+        availabilityStatus,
+        role: req.user.role,
+      });
 
       return res.json({ 
         success: true,
@@ -190,6 +226,16 @@ const createorupdateUserProfile = async (req, res) => {
       }
 
       await profile.save();
+      await syncAccountFromProfile({
+        userId,
+        name,
+        phone,
+        location,
+        image,
+        businessName,
+        availabilityStatus,
+        role: req.user.role,
+      });
   
       return res.json({ 
         success: true,

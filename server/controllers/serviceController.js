@@ -1,8 +1,45 @@
 // ifty
 import asyncHandler from 'express-async-handler';
 import Service from '../models/Service.js';
-import User from '../models/User.js';
 import Event from '../models/Event.js';
+
+const PROVIDER_CARD_FIELDS = 'username firstName lastName businessName profilePictureUrl isVerified';
+const PROVIDER_DETAIL_FIELDS =
+  'username firstName lastName businessName profilePictureUrl isVerified portfolio phone location availabilityStatus email';
+
+const parseMaybeJson = (value, fallback) => {
+  if (value == null || value === '') return fallback;
+  if (typeof value === 'object') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+};
+
+const normalizeServiceInput = (req) => {
+  const body = { ...req.body };
+  body.location = parseMaybeJson(body.location, body.location);
+  const urlImages = parseMaybeJson(body.imageUrls, null);
+  if (typeof body.images === 'string') {
+    body.images = parseMaybeJson(body.images, body.images.split(',').map((s) => s.trim()).filter(Boolean));
+  }
+  if (body.hasOffer === 'true') body.hasOffer = true;
+  if (body.hasOffer === 'false') body.hasOffer = false;
+  if (body.pricing != null && body.pricing !== '') body.pricing = Number(body.pricing);
+
+  const uploaded = (req.files || []).map((file) => `uploads/services/${file.filename}`);
+  const existing = Array.isArray(urlImages)
+    ? urlImages
+    : Array.isArray(body.images)
+      ? body.images
+      : [];
+  body.images = [
+    ...existing.filter((url) => typeof url === 'string' && url && !url.startsWith('blob:')),
+    ...uploaded,
+  ];
+  return body;
+};
 
 // @desc    Get all services (with filters)
 // @route   GET /api/services
@@ -23,6 +60,11 @@ const getServices = asyncHandler(async (req, res) => {
     lng,
     radius, // in kilometers
   } = req.query;
+
+  await Service.updateMany(
+    { featured: true, featuredUntil: { $lt: new Date() } },
+    { $set: { featured: false } }
+  );
 
   const query = { isActive: true };
 
@@ -56,17 +98,16 @@ const getServices = asyncHandler(async (req, res) => {
   // Rating filter
   if (minRating) query.averageRating = { $gte: parseFloat(minRating) };
 
-  // Determine sort order
+  // Determine sort order — featured listings always float first (paid placement)
   let sortOption = {};
   if (keyword && sort === 'relevance') {
-    sortOption = { score: { $meta: 'textScore' } };
+    sortOption = { featured: -1, score: { $meta: 'textScore' } };
   } else if (sort === 'rating') {
-    sortOption = { averageRating: -1, totalReviews: -1 };
+    sortOption = { featured: -1, averageRating: -1, totalReviews: -1 };
   } else if (sort === 'newest') {
-    sortOption = { createdAt: -1 };
+    sortOption = { featured: -1, createdAt: -1 };
   } else {
-    // Default to rating if no keyword
-    sortOption = { averageRating: -1, totalReviews: -1 };
+    sortOption = { featured: -1, averageRating: -1, totalReviews: -1 };
   }
 
   // Pagination
@@ -77,7 +118,7 @@ const getServices = asyncHandler(async (req, res) => {
   // Execute query
   const services = await Service.find(query)
     .populate('category', 'name icon')
-    .populate('provider', 'name businessName avatar isVerified')
+    .populate('provider', PROVIDER_CARD_FIELDS)
     .sort(sortOption)
     .skip(skip)
     .limit(limitNum);
@@ -157,7 +198,7 @@ const getServices = asyncHandler(async (req, res) => {
 const getServiceById = asyncHandler(async (req, res) => {
   const service = await Service.findById(req.params.id)
     .populate('category', 'name description icon')
-    .populate('provider', 'name businessName email phone avatar bio portfolio isVerified availability location');
+    .populate('provider', PROVIDER_DETAIL_FIELDS);
 
   if (!service) {
     res.status(404);
@@ -244,46 +285,37 @@ const getAreasByCity = asyncHandler(async (req, res) => {
 // @route   POST /api/services
 // @access  Private (Provider only)
 const createService = asyncHandler(async (req, res) => {
-  // Get data from form
-  const { title, description, category, pricing, pricingUnit, location, images, hasOffer, offerDescription, offerExpiry } = req.body;
+  const { title, description, category, pricing, pricingUnit, location, images, hasOffer, offerDescription, offerExpiry } =
+    normalizeServiceInput(req);
 
-  console.log('req.user:', req.user); //Rafi  (debugging)
-  console.log('req.body:', req.body); //Rafi (debugging)
-
-  // Step 1: Check if user is a provider
   if (req.user.role !== 'provider') {
     res.status(403);
     throw new Error('Only service providers can create services');
   }
 
-  // Step 2: Check if all required fields are provided
   if (!title || !description || !category || !pricing || !location) {
     res.status(400);
     throw new Error('Please provide all required fields');
   }
 
-  // Step 3: Check if location has all parts (city, area, country)
   if (!location.city || !location.area || !location.country) {
     res.status(400);
     throw new Error('Please provide complete location details (city, area, country)');
   }
 
-  // Feature 11: Prepare location data with coordinates if provided
   const locationData = {
     city: location.city,
     area: location.area,
     country: location.country,
   };
 
-  // Add coordinates if provided (for map display)
   if (location.coordinates && location.coordinates.lat && location.coordinates.lng) {
     locationData.coordinates = {
       type: 'Point',
-      coordinates: [parseFloat(location.coordinates.lng), parseFloat(location.coordinates.lat)] // [lng, lat] GeoJSON format
+      coordinates: [parseFloat(location.coordinates.lng), parseFloat(location.coordinates.lat)],
     };
   }
 
-  // Step 4: Save service to database
   const service = await Service.create({
     title,
     description,
@@ -298,10 +330,9 @@ const createService = asyncHandler(async (req, res) => {
     offerExpiry,
   });
 
-  // Step 5: Get the service with category and provider details
   const populatedService = await Service.findById(service._id)
     .populate('category', 'name icon')
-    .populate('provider', 'username businessName email phone isVerified');
+    .populate('provider', PROVIDER_DETAIL_FIELDS);
 
   // Step 6: Add service to provider's profile
   const Profile = (await import('../models/Profile.js')).default; //Profile e dekhabe
@@ -338,14 +369,33 @@ const updateService = asyncHandler(async (req, res) => {
     throw new Error('You can only update your own services');
   }
 
-  // Step 3: Update the service with new data
+  const payload = normalizeServiceInput(req);
+  delete payload.imageUrls;
+  delete payload.photos;
+
+  if (payload.location) {
+    const loc = payload.location;
+    const locationData = {
+      city: loc.city,
+      area: loc.area,
+      country: loc.country,
+    };
+    if (loc.coordinates && loc.coordinates.lat && loc.coordinates.lng) {
+      locationData.coordinates = {
+        type: 'Point',
+        coordinates: [parseFloat(loc.coordinates.lng), parseFloat(loc.coordinates.lat)],
+      };
+    }
+    payload.location = locationData;
+  }
+
   const updatedService = await Service.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    payload,
     { new: true, runValidators: true }
   )
     .populate('category', 'name icon')
-    .populate('provider', 'username businessName email phone isVerified');
+    .populate('provider', PROVIDER_DETAIL_FIELDS);
 
   // Step 4: Send back the updated service
   res.json({
@@ -554,6 +604,31 @@ const updateServicePricing = asyncHandler(async (req, res) => {
   });
 });
 
+const purchaseFeatured = asyncHandler(async (req, res) => {
+  const service = await Service.findById(req.params.id);
+  if (!service) {
+    res.status(404);
+    throw new Error('Service not found');
+  }
+  if (service.provider.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('You can only feature your own services');
+  }
+  const days = parseInt(req.body.days || '7', 10);
+  const price = parseInt(process.env.FEATURED_PRICE_BDT || '500', 10);
+  service.featured = true;
+  service.featuredUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  service.featuredPaidAt = new Date();
+  await service.save();
+  res.json({
+    success: true,
+    message: `Service featured for ${days} days`,
+    featuredUntil: service.featuredUntil,
+    chargedBdt: price,
+    currency: 'BDT',
+  });
+});
+
 export {
   getServices,
   getServiceById,
@@ -565,4 +640,5 @@ export {
   deleteService,
   toggleAvailability,
   updateServicePricing,
+  purchaseFeatured,
 };

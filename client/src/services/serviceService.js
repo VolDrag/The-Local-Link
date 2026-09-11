@@ -3,23 +3,36 @@
 // These functions send requests to the backend API
 import api from './api';
 
-// Create a new service
-export const createService = async (serviceData) => {
+const toServicePayload = (serviceData, files = []) => {
+  if (!files?.length) return serviceData;
+  const form = new FormData();
+  form.append('title', serviceData.title);
+  form.append('description', serviceData.description);
+  form.append('category', serviceData.category?._id || serviceData.category);
+  form.append('pricing', String(serviceData.pricing));
+  form.append('pricingUnit', serviceData.pricingUnit || 'fixed');
+  form.append('location', JSON.stringify(serviceData.location));
+  form.append('imageUrls', JSON.stringify(serviceData.images || []));
+  form.append('hasOffer', String(!!serviceData.hasOffer));
+  if (serviceData.offerDescription) form.append('offerDescription', serviceData.offerDescription);
+  if (serviceData.offerExpiry) form.append('offerExpiry', serviceData.offerExpiry);
+  files.forEach((file) => form.append('photos', file));
+  return form;
+};
+
+export const createService = async (serviceData, files = []) => {
   try {
-    // Send POST request with service data
-    const response = await api.post('/services', serviceData);
-    return response.data; // Return created service
+    const response = await api.post('/services', toServicePayload(serviceData, files));
+    return response.data;
   } catch (error) {
     throw error.response?.data || error;
   }
 };
 
-// Update an existing service
-export const updateService = async (serviceId, serviceData) => {
+export const updateService = async (serviceId, serviceData, files = []) => {
   try {
-    // Send PUT request with updated data
-    const response = await api.put(`/services/${serviceId}`, serviceData);
-    return response.data; // Return updated service
+    const response = await api.put(`/services/${serviceId}`, toServicePayload(serviceData, files));
+    return response.data;
   } catch (error) {
     throw error.response?.data || error;
   }

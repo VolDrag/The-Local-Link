@@ -1,20 +1,20 @@
 // Authentication Controller
 //Debashish
 import User from '../models/User.js';
-import jwt from 'jsonwebtoken';
 import { generate6DigitCode } from '../utils/tokenHelper.js';
 import sendEmail from '../utils/sendEmail.js';
+import { signAccessToken, issueRefreshToken, rotateRefreshToken, revokeRefreshToken, buildAuthPayload } from '../utils/tokens.js';
+import { setAuthCookies, clearAuthCookies, REFRESH_COOKIE } from '../utils/cookies.js';
 
-// Helper function to generate JWT token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const attachSession = async (res, user, req) => {
+  const token = signAccessToken(user._id);
+  const refreshToken = await issueRefreshToken(user._id, req);
+  setAuthCookies(res, token, refreshToken);
+  return buildAuthPayload(user, token);
 };
 
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
 export const registerUser = async (req, res) => {
-  const { username, email, password, firstName, lastName, phone, location, role, businessName } = req.body;
+  const { username, email, password, firstName, lastName, phone, location, role, businessName, referralCode } = req.body;
   
   try {
     if (!username || !email || !password || !firstName || !phone || !role || !location) {
@@ -27,7 +27,6 @@ export const registerUser = async (req, res) => {
     if (username.length < 3 || username.length > 30) {
       return res.status(400).json({ message: 'Username must be between 3 and 30 characters' });
     }
-    // email format (something@gmail.com or other domains)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Please provide a valid email address' });
@@ -37,10 +36,6 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // password requirements
-    // At least 8 characters
-    // Must contain at least one number
-    // Must contain at least one special character
     if (password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters long' });
     }
@@ -50,12 +45,11 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Password must contain at least one number' });
     }
 
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
     if (!hasSpecialChar) {
       return res.status(400).json({ message: 'Password must contain at least one special character (!@#$%^&* etc.)' });
     }
 
-    // phone number format (+880 followed by 10 digits)
     if (phone) {
       const phoneRegex = /^\+880\d{10}$/;
       if (!phoneRegex.test(phone)) {
@@ -68,6 +62,12 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'First name must be between 2 and 50 characters' });
     }
 
+    let referredBy;
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode: referralCode.trim().toUpperCase() });
+      if (referrer) referredBy = referrer._id;
+    }
+
     const user = await User.create({
       username,
       email,
@@ -78,37 +78,30 @@ export const registerUser = async (req, res) => {
       location,
       role,
       businessName,
+      referredBy,
+      identityVerification: { status: role === 'provider' ? 'unsubmitted' : 'unsubmitted' },
     });
 
     if (process.env.EMAIL_VERIFICATION_ENABLED === 'true') {
       const code = generate6DigitCode();
       user.emailVerificationCode = code;
-      user.emailVerificationExpires = Date.now() + 10 * 60 * 1000; // 10 min
+      user.emailVerificationExpires = Date.now() + 10 * 60 * 1000;
       await user.save();
       await sendEmail(user.email, 'Your Verification Code', `Your code: ${code}`);
       return res.status(201).json({ message: 'Verification code sent', userId: user._id });
-    } else {
-      user.emailVerified = true;
-      await user.save();
-      const token = generateToken(user._id);
-      return res.status(201).json({
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        token,
-      });
     }
+
+    user.emailVerified = true;
+    await user.save();
+    const payload = await attachSession(res, user, req);
+    return res.status(201).json(payload);
 
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error during registration' });
   }
 };
-// Email verification
-// @desc    Verify user email
-// @route   POST /api/auth/verify-email
-// @access  Public
+
 export const verifyEmail = async (req, res) => {
   const { userId, code } = req.body;
   const user = await User.findById(userId);
@@ -121,50 +114,40 @@ export const verifyEmail = async (req, res) => {
   await user.save();
   res.json({ message: 'Email verified' });
 };
-// Forgot password
-// @desc    Forgot password
-// @route   POST /api/auth/forgot-password
-// @access  Public
+
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
   
   try {
-    // 1. Check if email is provided
     if (!email) {
       return res.status(400).json({ message: 'Email is required' });
     }
 
-    // 2. Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Please provide a valid email address' });
     }
 
-    // 3. Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'No account found with this email address' });
     }
 
-    // 4. Check if email verification is enabled
     if (process.env.EMAIL_VERIFICATION_ENABLED === 'true') {
       const code = generate6DigitCode();
       user.passwordResetCode = code;
-      user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+      user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
       await user.save();
       await sendEmail(user.email, 'Password Reset Code', `Your password reset code: ${code}`);
       return res.json({ message: 'Reset code sent to your email', userId: user._id });
-    } else {
-      return res.status(400).json({ message: 'Password reset feature is currently disabled' });
     }
+    return res.status(400).json({ message: 'Password reset feature is currently disabled' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ message: 'Server error during password reset request' });
   }
-};// Verify reset code
-// @desc    Verify password reset code
-// @route   POST /api/auth/verify-reset-code
-// @access  Public
+};
+
 export const verifyResetCode = async (req, res) => {
   const { userId, code } = req.body;
   const user = await User.findById(userId);
@@ -173,10 +156,7 @@ export const verifyResetCode = async (req, res) => {
   }
   res.json({ message: 'Code valid' });
 };
-//password reset
-// @desc    Reset password
-// @route   POST /api/auth/reset-password
-// @access  Public
+
 export const resetPassword = async (req, res) => {
   const { userId, code, newPassword } = req.body;
   try {
@@ -202,9 +182,6 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-// @desc    Authenticate user & get token
-// @route   POST /api/auth/login
-// @access  Public
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -225,23 +202,14 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Incorrect password. Please try again' });
     }
     
-    const token = generateToken(user._id);
-    res.status(200).json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      token,
-    });
+    const payload = await attachSession(res, user, req);
+    res.status(200).json(payload);
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error during login' });
   }
 };
 
-// @desc    Get current user profile
-// @route   GET /api/auth/me
-// @access  Private
 export const getMe = async (req, res) => {
   try {
     res.status(200).json(req.user);
@@ -251,9 +219,6 @@ export const getMe = async (req, res) => {
   }
 };
 
-// @desc    Admin login
-// @route   POST /api/auth/admin/login
-// @access  Public
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -262,40 +227,57 @@ export const adminLogin = async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    // Find user and verify they are an admin
     const user = await User.findOne({ email });
     if (!user || user.role !== 'admin') {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
 
-    // Check password
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
 
-    // Generate token
-    const token = generateToken(user._id);
-
-    res.json({
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      adminLevel: user.adminLevel,
-      token,
-    });
+    const payload = await attachSession(res, user, req);
+    res.json(payload);
   } catch (error) {
     console.error('Admin login error:', error);
     res.status(500).json({ message: 'Server error during admin login' });
   }
 };
 
-// @desc    Setup admin (one-time use - remove after)
-// @route   POST /api/auth/admin/setup
-// @access  Public
+export const refreshSession = async (req, res) => {
+  try {
+    const raw = req.cookies?.[REFRESH_COOKIE];
+    const rotated = await rotateRefreshToken(raw, req);
+    if (!rotated) {
+      clearAuthCookies(res);
+      return res.status(401).json({ message: 'Refresh token invalid or expired' });
+    }
+    const user = await User.findById(rotated.userId).select('-password');
+    if (!user) {
+      clearAuthCookies(res);
+      return res.status(401).json({ message: 'User not found' });
+    }
+    const accessToken = signAccessToken(user._id);
+    setAuthCookies(res, accessToken, rotated.refreshToken);
+    res.json(buildAuthPayload(user, accessToken));
+  } catch (error) {
+    console.error('Refresh error:', error);
+    res.status(401).json({ message: 'Could not refresh session' });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    await revokeRefreshToken(req.cookies?.[REFRESH_COOKIE]);
+    clearAuthCookies(res);
+    res.json({ message: 'Logged out' });
+  } catch (error) {
+    clearAuthCookies(res);
+    res.json({ message: 'Logged out' });
+  }
+};
+
 export const setupAdmin = async (req, res) => {
   try {
     const { email, password, username, firstName, lastName, adminLevel } = req.body;

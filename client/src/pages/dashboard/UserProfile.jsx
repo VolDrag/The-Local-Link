@@ -6,6 +6,9 @@ import { deleteService, toggleServiceAvailability } from '../../services/service
 import { useAuth } from '../../context/AuthContext';
 import PricingManager from '../../components/services/PricingManager';//feature 21
 import PortfolioManager from '../../components/portfolio/PortfolioManager';//feature 25 - Portfolio showcase component
+import { featureService } from '../../services/platformService';
+import Layout from '../../components/layout/Layout';
+import { fileUrl } from '../../utils/helpers';
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -16,6 +19,7 @@ const UserProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false); 
 
@@ -65,7 +69,7 @@ const UserProfile = () => {
 
     try {
       await deleteService(serviceId);
-      // Refresh profile to update services list
+      setNotice('Service deleted');
       fetchProfile();
     } catch (err) {
       console.error('Error deleting service:', err);
@@ -76,9 +80,8 @@ const UserProfile = () => {
   const handleToggleAvailability = async (serviceId, currentStatus) => {
     try {
       await toggleServiceAvailability(serviceId);
-      // Refresh profile to update services list
+      setNotice(`Service is now ${currentStatus === 'online' ? 'offline' : 'online'}`);
       fetchProfile();
-      alert(`Service is now ${currentStatus === 'online' ? 'offline' : 'online'}!`);
     } catch (err) {
       console.error('Error toggling service availability:', err);
       setError(err.message || 'Failed to toggle service availability');
@@ -110,38 +113,45 @@ const UserProfile = () => {
 
   if (loading) {
     return (
-      <div className="profile-container">
-        <div className="loading">Loading profile...</div>
-      </div>
+      <Layout>
+        <div className="profile-container">
+          <div className="loading">Loading profile...</div>
+        </div>
+      </Layout>
     );
   }
 
   if (error) {
     return (
-      <div className="profile-container">
-        <div className="error-message">{error}</div>
-      </div>
+      <Layout>
+        <div className="profile-container">
+          <div className="error-message">{error}</div>
+          <button onClick={handleEditProfile} className="btn-primary">Edit profile</button>
+        </div>
+      </Layout>
     );
   }
 
   if (!profile || !profile.name) {
     return (
-      <div className="profile-container">
-        <div className="no-profile">
-          <h2>No Profile Found</h2>
-          <p>You haven't created your profile yet.</p>
-          <button onClick={handleEditProfile} className="btn-primary">
-            Create Profile
-          </button>
+      <Layout>
+        <div className="profile-container">
+          <div className="no-profile">
+            <h2>Create your profile</h2>
+            <p>Add a photo and your details so others know who they are booking.</p>
+            <button onClick={handleEditProfile} className="btn-primary">
+              Create profile
+            </button>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
+    <Layout>
     <div className="profile-container">
       <div className="profile-header">
-        <button onClick={() => navigate('/')} className="btn-home">🏠 Home</button>
         <h1>My Profile</h1>
         <div className="header-actions">
           <button onClick={handleEditProfile} className="btn-edit">
@@ -152,12 +162,14 @@ const UserProfile = () => {
           </button>
         </div>
       </div>
+      {notice && <div className="success-message">{notice}</div>}
+      {error && <div className="error-message">{error}</div>}
 
       <div className="profile-content">
         <div className="profile-image-section">
           {profile.image ? (
             <img 
-              src={`http://localhost:5000/${profile.image}`} 
+              src={fileUrl(profile.image)} 
               alt="Profile" 
               className="profile-image"
             />
@@ -190,6 +202,12 @@ const UserProfile = () => {
                 <label>Role</label>
                 <p className="role-badge">{profile.user.role}</p>
               </div>
+              {user?.referralCode && (
+                <div className="info-group">
+                  <label>Referral code</label>
+                  <p>{user.referralCode}</p>
+                </div>
+              )}
             </>
           )}
 
@@ -287,13 +305,27 @@ const UserProfile = () => {
                             onClick={() => handleEditService(service._id)} 
                             className="btn-edit-service"
                           >
-                            ✏️ Edit
+                            Edit
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                const res = await featureService.purchase(service._id, 7);
+                                setNotice(`Featured until ${new Date(res.featuredUntil).toLocaleDateString()} · ৳${res.chargedBdt}`);
+                                fetchProfile();
+                              } catch (err) {
+                                setError(err.response?.data?.message || 'Could not feature listing');
+                              }
+                            }}
+                            className="btn-edit-service"
+                          >
+                            {service.featured ? 'Extend featured' : 'Feature 7 days'}
                           </button>
                           <button 
                             onClick={() => handleDeleteService(service._id)} 
                             className="btn-delete-service"
                           >
-                            🗑️ Delete
+                            Delete
                           </button>
                         </div>
                       </div>
@@ -353,6 +385,7 @@ const UserProfile = () => {
         </div>
       )}
     </div>
+    </Layout>
   );
 };
 
